@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import VocabDetails from "../../component/Vocab";
 
 const Wrapper = styled.div``;
 const NavLink = styled(Link)`
@@ -12,6 +13,7 @@ export default function VocabBook() {
       <div>VocabBook</div>
       <NavLink to="/wordle">Wordle</NavLink>
       <NavLink to="/review">Review</NavLink>
+      <VocabDetails />
     </Wrapper>
   );
 }

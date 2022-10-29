@@ -24,9 +24,7 @@ interface Props {
 
 function App(props: Props) {
   let searchedKeyword: string;
-  const { keyword, setKeyword } = useContext(keywordContext);
-
-  console.log("keyword", keyword);
+  const { setKeyword } = useContext(keywordContext);
 
   return (
     <Wrapper>
@@ -37,8 +35,8 @@ function App(props: Props) {
         <NavLink to="/profile">Profile</NavLink>
         <Input
           onChange={(e) => {
+            e.target.value = e.target.value.toLowerCase();
             searchedKeyword = e.target.value;
-            console.log("searchedKeyword", searchedKeyword);
           }}
           onKeyDown={(e) => {
             e.key === "Enter" && setKeyword(searchedKeyword);
