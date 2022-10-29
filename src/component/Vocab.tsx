@@ -32,7 +32,7 @@ const DefinitionWrapper = styled.div`
 `;
 
 const Definition = styled.li`
-  font-weight: 800;
+  font-weight: 600;
 `;
 
 const Synonyms = styled.div`
@@ -46,27 +46,32 @@ const Example = styled.div`
 interface vocabDetailsInterface {
   word?: string;
   phonetic?: string;
-  phonetics?: object[];
-  meanings?: object[];
+  phonetics?: [
+    {
+      audio?: string;
+    }
+  ];
+  meanings?: [
+    {
+      partOfSpeech?: string;
+      definitions?: [
+        {
+          definition?: string;
+          example?: string;
+        }
+      ];
+      synonyms?: string[];
+      antonyms?: string[];
+    }
+  ];
   license?: object;
   sourceUrls?: [];
 }
 
-interface meaningInterface {
-  partOfSpeech?: string;
-  definitions?: object[];
-  synonyms?: string[];
-  antonyms?: string[];
-}
-
-interface definitionInterface {
-  definition?: string;
-  example?: string;
-}
-
 export default function VocabDetails() {
   const [vocabDetails, setVocabDetails] = useState<vocabDetailsInterface>();
-  const resourceUrl = "https://api.dictionaryapi.dev/api/v2/entries/en/day";
+  const [audioUrl, setAudioUrl] = useState();
+  const resourceUrl = "https://api.dictionaryapi.dev/api/v2/entries/en/weekday";
 
   useEffect(() => {
     async function fetchVocabDetails(resourceUrl: string) {
@@ -74,6 +79,7 @@ export default function VocabDetails() {
         const response = await fetch(resourceUrl);
         const data = await response.json();
         setVocabDetails(data[0]);
+        setAudioUrl(data[0].phonetics.slice(0, 1)[0].audio);
       } catch (error) {
         if (error instanceof Error) console.log(error.message);
       }
@@ -81,45 +87,52 @@ export default function VocabDetails() {
     fetchVocabDetails(resourceUrl);
   }, []);
 
+  const handlePlayAudio = () => {
+    // const audio = new Audio(vocabDetails?.phonetics?[0].audio);
+    console.log(audioUrl);
+    if (audioUrl) {
+      const audio = new Audio(audioUrl);
+      audio.play();
+    }
+  };
+
   return (
     <Wrapper>
       <VocabWrapper>
         <TitleContainer>
           <Vocab>{vocabDetails?.word}</Vocab>
           <Phonetic>{vocabDetails?.phonetic}</Phonetic>
-          <AudioImg src={audio} alt="audio" />
+          {audioUrl && (
+            <AudioImg src={audio} alt="audio" onClick={handlePlayAudio} />
+          )}
           <SaveVocabImg src={save} alt="save" />
           <Meanings>
-            {vocabDetails?.meanings?.map((meaning: meaningInterface) => (
-              <>
-                <PartOfSpeech key={meaning.partOfSpeech}>
-                  {meaning.partOfSpeech}
-                </PartOfSpeech>
-                <p>Definitions</p>
-                <ul>
-                  {meaning.definitions?.map(
-                    (definition: definitionInterface) => (
-                      <DefinitionWrapper>
-                        <Definition>{definition.definition}</Definition>
-                        <Example>
-                          {definition.example && `"${definition.example}"`}
-                        </Example>
+            {vocabDetails?.meanings?.map(
+              ({ partOfSpeech, definitions, synonyms }) => (
+                <>
+                  <PartOfSpeech key={partOfSpeech}>{partOfSpeech}</PartOfSpeech>
+                  <p>Definitions</p>
+                  <ul>
+                    {definitions?.map(({ definition, example }) => (
+                      <DefinitionWrapper key={definition}>
+                        <Definition>{definition}</Definition>
+                        <Example>{example && `"${example}"`}</Example>
                       </DefinitionWrapper>
-                    )
-                  )}
-                </ul>
-                {meaning.synonyms?.length === 0 ? (
-                  ""
-                ) : (
-                  <>
-                    <p>Synonyms</p>
-                    {meaning.synonyms?.map((synonym: string) => (
-                      <Synonyms>{synonym}</Synonyms>
                     ))}
-                  </>
-                )}
-              </>
-            ))}
+                  </ul>
+                  {synonyms?.length === 0 ? (
+                    ""
+                  ) : (
+                    <>
+                      <p>Synonyms</p>
+                      {synonyms?.map((synonym: string) => (
+                        <Synonyms key={synonym}>{synonym}</Synonyms>
+                      ))}
+                    </>
+                  )}
+                </>
+              )
+            )}
           </Meanings>
         </TitleContainer>
       </VocabWrapper>
