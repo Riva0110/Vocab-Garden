@@ -17,12 +17,7 @@ const Input = styled.input`
   width: 100px;
 `;
 
-interface Props {
-  onChange(e: React.ChangeEventHandler<HTMLInputElement>): void;
-  onKeyDown(e: React.KeyboardEventHandler<HTMLInputElement>): void;
-}
-
-function App(props: Props) {
+function App() {
   let searchedKeyword: string;
   const { setKeyword } = useContext(keywordContext);
 
