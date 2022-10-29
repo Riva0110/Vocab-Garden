@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import VocabDetails from "../../component/Vocab";
+import VocabDetails from "../../component/VocabDetails";
 
 const Wrapper = styled.div``;
 

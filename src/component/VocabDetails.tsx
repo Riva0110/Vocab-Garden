@@ -82,7 +82,6 @@ export default function VocabDetails() {
   const [isLoading, setIsLoading] = useState(false);
   const { keyword } = useContext(keywordContext);
   const resourceUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${keyword}`;
-  console.log(keyword);
 
   useEffect(() => {
     async function fetchVocabDetails(resourceUrl: string) {
@@ -98,7 +97,6 @@ export default function VocabDetails() {
 
   const handlePlayAudio = () => {
     // const audio = new Audio(vocabDetails?.phonetics?[0].audio);
-    console.log(audioUrl);
     if (audioUrl) {
       const audio = new Audio(audioUrl);
       audio.play();
