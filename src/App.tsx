@@ -4,7 +4,9 @@ import { Link, Outlet } from "react-router-dom";
 
 const Wrapper = styled.div``;
 const Header = styled.header``;
-const Main = styled.main``;
+const Main = styled.main`
+  margin: 50px;
+`;
 
 const NavLink = styled(Link)`
   margin-right: 20px;
