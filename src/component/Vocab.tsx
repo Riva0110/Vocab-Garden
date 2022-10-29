@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import styled from "styled-components";
+import { keywordContext } from "../context/keywordContext";
 import audio from "./audio.png";
 import save from "./save.png";
 
@@ -7,7 +8,10 @@ const Wrapper = styled.div`
   font-size: 12px;
 `;
 const VocabWrapper = styled.div``;
-const TitleContainer = styled.div``;
+const TitleContainer = styled.div`
+  display: flex;
+  gap: 10px;
+`;
 const Vocab = styled.div`
   font-size: 20px;
   font-weight: 800;
@@ -71,7 +75,9 @@ interface vocabDetailsInterface {
 export default function VocabDetails() {
   const [vocabDetails, setVocabDetails] = useState<vocabDetailsInterface>();
   const [audioUrl, setAudioUrl] = useState();
-  const resourceUrl = "https://api.dictionaryapi.dev/api/v2/entries/en/weekday";
+  const { keyword } = useContext(keywordContext);
+  const resourceUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${keyword}`;
+  console.log(keyword);
 
   useEffect(() => {
     async function fetchVocabDetails(resourceUrl: string) {
@@ -85,7 +91,7 @@ export default function VocabDetails() {
       }
     }
     fetchVocabDetails(resourceUrl);
-  }, []);
+  }, [resourceUrl]);
 
   const handlePlayAudio = () => {
     // const audio = new Audio(vocabDetails?.phonetics?[0].audio);
@@ -96,7 +102,7 @@ export default function VocabDetails() {
     }
   };
 
-  return (
+  return vocabDetails ? (
     <Wrapper>
       <VocabWrapper>
         <TitleContainer>
@@ -106,36 +112,40 @@ export default function VocabDetails() {
             <AudioImg src={audio} alt="audio" onClick={handlePlayAudio} />
           )}
           <SaveVocabImg src={save} alt="save" />
-          <Meanings>
-            {vocabDetails?.meanings?.map(
-              ({ partOfSpeech, definitions, synonyms }) => (
-                <>
-                  <PartOfSpeech key={partOfSpeech}>{partOfSpeech}</PartOfSpeech>
-                  <p>Definitions</p>
-                  <ul>
-                    {definitions?.map(({ definition, example }) => (
-                      <DefinitionWrapper key={definition}>
+        </TitleContainer>
+        <Meanings>
+          {vocabDetails?.meanings?.map(
+            ({ partOfSpeech, definitions, synonyms }) => (
+              <>
+                <PartOfSpeech key={partOfSpeech}>{partOfSpeech}</PartOfSpeech>
+                <p>Definitions</p>
+                <ul>
+                  {definitions?.map(
+                    ({ definition, example }, index: number) => (
+                      <DefinitionWrapper key={index}>
                         <Definition>{definition}</Definition>
                         <Example>{example && `"${example}"`}</Example>
                       </DefinitionWrapper>
-                    ))}
-                  </ul>
-                  {synonyms?.length === 0 ? (
-                    ""
-                  ) : (
-                    <>
-                      <p>Synonyms</p>
-                      {synonyms?.map((synonym: string) => (
-                        <Synonyms key={synonym}>{synonym}</Synonyms>
-                      ))}
-                    </>
+                    )
                   )}
-                </>
-              )
-            )}
-          </Meanings>
-        </TitleContainer>
+                </ul>
+                {synonyms?.length !== 0 ? (
+                  <>
+                    <p>Synonyms</p>
+                    {synonyms?.map((synonym: string, index: number) => (
+                      <Synonyms key={index}>{synonym}</Synonyms>
+                    ))}
+                  </>
+                ) : (
+                  ""
+                )}
+              </>
+            )
+          )}
+        </Meanings>
       </VocabWrapper>
     </Wrapper>
+  ) : (
+    <Wrapper>no result</Wrapper>
   );
 }

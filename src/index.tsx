@@ -9,6 +9,7 @@ import Profile from "./pages/Profile/Profile";
 import Review from "./pages/VocabBook/Review/Review";
 import VocabBook from "./pages/VocabBook/VocabBook";
 import Wordle from "./pages/VocabBook/Wordle/Wordle";
+import { KeywordContextProvider } from "./context/keywordContext";
 import reportWebVitals from "./reportWebVitals";
 
 const root = ReactDOM.createRoot(
@@ -16,19 +17,37 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<App />}>
-          <Route index element={<Home />} />
-          <Route path="article" element={<Article />} />
-          <Route path="vocabbook" element={<VocabBook />} />
-          <Route path="wordle" element={<Wordle />} />
-          <Route path="review" element={<Review />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="*" element={<NoPage />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <KeywordContextProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <App
+                onChange={function (
+                  e: React.ChangeEventHandler<HTMLInputElement>
+                ): void {
+                  throw new Error("Function not implemented.");
+                }}
+                onKeyDown={function (
+                  e: React.KeyboardEventHandler<HTMLInputElement>
+                ): void {
+                  throw new Error("Function not implemented.");
+                }}
+              />
+            }
+          >
+            <Route index element={<Home />} />
+            <Route path="article" element={<Article />} />
+            <Route path="vocabbook" element={<VocabBook />} />
+            <Route path="wordle" element={<Wordle />} />
+            <Route path="review" element={<Review />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="*" element={<NoPage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </KeywordContextProvider>
   </React.StrictMode>
 );
 
