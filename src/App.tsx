@@ -1,25 +1,52 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useContext } from "react";
+import styled from "styled-components";
+import { Link, Outlet } from "react-router-dom";
+import { keywordContext } from "./context/keywordContext";
 
-function App() {
+const Wrapper = styled.div``;
+const Header = styled.header``;
+const Main = styled.main`
+  margin: 50px;
+`;
+
+const NavLink = styled(Link)`
+  margin-right: 20px;
+`;
+
+const Input = styled.input`
+  width: 100px;
+`;
+
+interface Props {
+  onChange(e: React.ChangeEventHandler<HTMLInputElement>): void;
+  onKeyDown(e: React.KeyboardEventHandler<HTMLInputElement>): void;
+}
+
+function App(props: Props) {
+  let searchedKeyword: string;
+  const { setKeyword } = useContext(keywordContext);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Wrapper>
+      <Header>
+        <NavLink to="/">Home</NavLink>
+        <NavLink to="/article">Article</NavLink>
+        <NavLink to="/vocabbook">VocabBook</NavLink>
+        <NavLink to="/profile">Profile</NavLink>
+        <Input
+          onChange={(e) => {
+            e.target.value = e.target.value.toLowerCase();
+            searchedKeyword = e.target.value;
+          }}
+          onKeyDown={(e) => {
+            e.key === "Enter" && setKeyword(searchedKeyword);
+          }}
+        />
+      </Header>
+      <Main>
+        <Outlet />
+      </Main>
+    </Wrapper>
   );
 }
 
