@@ -1,5 +1,6 @@
 import { createContext, useState } from "react";
-import { auth } from "../firebase/firebase";
+import { collection, addDoc } from "firebase/firestore";
+import { auth, db } from "../firebase/firebase";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -47,6 +48,7 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
       password
     );
     const user = userCredential.user;
+
     setIsLogin(true);
   };
 
