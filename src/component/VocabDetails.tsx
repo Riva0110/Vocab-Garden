@@ -89,8 +89,12 @@ export default function VocabDetails() {
       const response = await fetch(resourceUrl);
       const data = await response.json();
       setVocabDetails(data[0]);
-      setAudioUrl(data[0].phonetics.slice(0, 1)[0].audio);
       setIsLoading(false);
+      if (data[0].phonetics.length > 0) {
+        setAudioUrl(data[0].phonetics.slice(0, 1)[0].audio);
+      } else {
+        setAudioUrl(undefined);
+      }
     }
     fetchVocabDetails(resourceUrl);
   }, [resourceUrl]);
