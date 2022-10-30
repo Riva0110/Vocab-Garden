@@ -18,6 +18,7 @@ const ArticlesWrapper = styled.div`
 `;
 const ArticleTitle = styled.div`
   margin-bottom: 20px;
+  cursor: pointer;
 `;
 const Date = styled.div`
   color: gray;
@@ -78,16 +79,15 @@ export default function Articles() {
         {articleList?.map(({ time, title, id }, index) => {
           // const readableTime = new Date(time.seconds);
           return (
-            <ArticleTitle key={index}>
+            <ArticleTitle
+              key={index}
+              onClick={() => {
+                navigate(`/articles/article?title=${title}&id=${id}`);
+                // setIsEditing(false);
+              }}
+            >
               <Date>{time.toLocaleString()}</Date>
-              <Title
-                onClick={() => {
-                  navigate(`/articles/article?title=${title}&id=${id}`);
-                  // setIsEditing(false);
-                }}
-              >
-                {title}
-              </Title>
+              <Title>{title}</Title>
             </ArticleTitle>
           );
         })}

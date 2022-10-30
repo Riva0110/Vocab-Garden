@@ -3,6 +3,7 @@ import VocabDetails from "../../component/VocabDetails";
 import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { authContext } from "../../context/authContext";
+import { keywordContext } from "../../context/keywordContext";
 import {
   doc,
   collection,
@@ -63,15 +64,14 @@ const EditBtn = styled(BackBtn)``;
 export default function Article() {
   const navigate = useNavigate();
   const { userId } = useContext(authContext);
+  const { setKeyword } = useContext(keywordContext);
   const [isEditing, setIsEditing] = useState<boolean>();
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
   const articleId = urlParams.get("id");
-  const articleEditing = urlParams.get("edit");
   const articleAdding = urlParams.get("add");
-  console.log(articleAdding);
 
   useEffect(() => {
     const getArticleContent = async (articleId: string) => {
@@ -173,8 +173,21 @@ export default function Article() {
                 Edit
               </EditBtn>
             </Btns>
-            <Title>{title}</Title>
-            <Content>{content}</Content>
+            {/* <Title>{title}</Title> */}
+            <Title>
+              {title.split(/([\s!]+)/).map((word: string, index: number) => (
+                <span key={index} onClick={() => setKeyword(word)}>
+                  {word}
+                </span>
+              ))}
+            </Title>
+            <Content>
+              {content.split(/([\s!]+)/).map((word: string, index: number) => (
+                <span key={index} onClick={() => setKeyword(word)}>
+                  {word}
+                </span>
+              ))}
+            </Content>
           </>
         )}
       </ArticleWrapper>
