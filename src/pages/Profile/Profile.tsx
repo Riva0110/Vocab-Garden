@@ -1,19 +1,32 @@
 import styled from "styled-components";
 import { authContext } from "../../context/authContext";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../firebase/firebase";
 
 const Wrapper = styled.div``;
 
 export default function Profile() {
-  const { isLogin, login, logout, signup } = useContext(authContext);
+  const { isLogin, login, logout, signup, userId } = useContext(authContext);
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [isMember, setIsMember] = useState<boolean>(true);
 
+  useEffect(() => {
+    if (isLogin) {
+      const getUserInfo = async (userId: string) => {
+        const docRef = doc(db, "users", userId);
+        const docSnap: any = await getDoc(docRef);
+        setName(docSnap.data().name);
+      };
+      getUserInfo(userId);
+    }
+  }, [userId]);
+
   return isLogin ? (
     <>
-      <p>已登入</p>
+      <p>{name}已登入</p>
       <button onClick={() => logout()}>Log out</button>
     </>
   ) : isMember ? (

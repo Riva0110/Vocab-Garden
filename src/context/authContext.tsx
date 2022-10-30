@@ -1,5 +1,5 @@
 import { createContext, useState } from "react";
-import { collection, addDoc, doc, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/firebase";
 import {
   signInWithEmailAndPassword,
@@ -14,6 +14,8 @@ type ContextProviderProps = {
 };
 
 interface authInterface {
+  userId: string;
+  setUserId: React.Dispatch<React.SetStateAction<string>>;
   isLogin: boolean;
   setIsLogin: React.Dispatch<React.SetStateAction<boolean>>;
   logout(): void;
@@ -22,6 +24,8 @@ interface authInterface {
 }
 
 export const authContext = createContext<authInterface>({
+  userId: "",
+  setUserId: () => {},
   isLogin: false,
   setIsLogin: () => {},
   logout: () => {},
@@ -31,11 +35,12 @@ export const authContext = createContext<authInterface>({
 
 export function AuthContextProvider({ children }: ContextProviderProps) {
   const [isLogin, setIsLogin] = useState(false);
+  const [userId, setUserId] = useState("");
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        const uid = user.uid;
+        setUserId(user.uid);
         setIsLogin(true);
       } else {
         setIsLogin(false);
@@ -72,7 +77,7 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
 
   return (
     <authContext.Provider
-      value={{ isLogin, setIsLogin, signup, login, logout }}
+      value={{ userId, setUserId, isLogin, setIsLogin, signup, login, logout }}
     >
       {children}
     </authContext.Provider>

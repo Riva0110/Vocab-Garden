@@ -1,7 +1,11 @@
 import styled from "styled-components";
 import VocabDetails from "../../component/VocabDetails";
-import { useState, Dispatch, SetStateAction } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../../firebase/firebase";
+import { useEffect } from "react";
+import { authContext } from "../../context/authContext";
 
 const Wrapper = styled.div`
   display: flex;
@@ -15,21 +19,50 @@ const ArticlesWrapper = styled.div`
 const ArticleTitle = styled.div`
   margin-bottom: 20px;
 `;
-const Date = styled.div``;
-const Title = styled.div``;
+const Date = styled.div`
+  color: gray;
+  font-size: 10px;
+`;
+const Title = styled.div`
+  border-bottom: 1px solid gray;
+`;
 const AddBtn = styled.button`
   width: 50px;
   margin-left: auto;
 `;
 
-const testArticles = [
-  { date: 1667099325, title: "Hello, World!" },
-  { date: 1667099361, title: "heyyyyyyyyyyyyyyyyyyy" },
-];
+interface articleListInterface {
+  time: {
+    seconds: number;
+    nanoseconds: number;
+  };
+  title: string;
+  content: string;
+}
 
 export default function Articles() {
+  const { userId } = useContext(authContext);
   const navigate = useNavigate();
+  const [articleList, setArticleList] = useState<articleListInterface[]>([]);
   // const [isEditing, setIsEditing] = useState<boolean>();
+
+  useEffect(() => {
+    const getArticles = async (userId: string) => {
+      let articleListData: articleListInterface[] = [];
+      const querySnapshot = await getDocs(
+        collection(db, "users", userId, "articles")
+      );
+      if (querySnapshot) {
+        querySnapshot.forEach((doc) => {
+          const article = doc.data() as articleListInterface;
+          articleListData = [...articleListData, article];
+        });
+        setArticleList(articleListData);
+      }
+    };
+    getArticles(userId);
+  }, [userId]);
+
   return (
     <Wrapper>
       <ArticlesWrapper>
@@ -41,10 +74,11 @@ export default function Articles() {
         >
           +
         </AddBtn>
-        {testArticles.map(({ date, title }, index) => {
+        {articleList?.map(({ time, title }, index) => {
+          // const readableTime = new Date(time.seconds);
           return (
-            <ArticleTitle>
-              <Date>{date}</Date>
+            <ArticleTitle key={index}>
+              <Date>{time.toLocaleString()}</Date>
               <Title
                 onClick={() => {
                   navigate("/articles/article");

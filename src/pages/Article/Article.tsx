@@ -1,7 +1,10 @@
 import styled from "styled-components";
 import VocabDetails from "../../component/VocabDetails";
-import { useState, Dispatch, SetStateAction } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { authContext } from "../../context/authContext";
+import { doc, collection, addDoc, setDoc } from "firebase/firestore";
+import { db } from "../../firebase/firebase";
 
 const Wrapper = styled.div`
   display: flex;
@@ -40,17 +43,34 @@ const EditBtn = styled(BackBtn)``;
 
 export default function Article() {
   const navigate = useNavigate();
+  const { userId } = useContext(authContext);
   const [isEditing, setIsEditing] = useState<boolean>();
+  const [title, setTitle] = useState<string>("");
+  const [content, setContent] = useState<string>("");
   return (
     <Wrapper>
       <ArticleWrapper>
         {isEditing ? (
           <>
             <TitleLabel>Title</TitleLabel>
-            <TitleInput type="text" />
+            <TitleInput
+              type="text"
+              onChange={(e) => setTitle(e.target.value)}
+            />
             <ContentLabel>Content</ContentLabel>
-            <ContentTextArea />
-            <DoneBtn onClick={() => setIsEditing(false)}>Done</DoneBtn>
+            <ContentTextArea onChange={(e) => setContent(e.target.value)} />
+            <DoneBtn
+              onClick={async () => {
+                setIsEditing(false);
+                await addDoc(collection(db, "users", userId, "articles"), {
+                  title,
+                  content,
+                  time: new Date(),
+                });
+              }}
+            >
+              Done
+            </DoneBtn>
           </>
         ) : (
           <>
