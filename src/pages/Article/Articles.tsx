@@ -69,7 +69,7 @@ export default function Articles() {
       <ArticlesWrapper>
         <AddBtn
           onClick={() => {
-            navigate("/articles/article");
+            navigate("/articles/article?add=true");
             // setIsEditing(true);
           }}
         >

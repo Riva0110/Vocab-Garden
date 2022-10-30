@@ -22,7 +22,7 @@ export default function Profile() {
       };
       getUserInfo(userId);
     }
-  }, [userId]);
+  }, [userId, isLogin]);
 
   return isLogin ? (
     <>
