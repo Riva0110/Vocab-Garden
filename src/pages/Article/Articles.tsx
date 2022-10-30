@@ -38,6 +38,7 @@ interface articleListInterface {
   };
   title: string;
   content: string;
+  id: string;
 }
 
 export default function Articles() {
@@ -74,14 +75,14 @@ export default function Articles() {
         >
           +
         </AddBtn>
-        {articleList?.map(({ time, title }, index) => {
+        {articleList?.map(({ time, title, id }, index) => {
           // const readableTime = new Date(time.seconds);
           return (
             <ArticleTitle key={index}>
               <Date>{time.toLocaleString()}</Date>
               <Title
                 onClick={() => {
-                  navigate("/articles/article");
+                  navigate(`/articles/article?title=${title}&id=${id}`);
                   // setIsEditing(false);
                 }}
               >

@@ -1,9 +1,16 @@
 import styled from "styled-components";
 import VocabDetails from "../../component/VocabDetails";
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { authContext } from "../../context/authContext";
-import { doc, collection, addDoc, setDoc } from "firebase/firestore";
+import {
+  doc,
+  collection,
+  query,
+  where,
+  setDoc,
+  getDocs,
+} from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 
 const Wrapper = styled.div`
@@ -47,6 +54,25 @@ export default function Article() {
   const [isEditing, setIsEditing] = useState<boolean>();
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  const articleId = urlParams.get("id");
+
+  useEffect(() => {
+    const getArticleContent = async (articleId: string) => {
+      const articleRef = collection(db, "users", userId, "articles");
+      const q = query(articleRef, where("id", "==", articleId));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        console.log(doc.id, " => ", doc.data());
+        setTitle(doc.data().title);
+        setContent(doc.data().content);
+      });
+    };
+    if (articleId) getArticleContent(articleId);
+  }, [articleId]);
+
   return (
     <Wrapper>
       <ArticleWrapper>
@@ -61,12 +87,20 @@ export default function Article() {
             <ContentTextArea onChange={(e) => setContent(e.target.value)} />
             <DoneBtn
               onClick={async () => {
-                setIsEditing(false);
-                await addDoc(collection(db, "users", userId, "articles"), {
-                  title,
-                  content,
-                  time: new Date(),
-                });
+                if (title && content) {
+                  setIsEditing(false);
+                  const docRef = doc(
+                    collection(db, "users", userId, "articles")
+                  );
+                  await setDoc(docRef, {
+                    id: docRef.id,
+                    title,
+                    content,
+                    time: new Date(),
+                  });
+                } else {
+                  alert("Title and content cannot be left blank!");
+                }
               }}
             >
               Done
@@ -76,24 +110,8 @@ export default function Article() {
           <>
             <BackBtn onClick={() => navigate("/articles")}>Back</BackBtn>
             <EditBtn onClick={() => setIsEditing(true)}>Edit</EditBtn>
-            <Title>Welcome Welcome</Title>
-            <Content>
-              Definitions Whose arrival is a cause of joy; received with
-              gladness; admitted willingly to the house, entertainment, or
-              company. "Refugees welcome in London!" Producing gladness. "a
-              welcome present;  welcome news" Free to have or enjoy
-              gratuitously. "You are welcome to the use of my library." \r\n
-              Definitions Whose arrival is a cause of joy; received with
-              gladness; admitted willingly to the house, entertainment, or
-              company. "Refugees welcome in London!" Producing gladness. "a
-              welcome present;  welcome news" Free to have or enjoy
-              gratuitously. "You are welcome to the use of my library." \r\n
-              Definitions Whose arrival is a cause of joy; received with
-              gladness; admitted willingly to the house, entertainment, or
-              company. "Refugees welcome in London!" Producing gladness. "a
-              welcome present;  welcome news" Free to have or enjoy
-              gratuitously. "You are welcome to the use of my library."
-            </Content>
+            <Title>{title}</Title>
+            <Content>{content}</Content>
           </>
         )}
       </ArticleWrapper>
