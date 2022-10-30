@@ -25,6 +25,7 @@ function App() {
 
   return (
     <Wrapper>
+<<<<<<< HEAD
       {isLogin ? (
         <Header>
           <NavLink to="/">Home</NavLink>
@@ -59,6 +60,23 @@ function App() {
         </Header>
       )}
 
+=======
+      <Header>
+        <NavLink to="/">Home</NavLink>
+        <NavLink to="/articles">Article</NavLink>
+        <NavLink to="/vocabbook">VocabBook</NavLink>
+        <NavLink to="/profile">Profile</NavLink>
+        <Input
+          onChange={(e) => {
+            e.target.value = e.target.value.toLowerCase();
+            searchedKeyword = e.target.value;
+          }}
+          onKeyDown={(e) => {
+            e.key === "Enter" && setKeyword(searchedKeyword);
+          }}
+        />
+      </Header>
+>>>>>>> Add some article's routers
       <Main>
         <Outlet />
       </Main>
