@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import VocabDetails from "../../component/VocabDetails";
 import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { authContext } from "../../context/authContext";
@@ -17,12 +16,13 @@ import { db } from "../../firebase/firebase";
 
 const Wrapper = styled.div`
   display: flex;
+  width: 50%;
 `;
 const ArticleWrapper = styled.div`
   display: flex;
   flex-direction: column;
   margin-right: 50px;
-  width: 60%;
+  width: 80%;
 `;
 const TitleLabel = styled.label``;
 const TitleInput = styled.input``;
@@ -61,129 +61,106 @@ export default function Article() {
   const [isEditing, setIsEditing] = useState<boolean>();
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
-  const queryString = window.location.search;
-  const urlParams = new URLSearchParams(queryString);
-  const articleId = urlParams.get("id");
-  const articleAdding = urlParams.get("add");
+  const articlePathName = window.location.pathname.slice(10);
 
   useEffect(() => {
-    const getArticleContent = async (articleId: string) => {
+    const getArticleContent = async (articlePathName: string) => {
       const articleRef = collection(db, "users", userId, "articles");
-      const q = query(articleRef, where("id", "==", articleId));
+      const q = query(articleRef, where("id", "==", articlePathName));
       const querySnapshot = await getDocs(q);
       querySnapshot.forEach((doc) => {
         setTitle(doc.data().title);
         setContent(doc.data().content);
       });
     };
-    if (articleId) getArticleContent(articleId);
-    if (articleAdding) setIsEditing(true);
-  }, [userId, articleId, articleAdding]);
+    if (articlePathName) getArticleContent(articlePathName);
+    if (articlePathName === "add") setIsEditing(true);
+  }, [userId, articlePathName]);
+
+  const renderReadMode = () => (
+    <>
+      <Btns>
+        <BackBtn onClick={() => navigate("/articles")}>Back</BackBtn>
+        <EditBtn
+          onClick={() => {
+            setIsEditing(true);
+            navigate(`/articles/${articlePathName}?title=${title}&edit=true`);
+          }}
+        >
+          Edit
+        </EditBtn>
+      </Btns>
+      <Title>
+        {title.split(/([\s!]+)/).map((word: string, index: number) => (
+          <span key={index} onClick={() => setKeyword(word)}>
+            {word}
+          </span>
+        ))}
+      </Title>
+      <Content>
+        {content.split(/([\s!]+)/).map((word: string, index: number) => (
+          <span key={index} onClick={() => setKeyword(word)}>
+            {word}
+          </span>
+        ))}
+      </Content>
+    </>
+  );
+
+  const renderEditMode = () => {
+    return (
+      <>
+        <TitleLabel>Title</TitleLabel>
+        <TitleInput
+          type="text"
+          defaultValue={articlePathName === "add" ? "" : title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <ContentLabel>Content</ContentLabel>
+        <ContentTextArea
+          defaultValue={articlePathName === "add" ? "" : content}
+          onChange={(e) => setContent(e.target.value)}
+        />
+        <DoneBtn
+          onClick={async () => {
+            if (title && content && userId && articlePathName !== "add") {
+              setIsEditing(false);
+              const docRef = doc(
+                db,
+                "users",
+                userId,
+                "articles",
+                articlePathName
+              );
+              await updateDoc(docRef, {
+                title,
+                content,
+              });
+            } else if (title && content) {
+              setIsEditing(false);
+              const docRef = doc(collection(db, "users", userId, "articles"));
+              await setDoc(docRef, {
+                id: docRef.id,
+                title,
+                content,
+                time: new Date(),
+              });
+            } else {
+              alert("Title and content cannot be left blank!");
+            }
+          }}
+        >
+          Done
+        </DoneBtn>
+      </>
+    );
+  };
 
   return (
     <Wrapper>
       <ArticleWrapper>
-        {isEditing ? (
-          articleAdding ? (
-            <>
-              <TitleLabel>Title</TitleLabel>
-              <TitleInput
-                type="text"
-                onChange={(e) => setTitle(e.target.value)}
-              />
-              <ContentLabel>Content</ContentLabel>
-              <ContentTextArea onChange={(e) => setContent(e.target.value)} />
-              <DoneBtn
-                onClick={async () => {
-                  if (title && content) {
-                    setIsEditing(false);
-                    const docRef = doc(
-                      collection(db, "users", userId, "articles")
-                    );
-                    await setDoc(docRef, {
-                      id: docRef.id,
-                      title,
-                      content,
-                      time: new Date(),
-                    });
-                  } else {
-                    alert("Title and content cannot be left blank!");
-                  }
-                }}
-              >
-                Done
-              </DoneBtn>
-            </>
-          ) : (
-            <>
-              <TitleLabel>Title</TitleLabel>
-              <TitleInput
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-              <ContentLabel>Content</ContentLabel>
-              <ContentTextArea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-              />
-              <DoneBtn
-                onClick={async () => {
-                  if (title && content && userId && articleId) {
-                    setIsEditing(false);
-                    const docRef = doc(
-                      db,
-                      "users",
-                      userId,
-                      "articles",
-                      articleId
-                    );
-                    await updateDoc(docRef, {
-                      title,
-                      content,
-                    });
-                  } else {
-                    alert("Title and content cannot be left blank!");
-                  }
-                }}
-              >
-                Done
-              </DoneBtn>
-            </>
-          )
-        ) : (
-          <>
-            <Btns>
-              <BackBtn onClick={() => navigate("/articles")}>Back</BackBtn>
-              <EditBtn
-                onClick={() => {
-                  setIsEditing(true);
-                  navigate(
-                    `/articles/article?title=${title}&id=${articleId}&edit=true`
-                  );
-                }}
-              >
-                Edit
-              </EditBtn>
-            </Btns>
-            <Title>
-              {title.split(/([\s!]+)/).map((word: string, index: number) => (
-                <span key={index} onClick={() => setKeyword(word)}>
-                  {word}
-                </span>
-              ))}
-            </Title>
-            <Content>
-              {content.split(/([\s!]+)/).map((word: string, index: number) => (
-                <span key={index} onClick={() => setKeyword(word)}>
-                  {word}
-                </span>
-              ))}
-            </Content>
-          </>
-        )}
+        {isEditing ? renderEditMode() : renderReadMode()}
       </ArticleWrapper>
-      <VocabDetails />
     </Wrapper>
   );
 }

@@ -51,6 +51,11 @@ const Example = styled.div`
   font-size: 10px;
 `;
 
+const LastVocabBtn = styled.button`
+  width: 50px;
+  height: 20px;
+`;
+
 interface vocabDetailsInterface {
   word?: string;
   phonetic?: string;
@@ -77,10 +82,9 @@ interface vocabDetailsInterface {
 }
 
 export default function VocabDetails() {
+  const { keyword, setKeyword } = useContext(keywordContext);
   const [vocabDetails, setVocabDetails] = useState<vocabDetailsInterface>();
-  const [audioUrl, setAudioUrl] = useState();
   const [isLoading, setIsLoading] = useState(true);
-  const { keyword } = useContext(keywordContext);
   const resourceUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${keyword}`;
 
   useEffect(() => {
@@ -90,11 +94,6 @@ export default function VocabDetails() {
         const data = await response.json();
         setVocabDetails(data[0]);
         setIsLoading(false);
-        if (data[0].phonetics.length > 0) {
-          setAudioUrl(data[0].phonetics.slice(0, 1)[0].audio);
-        } else {
-          setAudioUrl(undefined);
-        }
       } catch {
         setIsLoading(false);
       }
@@ -103,11 +102,8 @@ export default function VocabDetails() {
   }, [resourceUrl]);
 
   const handlePlayAudio = () => {
-    // const audio = new Audio(vocabDetails?.phonetics?[0].audio);
-    if (audioUrl) {
-      const audio = new Audio(audioUrl);
-      audio.play();
-    }
+    const audio = new Audio(vocabDetails?.phonetics?.[0].audio);
+    audio.play();
   };
 
   return isLoading ? (
@@ -117,10 +113,11 @@ export default function VocabDetails() {
   ) : vocabDetails ? (
     <Wrapper>
       <VocabWrapper>
+        <LastVocabBtn>Back</LastVocabBtn>
         <TitleContainer>
           <Vocab>{vocabDetails?.word}</Vocab>
           <Phonetic>{vocabDetails?.phonetic}</Phonetic>
-          {audioUrl && (
+          {vocabDetails?.phonetics?.[0]?.audio && (
             <AudioImg src={audio} alt="audio" onClick={handlePlayAudio} />
           )}
           <SaveVocabImg src={save} alt="save" />
@@ -129,14 +126,48 @@ export default function VocabDetails() {
           {vocabDetails?.meanings?.map(
             ({ partOfSpeech, definitions, synonyms }) => (
               <>
-                <PartOfSpeech key={partOfSpeech}>{partOfSpeech}</PartOfSpeech>
+                <PartOfSpeech key={partOfSpeech}>
+                  {partOfSpeech
+                    ?.split(/([\s!]+)/)
+                    .map((word: string, index: number) => (
+                      <span key={index} onClick={() => setKeyword(word)}>
+                        {word}
+                      </span>
+                    ))}
+                </PartOfSpeech>
                 <p>Definitions</p>
                 <ul>
                   {definitions?.map(
                     ({ definition, example }, index: number) => (
                       <DefinitionWrapper key={index}>
-                        <Definition key={definition}>{definition}</Definition>
-                        <Example>{example && `"${example}"`}</Example>
+                        <Definition key={definition}>
+                          {definition
+                            ?.split(/([\s!]+)/)
+                            .map((word: string, index: number) => (
+                              <span
+                                key={index}
+                                onClick={() => setKeyword(word)}
+                              >
+                                {word}
+                              </span>
+                            ))}
+                        </Definition>
+                        {example && (
+                          <Example>
+                            "
+                            {example
+                              ?.split(/([\s!]+)/)
+                              .map((word: string, index: number) => (
+                                <span
+                                  key={index}
+                                  onClick={() => setKeyword(word)}
+                                >
+                                  {word}
+                                </span>
+                              ))}
+                            "
+                          </Example>
+                        )}
                       </DefinitionWrapper>
                     )
                   )}
@@ -145,7 +176,15 @@ export default function VocabDetails() {
                   <>
                     <p>Synonyms</p>
                     {synonyms?.map((synonym: string, index: number) => (
-                      <Synonyms key={index}>{synonym}</Synonyms>
+                      <Synonyms key={index}>
+                        {synonym
+                          ?.split(/([\s!]+)/)
+                          .map((word: string, index: number) => (
+                            <span key={index} onClick={() => setKeyword(word)}>
+                              {word}
+                            </span>
+                          ))}
+                      </Synonyms>
                     ))}
                   </>
                 ) : (
@@ -158,6 +197,9 @@ export default function VocabDetails() {
       </VocabWrapper>
     </Wrapper>
   ) : (
-    <Wrapper>No result</Wrapper>
+    <>
+      <LastVocabBtn>Back</LastVocabBtn>
+      <Wrapper>No result</Wrapper>
+    </>
   );
 }

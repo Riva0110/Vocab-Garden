@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import styled from "styled-components";
 import { Link, Outlet } from "react-router-dom";
 import { keywordContext } from "./context/keywordContext";
@@ -19,45 +19,27 @@ const Input = styled.input`
 `;
 
 function App() {
-  let searchedKeyword: string;
   const { setKeyword } = useContext(keywordContext);
   const { isLogin } = useContext(authContext);
+  const [inputVocab, setInputVocab] = useState<string>();
 
   return (
     <Wrapper>
-      {isLogin ? (
-        <Header>
-          <NavLink to="/">Home</NavLink>
-          <NavLink to="/articles">Article</NavLink>
-          <NavLink to="/vocabbook">VocabBook</NavLink>
-          <NavLink to="/profile">Profile</NavLink>
-          <Input
-            onChange={(e) => {
-              e.target.value = e.target.value.toLowerCase();
-              searchedKeyword = e.target.value;
-            }}
-            onKeyDown={(e) => {
-              e.key === "Enter" && setKeyword(searchedKeyword);
-            }}
-          />
-        </Header>
-      ) : (
-        <Header>
-          <NavLink to="/">Home</NavLink>
-          <NavLink to="/profile">Article</NavLink>
-          <NavLink to="/profile">VocabBook</NavLink>
-          <NavLink to="/profile">Profile</NavLink>
-          <Input
-            onChange={(e) => {
-              e.target.value = e.target.value.toLowerCase();
-              searchedKeyword = e.target.value;
-            }}
-            onKeyDown={(e) => {
-              e.key === "Enter" && setKeyword(searchedKeyword);
-            }}
-          />
-        </Header>
-      )}
+      <Header>
+        <NavLink to="/">Home</NavLink>
+        <NavLink to={isLogin ? "/articles" : "/profile"}>Article</NavLink>
+        <NavLink to={isLogin ? "/vocabbook" : "/profile"}>VocabBook</NavLink>
+        <NavLink to={isLogin ? "/profile" : "/profile"}>Profile</NavLink>
+        <Input
+          onChange={(e) => {
+            e.target.value = e.target.value.toLowerCase();
+            setInputVocab(e.target.value);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && inputVocab) setKeyword(inputVocab);
+          }}
+        />
+      </Header>
 
       <Main>
         <Outlet />

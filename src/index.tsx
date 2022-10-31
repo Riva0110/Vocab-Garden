@@ -25,9 +25,12 @@ root.render(
           <Routes>
             <Route path="/" element={<App />}>
               <Route index element={<Home />} />
-              <Route path="articles" element={<Articles />} />
-              {/* 為何雙層失效？ */}
-              <Route path="articles/article" element={<Article />} />
+              <Route path="articles" element={<Articles />}>
+                <Route index />
+                {/* <Route path="articles/article" element={<Article />} /> */}
+                <Route path=":articleId" element={<Article />} />
+                <Route path="add" element={<Article />} />
+              </Route>
               <Route path="vocabbook" element={<VocabBook />} />
               <Route path="wordle" element={<Wordle />} />
               <Route path="review" element={<Review />} />
