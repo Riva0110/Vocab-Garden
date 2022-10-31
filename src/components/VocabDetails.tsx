@@ -136,7 +136,6 @@ export default function VocabDetails() {
   const getVocabBooks = async () => {
     const vocabBooksRef = doc(db, "vocabBooks", userId);
     const docSnap = await getDoc(vocabBooksRef);
-    console.log(vocabBooksRef, docSnap.data());
     if (docSnap) {
       const vocabBooksData = docSnap.data() as {};
       setVocabBooks(vocabBooksData);
@@ -200,10 +199,9 @@ export default function VocabDetails() {
                 setSelectedvocabBook(e.target.value);
               }}
             >
-              {vocabBooks &&
-                Object.keys(vocabBooks).map((vocabBook, index) => (
-                  <option key={vocabBook + index}>{vocabBook}</option>
-                ))}
+              {Object.keys(vocabBooks)?.map((vocabBook, index) => (
+                <option key={vocabBook + index}>{vocabBook}</option>
+              ))}
             </Select>
             <Buttons>
               <input onChange={(e) => setNewBook(e.target.value)} />

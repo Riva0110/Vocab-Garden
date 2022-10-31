@@ -3,7 +3,7 @@ import styled from "styled-components";
 import audio from "../../components/audio.png";
 import { keywordContext } from "../../context/keywordContext";
 import { authContext } from "../../context/authContext";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { getDoc, doc, arrayUnion, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 
@@ -25,6 +25,7 @@ const VocabBookAndCard = styled.div`
 
 const BookWrapper = styled.div`
   display: flex;
+  flex-wrap: wrap;
   gap: 20px;
   margin-bottom: 20px;
 `;
@@ -62,48 +63,42 @@ const AudioImg = styled.img`
 
 const Button = styled.button``;
 
-const books = ["unsorted", "finance", "technology"];
-const cards = [
-  {
-    vocab: "greeting",
-    partOfSpeech: "verb",
-    definition:
-      "To welcome in a friendly manner, either in person or through another means e.g. writing or over the phone/internet",
-  },
-  {
-    vocab: "welcome",
-    audioLink:
-      "https://api.dictionaryapi.dev/media/pronunciations/en/welcome-uk.mp3",
-    partOfSpeech: "noun",
-    definition:
-      "The act of greeting someone’s arrival, especially by saying 'Welcome!'; reception.",
-  },
-  {
-    vocab: "guest",
-    audioLink:
-      "https://api.dictionaryapi.dev/media/pronunciations/en/guest-us.mp3",
-    partOfSpeech: "noun",
-    definition:
-      "A recipient of hospitality, specifically someone staying by invitation at the house of another.",
-  },
-];
+interface BooksInterface {
+  [key: string]: [
+    {
+      vocab: string;
+      audioLink: string;
+      partOfSpeech: string;
+      definition: string;
+    }
+  ];
+}
+
+interface CardsInterface {
+  vocab: string;
+  audioLink: string;
+  partOfSpeech: string;
+  definition: string;
+}
 
 export default function VocabBook() {
   const { userId } = useContext(authContext);
   const { setKeyword } = useContext(keywordContext);
-  const [vocabBooks, setVocabBooks] = useState({});
+  const [vocabBooks, setVocabBooks] = useState<BooksInterface>();
+  const [vocabCards, setVocabCards] = useState<CardsInterface[]>([]);
   const [newBook, setNewBook] = useState<string>();
   const handlePlayAudio = (audioLink: string) => {
     const audio = new Audio(audioLink);
     audio.play();
   };
 
-  const getVocabBooks = async (userId: string) => {
+  const getVocabBooks = async () => {
     const vocabBooksRef = doc(db, "vocabBooks", userId);
     const docSnap = await getDoc(vocabBooksRef);
     if (docSnap) {
-      const vocabBooksData = docSnap.data() as {};
+      const vocabBooksData = docSnap.data() as BooksInterface;
       setVocabBooks(vocabBooksData);
+      setVocabCards(vocabBooksData.unsorted);
     }
   };
 
@@ -113,10 +108,14 @@ export default function VocabBook() {
       await updateDoc(docRef, {
         [newBook]: arrayUnion(),
       });
-      getVocabBooks(userId);
+      getVocabBooks();
       alert(`Add a ${newBook} vocabbook successfully!`);
     }
   };
+
+  useEffect(() => {
+    getVocabBooks();
+  }, []);
 
   return (
     <Wrapper>
@@ -129,12 +128,13 @@ export default function VocabBook() {
       <Main>
         <VocabBookAndCard>
           <BookWrapper>
-            {books.map((book) => (
-              <Book>{book}</Book>
-            ))}
+            {vocabBooks &&
+              Object.keys(vocabBooks)?.map((book: string) => (
+                <Book>{book}</Book>
+              ))}
           </BookWrapper>
           <CardWrapper>
-            {cards.map(
+            {vocabCards?.map(
               ({ vocab, audioLink, partOfSpeech, definition }, index) => (
                 <Card>
                   <VocabTitle>
