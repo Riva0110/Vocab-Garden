@@ -54,13 +54,6 @@ const BackBtn = styled.button`
 `;
 const EditBtn = styled(BackBtn)``;
 
-// interface Props {
-//   isEditing: boolean;
-//   setIsEditing: Dispatch<SetStateAction<boolean>>;
-// }
-
-// { isEditing, setIsEditing }: Props
-
 export default function Article() {
   const navigate = useNavigate();
   const { userId } = useContext(authContext);
@@ -173,7 +166,6 @@ export default function Article() {
                 Edit
               </EditBtn>
             </Btns>
-            {/* <Title>{title}</Title> */}
             <Title>
               {title.split(/([\s!]+)/).map((word: string, index: number) => (
                 <span key={index} onClick={() => setKeyword(word)}>

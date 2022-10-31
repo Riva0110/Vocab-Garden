@@ -46,7 +46,6 @@ export default function Articles() {
   const { userId } = useContext(authContext);
   const navigate = useNavigate();
   const [articleList, setArticleList] = useState<articleListInterface[]>([]);
-  // const [isEditing, setIsEditing] = useState<boolean>();
 
   useEffect(() => {
     const getArticles = async (userId: string) => {
@@ -71,19 +70,16 @@ export default function Articles() {
         <AddBtn
           onClick={() => {
             navigate("/articles/article?add=true");
-            // setIsEditing(true);
           }}
         >
           +
         </AddBtn>
         {articleList?.map(({ time, title, id }, index) => {
-          // const readableTime = new Date(time.seconds);
           return (
             <ArticleTitle
               key={index}
               onClick={() => {
                 navigate(`/articles/article?title=${title}&id=${id}`);
-                // setIsEditing(false);
               }}
             >
               <Date>{time.toLocaleString()}</Date>
@@ -93,7 +89,6 @@ export default function Articles() {
         })}
       </ArticlesWrapper>
       <VocabDetails />
-      {/* isEditing={isEditing} setIsEditing={setIsEditing} */}
     </Wrapper>
   );
 }
