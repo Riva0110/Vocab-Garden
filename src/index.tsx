@@ -5,6 +5,7 @@ import App from "./App";
 import Articles from "./pages/Article/Articles";
 import ArticlesLayout from "./pages/Article/ArticlesLayout";
 import Article from "./pages/Article/Article";
+import VocabBookLayout from "./pages/VocabBook/VocabBookLayout";
 import Home from "./pages/Home/Home";
 import NoPage from "./pages/NoPage/NoPage";
 import Profile from "./pages/Profile/Profile";
@@ -31,7 +32,8 @@ root.render(
                 <Route path=":articleId" element={<Article />} />
                 <Route path="add" element={<Article />} />
               </Route>
-              <Route path="vocabbook" element={<VocabBook />}>
+              <Route path="vocabbook" element={<VocabBookLayout />}>
+                <Route index element={<VocabBook />} />
                 <Route path="wordle" element={<Wordle />} />
                 <Route path="review" element={<Review />} />
               </Route>

@@ -94,8 +94,8 @@ export default function VocabBook() {
   return (
     <Wrapper>
       <Nav>
-        <NavLink to="/wordle">Wordle</NavLink>
-        <NavLink to="/review">Review</NavLink>
+        <NavLink to="wordle">Wordle</NavLink>
+        <NavLink to="review">Review</NavLink>
       </Nav>
       <Main>
         <VocabBookAndCard>
@@ -139,7 +139,6 @@ export default function VocabBook() {
             )}
           </CardWrapper>
         </VocabBookAndCard>
-        <VocabDetails />
       </Main>
     </Wrapper>
   );

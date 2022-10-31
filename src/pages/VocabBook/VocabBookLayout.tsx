@@ -6,7 +6,7 @@ const Wrapper = styled.div`
   display: flex;
 `;
 
-export default function ArticlesLayout() {
+export default function VocabBookLayout() {
   return (
     <Wrapper>
       <Outlet />
