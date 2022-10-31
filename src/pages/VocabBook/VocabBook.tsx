@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import VocabDetails from "../../components/VocabDetails";
 import audio from "../../components/audio.png";
 import { keywordContext } from "../../context/keywordContext";
-import { useContext } from "react";
+import { authContext } from "../../context/authContext";
+import { useContext, useState } from "react";
+import { getDoc, doc, arrayUnion, updateDoc } from "firebase/firestore";
+import { db } from "../../firebase/firebase";
 
 const Wrapper = styled.div``;
 const Nav = styled.nav`
@@ -58,6 +60,8 @@ const AudioImg = styled.img`
   height: 20px;
 `;
 
+const Button = styled.button``;
+
 const books = ["unsorted", "finance", "technology"];
 const cards = [
   {
@@ -85,10 +89,33 @@ const cards = [
 ];
 
 export default function VocabBook() {
+  const { userId } = useContext(authContext);
   const { setKeyword } = useContext(keywordContext);
+  const [vocabBooks, setVocabBooks] = useState({});
+  const [newBook, setNewBook] = useState<string>();
   const handlePlayAudio = (audioLink: string) => {
     const audio = new Audio(audioLink);
     audio.play();
+  };
+
+  const getVocabBooks = async (userId: string) => {
+    const vocabBooksRef = doc(db, "vocabBooks", userId);
+    const docSnap = await getDoc(vocabBooksRef);
+    if (docSnap) {
+      const vocabBooksData = docSnap.data() as {};
+      setVocabBooks(vocabBooksData);
+    }
+  };
+
+  const handleAddBook = async () => {
+    if (newBook) {
+      const docRef = doc(db, "vocabBooks", userId);
+      await updateDoc(docRef, {
+        [newBook]: arrayUnion(),
+      });
+      getVocabBooks(userId);
+      alert(`Add a ${newBook} vocabbook successfully!`);
+    }
   };
 
   return (
@@ -96,6 +123,8 @@ export default function VocabBook() {
       <Nav>
         <NavLink to="wordle">Wordle</NavLink>
         <NavLink to="review">Review</NavLink>
+        <input onChange={(e) => setNewBook(e.target.value)} />
+        <Button onClick={handleAddBook}>Add a Book</Button>
       </Nav>
       <Main>
         <VocabBookAndCard>

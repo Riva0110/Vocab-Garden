@@ -28,7 +28,7 @@ const AddBtn = styled.button`
   margin-left: auto;
 `;
 
-interface articleListInterface {
+interface ArticleListInterface {
   time: {
     seconds: number;
     nanoseconds: number;
@@ -41,17 +41,17 @@ interface articleListInterface {
 export default function Articles() {
   const { userId } = useContext(authContext);
   const navigate = useNavigate();
-  const [articleList, setArticleList] = useState<articleListInterface[]>([]);
+  const [articleList, setArticleList] = useState<ArticleListInterface[]>([]);
 
   useEffect(() => {
     const getArticles = async (userId: string) => {
       const articleRef = collection(db, "users", userId, "articles");
       const q = query(articleRef, orderBy("time", "desc"));
-      let articleListData: articleListInterface[] = [];
+      let articleListData: ArticleListInterface[] = [];
       const querySnapshot = await getDocs(q);
       if (querySnapshot) {
         querySnapshot.forEach((doc) => {
-          const article = doc.data() as articleListInterface;
+          const article = doc.data() as ArticleListInterface;
           articleListData = [...articleListData, article];
         });
         setArticleList(articleListData);
