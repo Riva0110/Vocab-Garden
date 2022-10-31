@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import App from "./App";
+import Articles from "./pages/Article/Articles";
 import Article from "./pages/Article/Article";
 import Home from "./pages/Home/Home";
 import NoPage from "./pages/NoPage/NoPage";
@@ -24,7 +25,12 @@ root.render(
           <Routes>
             <Route path="/" element={<App />}>
               <Route index element={<Home />} />
-              <Route path="article" element={<Article />} />
+              <Route path="articles" element={<Articles />}>
+                <Route index />
+                {/* <Route path="articles/article" element={<Article />} /> */}
+                <Route path=":articleId" element={<Article />} />
+                <Route path="add" element={<Article />} />
+              </Route>
               <Route path="vocabbook" element={<VocabBook />} />
               <Route path="wordle" element={<Wordle />} />
               <Route path="review" element={<Review />} />
