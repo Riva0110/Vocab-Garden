@@ -23,7 +23,7 @@ const Time = styled.div`
 const Title = styled.div`
   border-bottom: 1px solid gray;
 `;
-const AddBtn = styled.button`
+const Btn = styled.button`
   width: 50px;
   margin-left: auto;
 `;
@@ -62,13 +62,20 @@ export default function Articles() {
 
   return (
     <ArticlesWrapper>
-      <AddBtn
+      <Btn
+        onClick={() => {
+          navigate("/articles/words");
+        }}
+      >
+        Words
+      </Btn>
+      <Btn
         onClick={() => {
           navigate("/articles/add");
         }}
       >
         +
-      </AddBtn>
+      </Btn>
       {articleList?.map(({ time, title, id }, index) => {
         const newDate = new Date(time.seconds * 1000);
         return (

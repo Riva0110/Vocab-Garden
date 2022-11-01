@@ -23,6 +23,8 @@ const ArticleWrapper = styled.div`
   flex-direction: column;
   margin-right: 50px;
   width: 80%;
+  height: calc(100vh - 30px);
+  overflow-y: scroll;
 `;
 const TitleLabel = styled.label``;
 const TitleInput = styled.input``;

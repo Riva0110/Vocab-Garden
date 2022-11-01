@@ -15,6 +15,7 @@ import Wordle from "./pages/VocabBook/Wordle/Wordle";
 import { KeywordContextProvider } from "./context/keywordContext";
 import { AuthContextProvider } from "./context/authContext";
 import { VocabBookContextProvider } from "./context/vocabBookContext";
+import { ArticleWords } from "./pages/Article/ArticleWords";
 import reportWebVitals from "./reportWebVitals";
 
 const root = ReactDOM.createRoot(
@@ -31,6 +32,7 @@ root.render(
                 <Route index element={<Home />} />
                 <Route path="articles" element={<ArticlesLayout />}>
                   <Route index element={<Articles />} />
+                  <Route path="words" element={<ArticleWords />} />
                   <Route path=":articleId" element={<Article />} />
                   <Route path="add" element={<Article />} />
                 </Route>

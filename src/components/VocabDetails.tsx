@@ -15,6 +15,8 @@ interface Props {
 
 const Wrapper = styled.div`
   font-size: 12px;
+  height: calc(100vh - 30px);
+  overflow-y: scroll;
 `;
 const SpinnerImg = styled.img`
   width: 40px;
