@@ -41,7 +41,7 @@ const SavePopup = styled.div`
   position: absolute;
   border: 1px solid gray;
   border-radius: 10px;
-  top: 125px;
+  top: 170px;
   background-color: white;
   display: ${(props: Props) => (props.isPopuping ? "block" : "none")};
   padding: 10px;
@@ -147,17 +147,17 @@ export default function VocabDetails() {
 
   const handleAddBook = async () => {
     if (newBook) {
-      const docRef = doc(db, "vocabBooks", userId);
-      await updateDoc(docRef, {
+      const vocabRef = doc(db, "vocabBooks", userId);
+      await updateDoc(vocabRef, {
         [newBook]: arrayUnion(),
       });
-      getVocabBooks(userId);
+      await getVocabBooks(userId);
     }
   };
 
   const handleSaveVocab = async (selectedvocabBook: string) => {
-    const docRef = doc(db, "vocabBooks", userId);
-    await updateDoc(docRef, {
+    const vocabRef = doc(db, "vocabBooks", userId);
+    await updateDoc(vocabRef, {
       [selectedvocabBook]: arrayUnion({
         vocab: vocabDetails?.word,
         audioLink: vocabDetails?.phonetics?.[0]?.audio,
@@ -165,6 +165,7 @@ export default function VocabDetails() {
         definition: vocabDetails?.meanings?.[0].definitions?.[0].definition,
       }),
     });
+    await getVocabBooks(userId);
   };
 
   return isLoading ? (
@@ -189,7 +190,7 @@ export default function VocabDetails() {
           <SavePopup isPopuping={isPopuping}>
             <label>Book</label>
             <Select
-              value={"unsorted"}
+              value={selectedvocabBook}
               onChange={(e: any) => {
                 setSelectedvocabBook(e.target.value);
               }}
@@ -206,6 +207,7 @@ export default function VocabDetails() {
                 onClick={() => {
                   if (selectedvocabBook) {
                     handleSaveVocab(selectedvocabBook);
+                    getVocabBooks(userId);
                     setIsPopuping(false);
                     alert(
                       `"${keyword}" saved in the "${selectedvocabBook}" vocabbook successfully!`
@@ -289,7 +291,7 @@ export default function VocabDetails() {
   ) : (
     <>
       <LastVocabBtn>Back</LastVocabBtn>
-      <Wrapper>No result</Wrapper>
+      <Wrapper>Sorry......No result.</Wrapper>
     </>
   );
 }

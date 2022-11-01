@@ -13,6 +13,7 @@ const Header = styled.header`
   background-color: white;
   border-bottom: 1px solid gray;
   padding: 20px;
+  z-index: 1;
 `;
 const Main = styled.main`
   margin: 50px;

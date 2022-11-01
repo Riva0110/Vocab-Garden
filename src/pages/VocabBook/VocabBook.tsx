@@ -80,13 +80,6 @@ const SaveVocabImg = styled.img`
 
 const Button = styled.button``;
 
-interface CardsInterface {
-  vocab: string;
-  audioLink: string;
-  partOfSpeech: string;
-  definition: string;
-}
-
 interface Props {
   selected?: boolean;
   weight?: boolean;
@@ -96,9 +89,7 @@ export default function VocabBook() {
   const { userId } = useContext(authContext);
   const { setKeyword } = useContext(keywordContext);
   const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
-  const [vocabCards, setVocabCards] = useState<CardsInterface[]>([]);
   const [newBook, setNewBook] = useState<string>();
-  const [vocabBooksList, setVocabBooksList] = useState<string[]>();
   const [viewingBook, setViewingBook] = useState<string>("unsorted");
   const handlePlayAudio = (audioLink: string) => {
     const audio = new Audio(audioLink);
@@ -107,29 +98,25 @@ export default function VocabBook() {
 
   const handleAddBook = async () => {
     if (newBook) {
-      const docRef = doc(db, "vocabBooks", userId);
-      await updateDoc(docRef, {
+      const vocabRef = doc(db, "vocabBooks", userId);
+      await updateDoc(vocabRef, {
         [newBook]: arrayUnion(),
       });
       getVocabBooks(userId);
-      setVocabBooksList(Object.keys(vocabBooks));
-      setTimeout(alert, 100, `Add a ${newBook} vocabbook successfully!`);
+      setTimeout(alert, 1000, `Add a "${newBook}" vocabbook successfully!`);
     }
   };
 
   const handleDeleteBook = async (book: string) => {
     const yes = window.confirm(`Are you sure to delete book "${book}"?`);
 
-    if (yes && vocabBooksList && vocabBooksList?.length >= 1) {
+    if (yes) {
       const vocabRef = doc(db, "vocabBooks", userId);
       await updateDoc(vocabRef, {
         [book]: deleteField(),
       });
-      const vocabBooksAfterDelete = Object.keys(vocabBooks).filter(
-        (vocabbook) => vocabbook !== book
-      );
-      setVocabBooksList(vocabBooksAfterDelete);
-      setTimeout(alert, 100, `Delete book "${book}" sucessfully!`);
+      getVocabBooks(userId);
+      setTimeout(alert, 1000, `Delete book "${book}" sucessfully!`);
     }
   };
 
@@ -145,23 +132,17 @@ export default function VocabBook() {
       await updateDoc(vocabRef, {
         [viewingBook]: updateVocabCard,
       });
-      await runGetVocabBooks(viewingBook);
+      getVocabBooks(userId);
       setTimeout(
         alert,
-        100,
+        1000,
         `Remove vocab "${vocab}" from "${viewingBook}" sucessfully!`
       );
     }
   };
 
-  const runGetVocabBooks = async (vocabBook: string) => {
-    getVocabBooks(userId);
-    setVocabCards(vocabBooks[vocabBook]);
-    setVocabBooksList(Object.keys(vocabBooks));
-  };
-
   useEffect(() => {
-    runGetVocabBooks("unsorted");
+    getVocabBooks(userId);
   }, []);
 
   return (
@@ -175,22 +156,23 @@ export default function VocabBook() {
       <Main>
         <VocabBookAndCard>
           <BookWrapper>
-            {vocabBooksList?.map((book: string) => (
-              <Book
-                selected={viewingBook === `${book}` ? true : false}
-                onClick={() => {
-                  setViewingBook(book);
-                  setVocabCards(vocabBooks[book]);
-                }}
-              >
-                {book}
-                <br />({vocabBooks[book].length})
-                <button onClick={() => handleDeleteBook(book)}>Delete</button>
-              </Book>
-            ))}
+            {Object.keys(vocabBooks)
+              ?.sort()
+              .map((book: string) => (
+                <Book
+                  selected={viewingBook === `${book}` ? true : false}
+                  onClick={() => {
+                    setViewingBook(book);
+                  }}
+                >
+                  {book.toLocaleLowerCase()}
+                  <br />({vocabBooks?.[book]?.length})
+                  <button onClick={() => handleDeleteBook(book)}>Delete</button>
+                </Book>
+              ))}
           </BookWrapper>
           <CardWrapper>
-            {vocabCards?.map(
+            {vocabBooks[viewingBook]?.map(
               ({ vocab, audioLink, partOfSpeech, definition }, index) => (
                 <>
                   <Card>
