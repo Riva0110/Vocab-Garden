@@ -5,9 +5,19 @@ import { keywordContext } from "./context/keywordContext";
 import { authContext } from "./context/authContext";
 
 const Wrapper = styled.div``;
-const Header = styled.header``;
+const Header = styled.header`
+  position: fixed;
+  top: 0px;
+  width: 100vw;
+  height: 30px;
+  background-color: white;
+  border-bottom: 1px solid gray;
+  padding: 20px;
+  z-index: 1;
+`;
 const Main = styled.main`
   margin: 50px;
+  margin-top: 80px;
 `;
 
 const NavLink = styled(Link)`
@@ -31,6 +41,7 @@ function App() {
         <NavLink to={isLogin ? "/vocabbook" : "/profile"}>VocabBook</NavLink>
         <NavLink to={isLogin ? "/profile" : "/profile"}>Profile</NavLink>
         <Input
+          placeholder="search..."
           onChange={(e) => {
             e.target.value = e.target.value.toLowerCase();
             setInputVocab(e.target.value);

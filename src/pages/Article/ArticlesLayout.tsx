@@ -1,17 +1,15 @@
 import styled from "styled-components";
 import VocabDetails from "../../components/VocabDetails";
+import { Outlet } from "react-router-dom";
 
 const Wrapper = styled.div`
   display: flex;
 `;
-const Main = styled.div`
-  width: 50vw;
-`;
 
-export default function Home() {
+export default function ArticlesLayout() {
   return (
     <Wrapper>
-      <Main />
+      <Outlet />
       <VocabDetails />
     </Wrapper>
   );

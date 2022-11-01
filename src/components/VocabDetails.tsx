@@ -1,12 +1,22 @@
 import { useEffect, useState, useContext } from "react";
 import styled from "styled-components";
 import { keywordContext } from "../context/keywordContext";
+import { authContext } from "../context/authContext";
+import { vocabBookContext } from "../context/vocabBookContext";
+import { updateDoc, doc, arrayUnion } from "firebase/firestore";
+import { db } from "../firebase/firebase";
 import audio from "./audio.png";
 import save from "./save.png";
 import spinner from "./spinner.gif";
 
+interface Props {
+  isPopuping: boolean;
+}
+
 const Wrapper = styled.div`
   font-size: 12px;
+  height: calc(100vh - 30px);
+  overflow-y: scroll;
 `;
 const SpinnerImg = styled.img`
   width: 40px;
@@ -27,6 +37,25 @@ const AudioImg = styled.img`
 const SaveVocabImg = styled.img`
   width: 20px;
 `;
+const SavePopup = styled.div`
+  position: absolute;
+  border: 1px solid gray;
+  border-radius: 10px;
+  top: 170px;
+  background-color: white;
+  display: ${(props: Props) => (props.isPopuping ? "block" : "none")};
+  padding: 10px;
+`;
+const Select = styled.select`
+  width: 80%;
+  margin-left: 10px;
+`;
+const Buttons = styled.div`
+  display: flex;
+  margin-top: 20px;
+  gap: 10px;
+`;
+const Button = styled.button``;
 const Meanings = styled.div``;
 const PartOfSpeech = styled.div`
   color: green;
@@ -56,7 +85,7 @@ const LastVocabBtn = styled.button`
   height: 20px;
 `;
 
-interface vocabDetailsInterface {
+interface VocabDetailsInterface {
   word?: string;
   phonetic?: string;
   phonetics?: [
@@ -82,9 +111,15 @@ interface vocabDetailsInterface {
 }
 
 export default function VocabDetails() {
+  const { userId } = useContext(authContext);
   const { keyword, setKeyword } = useContext(keywordContext);
-  const [vocabDetails, setVocabDetails] = useState<vocabDetailsInterface>();
+  const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
+  const [vocabDetails, setVocabDetails] = useState<VocabDetailsInterface>();
+  const [newBook, setNewBook] = useState<string>();
+  const [selectedvocabBook, setSelectedvocabBook] =
+    useState<string>("unsorted");
   const [isLoading, setIsLoading] = useState(true);
+  const [isPopuping, setIsPopuping] = useState(false);
   const resourceUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${keyword}`;
 
   useEffect(() => {
@@ -101,9 +136,36 @@ export default function VocabDetails() {
     fetchVocabDetails(resourceUrl);
   }, [resourceUrl]);
 
+  useEffect(() => {
+    getVocabBooks(userId);
+  }, []);
+
   const handlePlayAudio = () => {
     const audio = new Audio(vocabDetails?.phonetics?.[0].audio);
     audio.play();
+  };
+
+  const handleAddBook = async () => {
+    if (newBook) {
+      const vocabRef = doc(db, "vocabBooks", userId);
+      await updateDoc(vocabRef, {
+        [newBook]: arrayUnion(),
+      });
+      await getVocabBooks(userId);
+    }
+  };
+
+  const handleSaveVocab = async (selectedvocabBook: string) => {
+    const vocabRef = doc(db, "vocabBooks", userId);
+    await updateDoc(vocabRef, {
+      [selectedvocabBook]: arrayUnion({
+        vocab: vocabDetails?.word,
+        audioLink: vocabDetails?.phonetics?.[0]?.audio,
+        partOfSpeech: vocabDetails?.meanings?.[0].partOfSpeech,
+        definition: vocabDetails?.meanings?.[0].definitions?.[0].definition,
+      }),
+    });
+    await getVocabBooks(userId);
   };
 
   return isLoading ? (
@@ -120,7 +182,43 @@ export default function VocabDetails() {
           {vocabDetails?.phonetics?.[0]?.audio && (
             <AudioImg src={audio} alt="audio" onClick={handlePlayAudio} />
           )}
-          <SaveVocabImg src={save} alt="save" />
+          <SaveVocabImg
+            src={save}
+            alt="save"
+            onClick={() => setIsPopuping(true)}
+          />
+          <SavePopup isPopuping={isPopuping}>
+            <label>Book</label>
+            <Select
+              value={selectedvocabBook}
+              onChange={(e: any) => {
+                setSelectedvocabBook(e.target.value);
+              }}
+            >
+              {Object.keys(vocabBooks)?.map((vocabBook, index) => (
+                <option key={vocabBook + index}>{vocabBook}</option>
+              ))}
+            </Select>
+            <Buttons>
+              <input onChange={(e) => setNewBook(e.target.value)} />
+              <Button onClick={() => handleAddBook()}>Add a book</Button>
+              <Button onClick={() => setIsPopuping(false)}>Cancel</Button>
+              <Button
+                onClick={() => {
+                  if (selectedvocabBook) {
+                    handleSaveVocab(selectedvocabBook);
+                    getVocabBooks(userId);
+                    setIsPopuping(false);
+                    alert(
+                      `"${keyword}" saved in the "${selectedvocabBook}" vocabbook successfully!`
+                    );
+                  }
+                }}
+              >
+                Done
+              </Button>
+            </Buttons>
+          </SavePopup>
         </TitleContainer>
         <Meanings>
           {vocabDetails?.meanings?.map(
@@ -176,14 +274,8 @@ export default function VocabDetails() {
                   <>
                     <p>Synonyms</p>
                     {synonyms?.map((synonym: string, index: number) => (
-                      <Synonyms key={index}>
-                        {synonym
-                          ?.split(/([\s!]+)/)
-                          .map((word: string, index: number) => (
-                            <span key={index} onClick={() => setKeyword(word)}>
-                              {word}
-                            </span>
-                          ))}
+                      <Synonyms key={index} onClick={() => setKeyword(synonym)}>
+                        {synonym}
                       </Synonyms>
                     ))}
                   </>
@@ -199,7 +291,7 @@ export default function VocabDetails() {
   ) : (
     <>
       <LastVocabBtn>Back</LastVocabBtn>
-      <Wrapper>No result</Wrapper>
+      <Wrapper>Sorry......No result.</Wrapper>
     </>
   );
 }

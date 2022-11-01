@@ -1,5 +1,5 @@
 import { createContext, useState } from "react";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, arrayUnion } from "firebase/firestore";
 import { auth, db } from "../firebase/firebase";
 import {
   signInWithEmailAndPassword,
@@ -13,7 +13,7 @@ type ContextProviderProps = {
   children: React.ReactNode;
 };
 
-interface authInterface {
+interface AuthInterface {
   userId: string;
   setUserId: React.Dispatch<React.SetStateAction<string>>;
   isLogin: boolean;
@@ -23,7 +23,7 @@ interface authInterface {
   signup(email: string, password: string, name: string): void;
 }
 
-export const authContext = createContext<authInterface>({
+export const authContext = createContext<AuthInterface>({
   userId: "",
   setUserId: () => {},
   isLogin: false,
@@ -58,17 +58,15 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
     await setDoc(doc(db, "users", user.uid), {
       name,
     });
-
     setIsLogin(true);
+    const docRef = doc(db, "vocabBooks", user.uid);
+    await setDoc(docRef, {
+      unsorted: arrayUnion(),
+    });
   };
 
   const login = async (email: string, password: string) => {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-    const user = userCredential.user;
+    await signInWithEmailAndPassword(auth, email, password);
   };
 
   const logout = async () => {

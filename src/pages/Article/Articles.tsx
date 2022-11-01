@@ -1,16 +1,11 @@
 import styled from "styled-components";
-import VocabDetails from "../../components/VocabDetails";
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { useEffect } from "react";
 import { authContext } from "../../context/authContext";
-import { Outlet } from "react-router-dom";
 
-const Wrapper = styled.div`
-  display: flex;
-`;
 const ArticlesWrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -28,12 +23,12 @@ const Time = styled.div`
 const Title = styled.div`
   border-bottom: 1px solid gray;
 `;
-const AddBtn = styled.button`
+const Btn = styled.button`
   width: 50px;
   margin-left: auto;
 `;
 
-interface articleListInterface {
+interface ArticleListInterface {
   time: {
     seconds: number;
     nanoseconds: number;
@@ -46,56 +41,55 @@ interface articleListInterface {
 export default function Articles() {
   const { userId } = useContext(authContext);
   const navigate = useNavigate();
-  const [articleList, setArticleList] = useState<articleListInterface[]>([]);
-  const articleId = window.location.pathname.slice(10);
+  const [articleList, setArticleList] = useState<ArticleListInterface[]>([]);
 
   useEffect(() => {
     const getArticles = async (userId: string) => {
       const articleRef = collection(db, "users", userId, "articles");
       const q = query(articleRef, orderBy("time", "desc"));
-      let articleListData: articleListInterface[] = [];
+      let articleListData: ArticleListInterface[] = [];
       const querySnapshot = await getDocs(q);
       if (querySnapshot) {
         querySnapshot.forEach((doc) => {
-          const article = doc.data() as articleListInterface;
+          const article = doc.data() as ArticleListInterface;
           articleListData = [...articleListData, article];
         });
         setArticleList(articleListData);
       }
     };
     getArticles(userId);
-  });
+  }, [userId]);
 
   return (
-    <Wrapper>
-      {!articleId ? (
-        <ArticlesWrapper>
-          <AddBtn
+    <ArticlesWrapper>
+      <Btn
+        onClick={() => {
+          navigate("/articles/words");
+        }}
+      >
+        Words
+      </Btn>
+      <Btn
+        onClick={() => {
+          navigate("/articles/add");
+        }}
+      >
+        +
+      </Btn>
+      {articleList?.map(({ time, title, id }, index) => {
+        const newDate = new Date(time.seconds * 1000);
+        return (
+          <ArticleTitle
+            key={index}
             onClick={() => {
-              navigate("/articles/add");
+              navigate(`/articles/${id}?title=${title}`);
             }}
           >
-            +
-          </AddBtn>
-          {articleList?.map(({ time, title, id }, index) => {
-            const newDate = new Date(time.seconds * 1000);
-            return (
-              <ArticleTitle
-                key={index}
-                onClick={() => {
-                  navigate(`/articles/${id}?title=${title}`);
-                }}
-              >
-                <Time>{newDate.toLocaleString()}</Time>
-                <Title>{title}</Title>
-              </ArticleTitle>
-            );
-          })}
-        </ArticlesWrapper>
-      ) : (
-        <Outlet />
-      )}
-      <VocabDetails />
-    </Wrapper>
+            <Time>{newDate.toLocaleString()}</Time>
+            <Title>{title}</Title>
+          </ArticleTitle>
+        );
+      })}
+    </ArticlesWrapper>
   );
 }
