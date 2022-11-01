@@ -50,7 +50,7 @@ export const ArticleWords = () => {
   const { setKeyword } = useContext(keywordContext);
   const navigate = useNavigate();
   const [articleWords, setArticleWords] = useState<[string, number][]>([]);
-  let articleWordsArray = useRef<[string, number][]>([]);
+  let articleWordsArray = useRef<[string, any][]>([]);
 
   useEffect(() => {
     const getArticleContent = async () => {
@@ -81,7 +81,7 @@ export const ArticleWords = () => {
       }, {});
     if (sortByCount) {
       articleWordsArray.current = Object.entries(countArticleWords).sort(
-        (a, b) => b[1] - a[1]
+        (a: any, b: any) => b[1] - a[1]
       );
       setArticleWords(articleWordsArray.current);
     } else {
