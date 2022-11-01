@@ -1,8 +1,9 @@
 import { useEffect, useState, useContext } from "react";
 import styled from "styled-components";
 import { keywordContext } from "../context/keywordContext";
-import { authContext } from "..//context/authContext";
-import { getDoc, updateDoc, doc, arrayUnion } from "firebase/firestore";
+import { authContext } from "../context/authContext";
+import { vocabBookContext } from "../context/vocabBookContext";
+import { updateDoc, doc, arrayUnion } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import audio from "./audio.png";
 import save from "./save.png";
@@ -110,8 +111,8 @@ interface VocabDetailsInterface {
 export default function VocabDetails() {
   const { userId } = useContext(authContext);
   const { keyword, setKeyword } = useContext(keywordContext);
+  const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
   const [vocabDetails, setVocabDetails] = useState<VocabDetailsInterface>();
-  const [vocabBooks, setVocabBooks] = useState({});
   const [newBook, setNewBook] = useState<string>();
   const [selectedvocabBook, setSelectedvocabBook] =
     useState<string>("unsorted");
@@ -133,17 +134,8 @@ export default function VocabDetails() {
     fetchVocabDetails(resourceUrl);
   }, [resourceUrl]);
 
-  const getVocabBooks = async () => {
-    const vocabBooksRef = doc(db, "vocabBooks", userId);
-    const docSnap = await getDoc(vocabBooksRef);
-    if (docSnap) {
-      const vocabBooksData = docSnap.data() as {};
-      setVocabBooks(vocabBooksData);
-    }
-  };
-
   useEffect(() => {
-    getVocabBooks();
+    getVocabBooks(userId);
   }, []);
 
   const handlePlayAudio = () => {
@@ -157,7 +149,7 @@ export default function VocabDetails() {
       await updateDoc(docRef, {
         [newBook]: arrayUnion(),
       });
-      getVocabBooks();
+      getVocabBooks(userId);
     }
   };
 
@@ -195,6 +187,7 @@ export default function VocabDetails() {
           <SavePopup isPopuping={isPopuping}>
             <label>Book</label>
             <Select
+              value={"unsorted"}
               onChange={(e: any) => {
                 setSelectedvocabBook(e.target.value);
               }}

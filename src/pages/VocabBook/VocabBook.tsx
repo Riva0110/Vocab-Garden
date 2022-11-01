@@ -3,8 +3,9 @@ import styled from "styled-components";
 import audio from "../../components/audio.png";
 import { keywordContext } from "../../context/keywordContext";
 import { authContext } from "../../context/authContext";
+import { vocabBookContext } from "../../context/vocabBookContext";
 import { useContext, useState, useEffect } from "react";
-import { getDoc, doc, arrayUnion, updateDoc } from "firebase/firestore";
+import { doc, arrayUnion, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 
 const Wrapper = styled.div``;
@@ -31,10 +32,9 @@ const BookWrapper = styled.div`
 `;
 const Book = styled.div`
   text-align: center;
-  line-height: 150px;
   width: 100px;
   height: 150px;
-  border: 1px gray solid;
+  border: 1px solid ${(props: Props) => (props.selected ? "red" : "gray")};
 `;
 const CardWrapper = styled.div`
   display: flex;
@@ -63,17 +63,6 @@ const AudioImg = styled.img`
 
 const Button = styled.button``;
 
-interface BooksInterface {
-  [key: string]: [
-    {
-      vocab: string;
-      audioLink: string;
-      partOfSpeech: string;
-      definition: string;
-    }
-  ];
-}
-
 interface CardsInterface {
   vocab: string;
   audioLink: string;
@@ -81,25 +70,20 @@ interface CardsInterface {
   definition: string;
 }
 
+interface Props {
+  selected: boolean;
+}
+
 export default function VocabBook() {
   const { userId } = useContext(authContext);
   const { setKeyword } = useContext(keywordContext);
-  const [vocabBooks, setVocabBooks] = useState<BooksInterface>();
+  const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
   const [vocabCards, setVocabCards] = useState<CardsInterface[]>([]);
   const [newBook, setNewBook] = useState<string>();
+  const [viewingBook, setViewingBook] = useState<string>("unsorted");
   const handlePlayAudio = (audioLink: string) => {
     const audio = new Audio(audioLink);
     audio.play();
-  };
-
-  const getVocabBooks = async () => {
-    const vocabBooksRef = doc(db, "vocabBooks", userId);
-    const docSnap = await getDoc(vocabBooksRef);
-    if (docSnap) {
-      const vocabBooksData = docSnap.data() as BooksInterface;
-      setVocabBooks(vocabBooksData);
-      setVocabCards(vocabBooksData.unsorted);
-    }
   };
 
   const handleAddBook = async () => {
@@ -108,13 +92,14 @@ export default function VocabBook() {
       await updateDoc(docRef, {
         [newBook]: arrayUnion(),
       });
-      getVocabBooks();
+      getVocabBooks(userId);
       alert(`Add a ${newBook} vocabbook successfully!`);
     }
   };
 
   useEffect(() => {
-    getVocabBooks();
+    getVocabBooks(userId);
+    setVocabCards(vocabBooks["unsorted"]);
   }, []);
 
   return (
@@ -130,7 +115,16 @@ export default function VocabBook() {
           <BookWrapper>
             {vocabBooks &&
               Object.keys(vocabBooks)?.map((book: string) => (
-                <Book>{book}</Book>
+                <Book
+                  selected={viewingBook === `${book}` ? true : false}
+                  onClick={() => {
+                    setViewingBook(book);
+                    setVocabCards(vocabBooks[book]);
+                  }}
+                >
+                  {book}
+                  <br />({vocabBooks[book].length})
+                </Book>
               ))}
           </BookWrapper>
           <CardWrapper>
