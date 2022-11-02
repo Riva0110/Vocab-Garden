@@ -3,7 +3,14 @@ import styled from "styled-components";
 import { keywordContext } from "../context/keywordContext";
 import { authContext } from "../context/authContext";
 import { vocabBookContext } from "../context/vocabBookContext";
-import { updateDoc, doc, arrayUnion, setDoc, getDoc } from "firebase/firestore";
+import {
+  updateDoc,
+  doc,
+  arrayUnion,
+  setDoc,
+  getDoc,
+  deleteDoc,
+} from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import audio from "./audio.png";
 import save from "./save.png";
@@ -147,7 +154,7 @@ export default function VocabDetails() {
     const checkIfSaved = async () => {
       const docRef = doc(db, "savedVocabs", `${userId}+${keyword}`);
       const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
+      if (docSnap.data()?.vocab === keyword) {
         setIsSaved(true);
         console.log("Document data:", docSnap.data());
       }
@@ -171,6 +178,7 @@ export default function VocabDetails() {
   };
 
   const handleSaveVocab = async (selectedvocabBook: string) => {
+    setIsSaved(true);
     const vocabRef = doc(db, "vocabBooks", userId);
     await updateDoc(vocabRef, {
       [selectedvocabBook]: arrayUnion({
@@ -182,8 +190,31 @@ export default function VocabDetails() {
     });
     await setDoc(doc(db, "savedVocabs", `${userId}+${vocabDetails?.word}`), {
       vocab: vocabDetails?.word,
+      vocabBook: selectedvocabBook,
     });
     await getVocabBooks(userId);
+  };
+
+  const handleDeleteVocabFromBook = async () => {
+    const docRef = doc(db, "savedVocabs", `${userId}+${keyword}`);
+    const docSnap = await getDoc(docRef);
+    const savedVocabBook = docSnap.data()?.vocabBook;
+    const yes = window.confirm(
+      `Are you sure to unsave "${keyword}" from "${savedVocabBook}"?`
+    );
+    if (yes) {
+      setIsSaved(false);
+      await deleteDoc(doc(db, "savedVocabs", `${userId}+${keyword}`));
+      const vocabRef = doc(db, "vocabBooks", userId);
+      const updateVocabCard = vocabBooks[savedVocabBook].filter(
+        (vocabcard) => vocabcard.vocab !== keyword
+      );
+      await updateDoc(vocabRef, {
+        [savedVocabBook]: updateVocabCard,
+      });
+      getVocabBooks(userId);
+      setTimeout(alert, 200, `Unsave vocab "${keyword}" sucessfully!`);
+    }
   };
 
   return isLoading ? (
@@ -203,7 +234,9 @@ export default function VocabDetails() {
           <SaveVocabImg
             src={isSaved ? saved : save}
             alt="save"
-            onClick={() => setIsPopuping(true)}
+            onClick={() =>
+              isSaved ? handleDeleteVocabFromBook() : setIsPopuping(true)
+            }
           />
           <SavePopup isPopuping={isPopuping}>
             <label>Book</label>
