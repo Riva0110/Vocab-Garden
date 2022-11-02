@@ -13,7 +13,7 @@ import { getAuth } from "firebase/auth";
 // };
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCJhJwy1QIOHVcJ4Mg1yxPtOv-7Hrq_Fro",
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY_BACKUP,
   authDomain: "vocab-garden-backup.firebaseapp.com",
   projectId: "vocab-garden-backup",
   storageBucket: "vocab-garden-backup.appspot.com",
