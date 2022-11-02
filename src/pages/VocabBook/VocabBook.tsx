@@ -9,6 +9,7 @@ import { doc, arrayUnion, updateDoc, deleteField } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import saved from "../../components/saved.png";
 import VocabDetails from "../../components/VocabDetails";
+import { useViewingBook } from "../../App";
 
 const Wrapper = styled.div``;
 const Nav = styled.nav`
@@ -86,6 +87,7 @@ interface Props {
 }
 
 export default function VocabBook() {
+  // const { viewingBook, setViewingBook } = useViewingBook();
   const { userId } = useContext(authContext);
   const { setKeyword } = useContext(keywordContext);
   const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);

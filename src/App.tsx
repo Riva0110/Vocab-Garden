@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import styled from "styled-components";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useOutletContext } from "react-router-dom";
 import { keywordContext } from "./context/keywordContext";
 import { authContext } from "./context/authContext";
 
@@ -28,10 +28,16 @@ const Input = styled.input`
   width: 100px;
 `;
 
+type ContextType = {
+  viewingBook: string;
+  setViewingBook: React.Dispatch<React.SetStateAction<string>>;
+};
+
 function App() {
   const { setKeyword } = useContext(keywordContext);
   const { isLogin } = useContext(authContext);
   const [inputVocab, setInputVocab] = useState<string>();
+  const [viewingBook, setViewingBook] = useState<string>("unsorted");
 
   return (
     <Wrapper>
@@ -53,10 +59,14 @@ function App() {
       </Header>
 
       <Main>
-        <Outlet />
+        <Outlet context={{ viewingBook, setViewingBook }} />
       </Main>
     </Wrapper>
   );
 }
 
 export default App;
+
+export function useViewingBook() {
+  return useOutletContext<ContextType>();
+}
