@@ -3,10 +3,11 @@ import styled from "styled-components";
 import { keywordContext } from "../context/keywordContext";
 import { authContext } from "../context/authContext";
 import { vocabBookContext } from "../context/vocabBookContext";
-import { updateDoc, doc, arrayUnion } from "firebase/firestore";
+import { updateDoc, doc, arrayUnion, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import audio from "./audio.png";
 import save from "./save.png";
+import saved from "./saved.png";
 import spinner from "./spinner.gif";
 
 interface Props {
@@ -120,6 +121,7 @@ export default function VocabDetails() {
     useState<string>("unsorted");
   const [isLoading, setIsLoading] = useState(true);
   const [isPopuping, setIsPopuping] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const resourceUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${keyword}`;
 
   useEffect(() => {
@@ -139,6 +141,19 @@ export default function VocabDetails() {
   useEffect(() => {
     getVocabBooks(userId);
   }, []);
+
+  useEffect(() => {
+    setIsSaved(false);
+    const checkIfSaved = async () => {
+      const docRef = doc(db, "savedVocabs", `${userId}+${keyword}`);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setIsSaved(true);
+        console.log("Document data:", docSnap.data());
+      }
+    };
+    checkIfSaved();
+  }, [userId, keyword]);
 
   const handlePlayAudio = () => {
     const audio = new Audio(vocabDetails?.phonetics?.[0].audio);
@@ -165,6 +180,9 @@ export default function VocabDetails() {
         definition: vocabDetails?.meanings?.[0].definitions?.[0].definition,
       }),
     });
+    await setDoc(doc(db, "savedVocabs", `${userId}+${vocabDetails?.word}`), {
+      vocab: vocabDetails?.word,
+    });
     await getVocabBooks(userId);
   };
 
@@ -183,7 +201,7 @@ export default function VocabDetails() {
             <AudioImg src={audio} alt="audio" onClick={handlePlayAudio} />
           )}
           <SaveVocabImg
-            src={save}
+            src={isSaved ? saved : save}
             alt="save"
             onClick={() => setIsPopuping(true)}
           />

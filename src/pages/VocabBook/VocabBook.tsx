@@ -5,7 +5,13 @@ import { keywordContext } from "../../context/keywordContext";
 import { authContext } from "../../context/authContext";
 import { vocabBookContext } from "../../context/vocabBookContext";
 import { useContext, useState, useEffect } from "react";
-import { doc, arrayUnion, updateDoc, deleteField } from "firebase/firestore";
+import {
+  doc,
+  arrayUnion,
+  updateDoc,
+  deleteField,
+  deleteDoc,
+} from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import saved from "../../components/saved.png";
 import VocabDetails from "../../components/VocabDetails";
@@ -106,7 +112,7 @@ export default function VocabBook() {
         [newBook]: arrayUnion(),
       });
       getVocabBooks(userId);
-      setTimeout(alert, 1000, `Add a "${newBook}" vocabbook successfully!`);
+      setTimeout(alert, 200, `Add a "${newBook}" vocabbook successfully!`);
     }
   };
 
@@ -119,7 +125,7 @@ export default function VocabBook() {
         [book]: deleteField(),
       });
       getVocabBooks(userId);
-      setTimeout(alert, 1000, `Delete book "${book}" sucessfully!`);
+      setTimeout(alert, 200, `Delete book "${book}" sucessfully!`);
     }
   };
 
@@ -135,10 +141,11 @@ export default function VocabBook() {
       await updateDoc(vocabRef, {
         [viewingBook]: updateVocabCard,
       });
+      await deleteDoc(doc(db, "savedVocabs", `${userId}+${vocab}`));
       getVocabBooks(userId);
       setTimeout(
         alert,
-        1000,
+        200,
         `Remove vocab "${vocab}" from "${viewingBook}" sucessfully!`
       );
     }
