@@ -93,6 +93,7 @@ export default function VocabBook() {
   const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
   const [newBook, setNewBook] = useState<string>();
   const [viewingBook, setViewingBook] = useState<string>("unsorted");
+
   const handlePlayAudio = (audioLink: string) => {
     const audio = new Audio(audioLink);
     audio.play();
@@ -151,7 +152,18 @@ export default function VocabBook() {
     <Wrapper>
       <Nav>
         <NavLink to="wordle">Wordle</NavLink>
-        <NavLink to="review">Review</NavLink>
+        {vocabBooks[viewingBook]?.length >= 20 ? (
+          <NavLink to="review">Review</NavLink>
+        ) : (
+          <span
+            onClick={() =>
+              alert("Please save at least 20 vocab cards in this book!")
+            }
+          >
+            Review
+          </span>
+        )}
+
         <input onChange={(e) => setNewBook(e.target.value)} />
         <Button onClick={handleAddBook}>Add a Book</Button>
       </Nav>

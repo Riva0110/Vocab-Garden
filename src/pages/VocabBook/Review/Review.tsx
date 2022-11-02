@@ -2,6 +2,7 @@ import styled from "styled-components";
 import { useContext, useState, useEffect, useRef } from "react";
 import { vocabBookContext } from "../../../context/vocabBookContext";
 import { authContext } from "../../../context/authContext";
+import audio from "../../../components/audio.png";
 
 interface Props {
   correct?: boolean;
@@ -28,10 +29,21 @@ const Main = styled.div`
   flex-direction: column;
 `;
 
+const VocabWrapper = styled.div`
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin: 50px auto;
+`;
+
 const Vocab = styled.div`
   font-weight: 600;
   font-size: 20px;
-  margin: 50px auto;
+`;
+
+const AudioImg = styled.img`
+  width: 20px;
+  height: 20px;
 `;
 
 const Options = styled.div`
@@ -77,20 +89,29 @@ export default function Review() {
   const [gameOver, setGameOver] = useState(false);
   const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
   const { userId } = useContext(authContext);
-  const questionsNumber = 5;
+  //要要求至少存到這個數量的單字卡
+  const questionsNumber = 3;
   const questions = vocabBooks?.[viewingBook]
     ?.sort(() => Math.random() - 0.5)
     .slice(0, questionsNumber);
+
   const [viewingBookInfo, setViewingBookInfo] = useState(questions);
+
   const correctVocab = viewingBookInfo?.[round];
-  const wrongVocab1 = viewingBookInfo?.[getRandomIndex()];
-  const wrongVocab2 = viewingBookInfo?.[getRandomIndex()];
+
+  const wrongVocab1 =
+    viewingBookInfo?.[Math.ceil(Math.random() * questionsNumber)];
+  const wrongVocab2 =
+    viewingBookInfo?.[Math.ceil(Math.random() * questionsNumber)];
+
   const randomOptions = Object.entries({
     [correctVocab?.vocab]: correctVocab?.definition,
     [wrongVocab1?.vocab]: wrongVocab1?.definition,
     [wrongVocab2?.vocab]: wrongVocab2?.definition,
   }).sort(() => Math.random() - 0.5);
+
   const [currentOptions, setCurrentOptions] = useState(randomOptions);
+  console.log(viewingBookInfo, currentOptions);
 
   const [showBtn, setShowBtn] = useState<boolean>(false);
   const [showAnswerArr, setShowAnswerArr] = useState([
@@ -99,9 +120,10 @@ export default function Review() {
     "notAnswer",
   ]);
 
-  function getRandomIndex(): number {
-    return Math.ceil(Math.random() * viewingBookInfo?.length);
-  }
+  const handlePlayAudio = (audioLink: string) => {
+    const audio = new Audio(audioLink);
+    audio.play();
+  };
 
   useEffect(() => {
     getVocabBooks(userId);
@@ -110,7 +132,18 @@ export default function Review() {
   function renderTest() {
     return (
       <Main>
-        <Vocab>{correctVocab?.vocab}</Vocab>
+        <VocabWrapper>
+          <Vocab>{correctVocab?.vocab}</Vocab>
+          {correctVocab?.audioLink ? (
+            <AudioImg
+              src={audio}
+              alt="audio"
+              onClick={() => handlePlayAudio(correctVocab?.audioLink)}
+            />
+          ) : (
+            ""
+          )}
+        </VocabWrapper>
         <Options>
           {currentOptions?.map(([clickedVocab, def], index) => (
             <Option
@@ -142,7 +175,7 @@ export default function Review() {
                 }
               }}
             >
-              {clickedVocab}: {def}
+              {def}
             </Option>
           ))}
           {round === questionsNumber - 1 ? (
@@ -164,7 +197,7 @@ export default function Review() {
                 setCurrentOptions(
                   Object.entries({
                     [viewingBookInfo?.[round + 1]?.vocab]:
-                      correctVocab?.definition,
+                      viewingBookInfo?.[round + 1].definition,
                     [wrongVocab1?.vocab]: wrongVocab1?.definition,
                     [wrongVocab2?.vocab]: wrongVocab2?.definition,
                   }).sort(() => Math.random() - 0.5)
@@ -194,6 +227,7 @@ export default function Review() {
             onClick={() => {
               setGameOver(false);
               setAnswerCount({ correct: 0, wrong: 0 });
+              setViewingBookInfo(questions);
               setRound(0);
               setShowBtn(false);
               setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
