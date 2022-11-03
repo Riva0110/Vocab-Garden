@@ -14,6 +14,7 @@ interface BooksInterface {
         audioLink: string;
         partOfSpeech: string;
         definition: string;
+        isCorrect: boolean;
       }
     ];
   };

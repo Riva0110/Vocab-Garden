@@ -4,6 +4,7 @@ import { vocabBookContext } from "../../../context/vocabBookContext";
 import { authContext } from "../../../context/authContext";
 import audio from "../../../components/audio.png";
 import { useViewingBook } from "../VocabBookLayout";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   correct?: boolean;
@@ -67,6 +68,11 @@ const Option = styled.div`
   cursor: pointer;
 `;
 
+const Btns = styled.div`
+  display: flex;
+  gap: 10px;
+`;
+
 const Btn = styled.button`
   display: ${(props: Props) => (props.showBtn ? "flex" : "none")};
   width: 100%;
@@ -83,7 +89,22 @@ const OutcomeWrapper = styled.div`
   margin: 50px auto;
 `;
 
+const ReviewVocabs = styled.div``;
+const WrongVocabs = styled.div``;
+const CorrectVocabs = styled.div``;
+const LabelDiv = styled.div`
+  border-bottom: 1px gray solid;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  width: 100%;
+  font-weight: 600;
+`;
+const VocabList = styled.div`
+  margin-bottom: 10px;
+`;
+
 export default function Review() {
+  const navigate = useNavigate();
   const { viewingBook } = useViewingBook();
   const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
   const { userId } = useContext(authContext);
@@ -99,7 +120,6 @@ export default function Review() {
   const [reviewingQuestions, setReviewingQuestions] = useState(questions);
   const correctVocab = reviewingQuestions[round];
 
-  console.log(reviewingQuestions);
   const getRandomIndex = () => {
     return Math.floor(Math.random() * questionsNumber);
   };
@@ -124,7 +144,6 @@ export default function Review() {
   }).sort(() => Math.random() - 0.5);
 
   const [currentOptions, setCurrentOptions] = useState(randomOptions);
-  console.log(correctVocab?.vocab, wrongVocab1?.vocab, wrongVocab2?.vocab);
 
   const [showBtn, setShowBtn] = useState<boolean>(false);
   const [showAnswerArr, setShowAnswerArr] = useState([
@@ -181,8 +200,12 @@ export default function Review() {
 
                   if (clickedVocab === correctVocab.vocab) {
                     answerCount.correct += 1;
+                    reviewingQuestions[round].isCorrect = true;
+                    setReviewingQuestions(reviewingQuestions);
                   } else {
                     answerCount.wrong += 1;
+                    reviewingQuestions[round].isCorrect = false;
+                    setReviewingQuestions(reviewingQuestions);
                   }
                   setAnswerCount(answerCount);
                 }
@@ -235,19 +258,78 @@ export default function Review() {
               ? " 你太棒了！！！我服了你 "
               : "加油，好嗎？我對你太失望了"}
           </Message>
-          <Btn
-            showBtn={showBtn}
-            onClick={() => {
-              setGameOver(false);
-              setAnswerCount({ correct: 0, wrong: 0 });
-              setReviewingQuestions(questions);
-              setRound(0);
-              setShowBtn(false);
-              setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
-            }}
-          >
-            再玩一次
-          </Btn>
+          <Btns>
+            <Btn
+              showBtn={showBtn}
+              onClick={() => {
+                setGameOver(false);
+                setAnswerCount({ correct: 0, wrong: 0 });
+                setReviewingQuestions(questions);
+                setRound(0);
+                setShowBtn(false);
+                setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
+              }}
+            >
+              Review again
+            </Btn>
+            <Btn showBtn={showBtn} onClick={() => navigate("/vocabbook")}>
+              Back to VocabBooks
+            </Btn>
+          </Btns>
+          <ReviewVocabs>
+            <WrongVocabs>
+              <LabelDiv>Wrong vocab:</LabelDiv>{" "}
+              {reviewingQuestions.map(
+                ({ vocab, audioLink, partOfSpeech, definition, isCorrect }) => {
+                  if (!isCorrect) {
+                    return (
+                      <VocabList>
+                        {vocab}{" "}
+                        {audioLink ? (
+                          <AudioImg
+                            src={audio}
+                            alt="audio"
+                            onClick={() => handlePlayAudio(audioLink)}
+                          />
+                        ) : (
+                          ""
+                        )}
+                        : ({partOfSpeech}) {definition}
+                      </VocabList>
+                    );
+                  } else {
+                    <></>;
+                  }
+                }
+              )}
+            </WrongVocabs>
+            <CorrectVocabs>
+              <LabelDiv>Correct vocab:</LabelDiv>{" "}
+              {reviewingQuestions.map(
+                ({ vocab, audioLink, partOfSpeech, definition, isCorrect }) => {
+                  if (isCorrect) {
+                    return (
+                      <VocabList>
+                        {vocab}{" "}
+                        {audioLink ? (
+                          <AudioImg
+                            src={audio}
+                            alt="audio"
+                            onClick={() => handlePlayAudio(audioLink)}
+                          />
+                        ) : (
+                          ""
+                        )}
+                        : ({partOfSpeech}) {definition}
+                      </VocabList>
+                    );
+                  } else {
+                    <></>;
+                  }
+                }
+              )}
+            </CorrectVocabs>
+          </ReviewVocabs>
         </OutcomeWrapper>
       </Main>
     );

@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
 import styled from "styled-components";
 import { keywordContext } from "../context/keywordContext";
 import { authContext } from "../context/authContext";
@@ -131,6 +131,7 @@ export default function VocabDetails() {
     useState<string>("unsorted");
   const [isLoading, setIsLoading] = useState(true);
   const [isPopuping, setIsPopuping] = useState(false);
+  const popup = useRef<HTMLDivElement>(null);
   // const [isSaved, setIsSaved] = useState(false);
   const resourceUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${keyword}`;
 
@@ -204,9 +205,21 @@ export default function VocabDetails() {
     fetchVocabDetails(resourceUrl);
   }, [resourceUrl]);
 
-  useEffect(() => {
-    getVocabBooks(userId);
-  }, []);
+  // useEffect(() => {
+  //   getVocabBooks(userId);
+  //   document.addEventListener("click", handleClickElement, false);
+  //   return () => {
+  //     document.removeEventListener("click", handleClickElement, false);
+  //   };
+  // }, []);
+
+  // const handleClickElement = (e: any) => {
+  //   if (popup.current) console.log(1, popup.current.contains(e.target));
+  //   if (isPopuping && popup.current && !popup.current.contains(e.target)) {
+  //     console.log(2);
+  //     setIsPopuping(false);
+  //   }
+  // };
 
   useEffect(() => {
     setIsSaved(false);
@@ -241,7 +254,7 @@ export default function VocabDetails() {
               isSaved ? handleDeleteVocabFromBook() : setIsPopuping(true)
             }
           />
-          <SavePopup isPopuping={isPopuping}>
+          <SavePopup isPopuping={isPopuping} ref={popup}>
             <label>Book</label>
             <Select
               value={selectedvocabBook}
@@ -282,7 +295,13 @@ export default function VocabDetails() {
                   {partOfSpeech
                     ?.split(/([\s!]+)/)
                     .map((word: string, index: number) => (
-                      <span key={index} onClick={() => setKeyword(word)}>
+                      <span
+                        key={index}
+                        onClick={() => {
+                          setKeyword(word);
+                          setIsPopuping(false);
+                        }}
+                      >
                         {word}
                       </span>
                     ))}
@@ -298,7 +317,10 @@ export default function VocabDetails() {
                             .map((word: string, index: number) => (
                               <span
                                 key={index}
-                                onClick={() => setKeyword(word)}
+                                onClick={() => {
+                                  setKeyword(word);
+                                  setIsPopuping(false);
+                                }}
                               >
                                 {word}
                               </span>
@@ -312,7 +334,10 @@ export default function VocabDetails() {
                               .map((word: string, index: number) => (
                                 <span
                                   key={index}
-                                  onClick={() => setKeyword(word)}
+                                  onClick={() => {
+                                    setKeyword(word);
+                                    setIsPopuping(false);
+                                  }}
                                 >
                                   {word}
                                 </span>
@@ -328,7 +353,13 @@ export default function VocabDetails() {
                   <>
                     <p>Synonyms</p>
                     {synonyms?.map((synonym: string, index: number) => (
-                      <Synonyms key={index} onClick={() => setKeyword(synonym)}>
+                      <Synonyms
+                        key={index}
+                        onClick={() => {
+                          setKeyword(synonym);
+                          setIsPopuping(false);
+                        }}
+                      >
                         {synonym}
                       </Synonyms>
                     ))}
