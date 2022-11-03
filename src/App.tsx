@@ -29,15 +29,18 @@ const Input = styled.input`
 `;
 
 type ContextType = {
-  viewingBook: string;
-  setViewingBook: React.Dispatch<React.SetStateAction<string>>;
+  // viewingBook: string;
+  // setViewingBook: React.Dispatch<React.SetStateAction<string>>;
+  // isSaved: boolean;
+  // setIsSaved: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 function App() {
   const { setKeyword } = useContext(keywordContext);
   const { isLogin } = useContext(authContext);
   const [inputVocab, setInputVocab] = useState<string>();
-  const [viewingBook, setViewingBook] = useState<string>("unsorted");
+  // const [viewingBook, setViewingBook] = useState<string>("unsorted");
+  // const [isSaved, setIsSaved] = useState<boolean>(false);
 
   return (
     <Wrapper>
@@ -59,7 +62,7 @@ function App() {
       </Header>
 
       <Main>
-        <Outlet context={{ viewingBook, setViewingBook }} />
+        <Outlet />
       </Main>
     </Wrapper>
   );
@@ -67,6 +70,6 @@ function App() {
 
 export default App;
 
-export function useViewingBook() {
+export function useSaveVocab() {
   return useOutletContext<ContextType>();
 }

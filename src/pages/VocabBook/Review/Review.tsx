@@ -84,48 +84,38 @@ const OutcomeWrapper = styled.div`
 `;
 
 export default function Review() {
-  const { viewingBook, setViewingBook } = useViewingBook();
+  const { viewingBook } = useViewingBook();
+  const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
+  const { userId } = useContext(authContext);
   const [round, setRound] = useState<number>(0);
   const [answerCount, setAnswerCount] = useState({ correct: 0, wrong: 0 });
   const [gameOver, setGameOver] = useState(false);
-  const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
-  const { userId } = useContext(authContext);
+
   const questionsNumber = 5;
   const questions = vocabBooks?.[viewingBook]
     ?.sort(() => Math.random() - 0.5)
     .slice(0, questionsNumber);
 
-  const [viewingBookInfo, setViewingBookInfo] = useState(questions);
-  const correctVocab = viewingBookInfo?.[round];
+  const [reviewingQuestions, setReviewingQuestions] = useState(questions);
+  const correctVocab = reviewingQuestions[round];
 
-  // Math.floor(Math.random() * questionsNumber)
+  console.log(reviewingQuestions);
+  const getRandomIndex = () => {
+    return Math.floor(Math.random() * questionsNumber);
+  };
+  let randomIndex1 = getRandomIndex();
+  let randomIndex2 = getRandomIndex();
 
-  let randomIndex1 = Math.floor(Math.random() * questionsNumber);
-  let randomIndex2 = Math.floor(Math.random() * questionsNumber);
-
-  switch (randomIndex1) {
-    case round:
-      randomIndex1 = Math.floor(Math.random() * questionsNumber);
-      break;
+  while (randomIndex1 === round) {
+    randomIndex1 = getRandomIndex();
   }
 
-  switch (randomIndex2) {
-    case round:
-      randomIndex2 = Math.floor(Math.random() * questionsNumber);
-      break;
-    case randomIndex1:
-      randomIndex2 = Math.floor(Math.random() * questionsNumber);
-      break;
+  while (randomIndex2 === round || randomIndex2 === randomIndex1) {
+    randomIndex2 = getRandomIndex();
   }
 
-  // if (randomIndex1 === questionsNumber - 1) {
-  //   randomIndex1 = 0;
-  // } else randomIndex1 += 1;
-  // if (randomIndex2 === questionsNumber - 1) {
-  //   randomIndex2 = 0;
-  // } else randomIndex2 += 1;
-  const wrongVocab1 = viewingBookInfo?.[randomIndex1];
-  const wrongVocab2 = viewingBookInfo?.[randomIndex2];
+  const wrongVocab1 = reviewingQuestions?.[randomIndex1];
+  const wrongVocab2 = reviewingQuestions?.[randomIndex2];
 
   const randomOptions = Object.entries({
     [correctVocab?.vocab]: correctVocab?.definition,
@@ -219,8 +209,8 @@ export default function Review() {
                 setRound(round + 1);
                 setCurrentOptions(
                   Object.entries({
-                    [viewingBookInfo?.[round + 1]?.vocab]:
-                      viewingBookInfo?.[round + 1].definition,
+                    [reviewingQuestions?.[round + 1]?.vocab]:
+                      reviewingQuestions?.[round + 1].definition,
                     [wrongVocab1?.vocab]: wrongVocab1?.definition,
                     [wrongVocab2?.vocab]: wrongVocab2?.definition,
                   }).sort(() => Math.random() - 0.5)
@@ -250,7 +240,7 @@ export default function Review() {
             onClick={() => {
               setGameOver(false);
               setAnswerCount({ correct: 0, wrong: 0 });
-              setViewingBookInfo(questions);
+              setReviewingQuestions(questions);
               setRound(0);
               setShowBtn(false);
               setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);

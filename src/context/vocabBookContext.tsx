@@ -19,16 +19,21 @@ interface BooksInterface {
   };
   setVocabBooks: React.Dispatch<React.SetStateAction<string>>;
   getVocabBooks(userId: string): void;
+  isSaved: boolean;
+  setIsSaved: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const vocabBookContext = createContext<BooksInterface>({
   vocabBooks: {},
   setVocabBooks: () => {},
   getVocabBooks: () => {},
+  isSaved: false,
+  setIsSaved: () => {},
 });
 
 export function VocabBookContextProvider({ children }: ContextProviderProps) {
   const [vocabBooks, setVocabBooks] = useState({});
+  const [isSaved, setIsSaved] = useState(false);
 
   const getVocabBooks = async (userId: string) => {
     const vocabBooksRef = doc(db, "vocabBooks", userId);
@@ -41,7 +46,7 @@ export function VocabBookContextProvider({ children }: ContextProviderProps) {
 
   return (
     <vocabBookContext.Provider
-      value={{ vocabBooks, setVocabBooks, getVocabBooks }}
+      value={{ vocabBooks, setVocabBooks, getVocabBooks, isSaved, setIsSaved }}
     >
       {children}
     </vocabBookContext.Provider>

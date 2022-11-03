@@ -16,6 +16,7 @@ import { db } from "../../firebase/firebase";
 import saved from "../../components/saved.png";
 import VocabDetails from "../../components/VocabDetails";
 import { useViewingBook } from "./VocabBookLayout";
+// import { useSaveVocab } from "../../App";
 
 const Wrapper = styled.div``;
 const Nav = styled.nav`
@@ -94,9 +95,11 @@ interface Props {
 
 export default function VocabBook() {
   const { viewingBook, setViewingBook } = useViewingBook();
+  // const { isSaved, setIsSaved } = useSaveVocab();
   const { userId } = useContext(authContext);
   const { setKeyword } = useContext(keywordContext);
-  const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
+  const { vocabBooks, getVocabBooks, isSaved, setIsSaved } =
+    useContext(vocabBookContext);
   const [newBook, setNewBook] = useState<string>();
 
   const handlePlayAudio = (audioLink: string) => {
@@ -142,6 +145,7 @@ export default function VocabBook() {
       });
       await deleteDoc(doc(db, "savedVocabs", `${userId}+${vocab}`));
       getVocabBooks(userId);
+      if (isSaved) setIsSaved(false);
       setTimeout(
         alert,
         200,

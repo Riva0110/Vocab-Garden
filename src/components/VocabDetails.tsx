@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { keywordContext } from "../context/keywordContext";
 import { authContext } from "../context/authContext";
 import { vocabBookContext } from "../context/vocabBookContext";
+// import { useSaveVocab } from "../App";
 import {
   updateDoc,
   doc,
@@ -119,48 +120,19 @@ interface VocabDetailsInterface {
 }
 
 export default function VocabDetails() {
+  // const { isSaved, setIsSaved } = useSaveVocab();
   const { userId } = useContext(authContext);
   const { keyword, setKeyword } = useContext(keywordContext);
-  const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
+  const { vocabBooks, getVocabBooks, isSaved, setIsSaved } =
+    useContext(vocabBookContext);
   const [vocabDetails, setVocabDetails] = useState<VocabDetailsInterface>();
   const [newBook, setNewBook] = useState<string>();
   const [selectedvocabBook, setSelectedvocabBook] =
     useState<string>("unsorted");
   const [isLoading, setIsLoading] = useState(true);
   const [isPopuping, setIsPopuping] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
+  // const [isSaved, setIsSaved] = useState(false);
   const resourceUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${keyword}`;
-
-  useEffect(() => {
-    async function fetchVocabDetails(resourceUrl: string) {
-      try {
-        const response = await fetch(resourceUrl);
-        const data = await response.json();
-        setVocabDetails(data[0]);
-        setIsLoading(false);
-      } catch {
-        setIsLoading(false);
-      }
-    }
-    fetchVocabDetails(resourceUrl);
-  }, [resourceUrl]);
-
-  useEffect(() => {
-    getVocabBooks(userId);
-  }, []);
-
-  useEffect(() => {
-    setIsSaved(false);
-    const checkIfSaved = async () => {
-      const docRef = doc(db, "savedVocabs", `${userId}+${keyword}`);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.data()?.vocab === keyword) {
-        setIsSaved(true);
-        console.log("Document data:", docSnap.data());
-      }
-    };
-    checkIfSaved();
-  }, [userId, keyword]);
 
   const handlePlayAudio = () => {
     const audio = new Audio(vocabDetails?.phonetics?.[0].audio);
@@ -199,6 +171,7 @@ export default function VocabDetails() {
     const docRef = doc(db, "savedVocabs", `${userId}+${keyword}`);
     const docSnap = await getDoc(docRef);
     const savedVocabBook = docSnap.data()?.vocabBook;
+
     const yes = window.confirm(
       `Are you sure to unsave "${keyword}" from "${savedVocabBook}"?`
     );
@@ -216,6 +189,36 @@ export default function VocabDetails() {
       setTimeout(alert, 200, `Unsave vocab "${keyword}" sucessfully!`);
     }
   };
+
+  useEffect(() => {
+    async function fetchVocabDetails(resourceUrl: string) {
+      try {
+        const response = await fetch(resourceUrl);
+        const data = await response.json();
+        setVocabDetails(data[0]);
+        setIsLoading(false);
+      } catch {
+        setIsLoading(false);
+      }
+    }
+    fetchVocabDetails(resourceUrl);
+  }, [resourceUrl]);
+
+  useEffect(() => {
+    getVocabBooks(userId);
+  }, []);
+
+  useEffect(() => {
+    setIsSaved(false);
+    const checkIfSaved = async () => {
+      const docRef = doc(db, "savedVocabs", `${userId}+${keyword}`);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.data()?.vocab === keyword) {
+        setIsSaved(true);
+      }
+    };
+    checkIfSaved();
+  }, [userId, keyword, setIsSaved]);
 
   return isLoading ? (
     <p>
