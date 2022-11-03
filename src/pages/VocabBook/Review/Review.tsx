@@ -3,6 +3,7 @@ import { useContext, useState, useEffect, useRef } from "react";
 import { vocabBookContext } from "../../../context/vocabBookContext";
 import { authContext } from "../../../context/authContext";
 import audio from "../../../components/audio.png";
+import { useViewingBook } from "../VocabBookLayout";
 
 interface Props {
   correct?: boolean;
@@ -83,7 +84,7 @@ const OutcomeWrapper = styled.div`
 `;
 
 export default function Review() {
-  const [viewingBook, setViewingBook] = useState<string>("finance");
+  const { viewingBook, setViewingBook } = useViewingBook();
   const [round, setRound] = useState<number>(0);
   const [answerCount, setAnswerCount] = useState({ correct: 0, wrong: 0 });
   const [gameOver, setGameOver] = useState(false);

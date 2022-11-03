@@ -15,7 +15,7 @@ import {
 import { db } from "../../firebase/firebase";
 import saved from "../../components/saved.png";
 import VocabDetails from "../../components/VocabDetails";
-import { useViewingBook } from "../../App";
+import { useViewingBook } from "./VocabBookLayout";
 
 const Wrapper = styled.div``;
 const Nav = styled.nav`
@@ -93,12 +93,11 @@ interface Props {
 }
 
 export default function VocabBook() {
-  // const { viewingBook, setViewingBook } = useViewingBook();
+  const { viewingBook, setViewingBook } = useViewingBook();
   const { userId } = useContext(authContext);
   const { setKeyword } = useContext(keywordContext);
   const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
   const [newBook, setNewBook] = useState<string>();
-  const [viewingBook, setViewingBook] = useState<string>("unsorted");
 
   const handlePlayAudio = (audioLink: string) => {
     const audio = new Audio(audioLink);
@@ -159,12 +158,12 @@ export default function VocabBook() {
     <Wrapper>
       <Nav>
         <NavLink to="wordle">Wordle</NavLink>
-        {vocabBooks[viewingBook]?.length >= 20 ? (
+        {vocabBooks[viewingBook]?.length >= 5 ? (
           <NavLink to="review">Review</NavLink>
         ) : (
           <span
             onClick={() =>
-              alert("Please save at least 20 vocab cards in this book!")
+              alert("Please save at least 5 vocab cards in this book!")
             }
           >
             Review
