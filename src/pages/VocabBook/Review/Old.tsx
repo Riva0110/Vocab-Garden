@@ -105,8 +105,6 @@ const VocabList = styled.div`
   margin-bottom: 10px;
 `;
 
-const questionsNumber = 5;
-
 export default function Review() {
   const navigate = useNavigate();
   const { viewingBook } = useViewingBook();
@@ -117,92 +115,74 @@ export default function Review() {
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState<number>();
   const [isChallenging, setIsChallenging] = useState<boolean>();
-  const [currentOptions, setCurrentOptions] = useState<[string, string][]>([]);
-  const [showBtn, setShowBtn] = useState<boolean>(false);
+
+  const questionsNumber = 5;
   const questions = vocabBooks?.[viewingBook]
     ?.sort(() => Math.random() - 0.5)
     .slice(0, questionsNumber);
-  const [reviewingQuestions, setReviewingQuestions] = useState<
-    {
-      vocab: string;
-      audioLink: string;
-      partOfSpeech: string;
-      definition: string;
-      isCorrect: boolean;
-    }[]
-  >(questions);
-  const correctVocab = reviewingQuestions?.[round];
+
+  //test
+  console.log("questions", questions);
+
+  const [reviewingQuestions, setReviewingQuestions] = useState(questions);
+  const correctVocab = reviewingQuestions[round];
+
+  //test
+  console.log("reviewingQuestions", reviewingQuestions);
+  console.log("correctVocab", correctVocab, "round", round);
+
+  const getRandomIndex = () => {
+    return Math.floor(Math.random() * questionsNumber);
+  };
+  let randomIndex1 = getRandomIndex();
+  let randomIndex2 = getRandomIndex();
+
+  //test
+  console.log("randomIndex1", randomIndex1);
+  console.log("randomIndex2", randomIndex2);
+
+  while (randomIndex1 === round) {
+    randomIndex1 = getRandomIndex();
+  }
+
+  while (randomIndex2 === round || randomIndex2 === randomIndex1) {
+    randomIndex2 = getRandomIndex();
+  }
+
+  //test
+  console.log("while randomIndex1", randomIndex1);
+  console.log("while randomIndex2", randomIndex2);
+
+  const wrongVocab1 = reviewingQuestions?.[randomIndex1];
+  const wrongVocab2 = reviewingQuestions?.[randomIndex2];
+
+  //test
+  console.log("wrongVocab1", wrongVocab1);
+  console.log("wrongVocab2", wrongVocab2);
+
+  const randomOptions = Object.entries({
+    [correctVocab?.vocab]: correctVocab?.definition,
+    [wrongVocab1?.vocab]: wrongVocab1?.definition,
+    [wrongVocab2?.vocab]: wrongVocab2?.definition,
+  }).sort(() => Math.random() - 0.5);
+
+  //test
+  console.log("correctVocab?.vocab", correctVocab?.definition);
+  console.log("wrongVocab1?.vocab", wrongVocab1?.definition);
+  console.log("wrongVocab2?.vocab", wrongVocab2?.definition);
+  console.log("randomOptions", randomOptions);
+
+  const [currentOptions, setCurrentOptions] = useState(randomOptions);
+
+  //test
+  console.log("currentOptions", currentOptions);
+
+  const [showBtn, setShowBtn] = useState<boolean>(false);
   const [showAnswerArr, setShowAnswerArr] = useState([
     "notAnswer",
     "notAnswer",
     "notAnswer",
   ]);
-
-  //test
-  console.log("questions", questions);
-
-  useEffect(() => {
-    getVocabBooks(userId);
-    const getUserInfo = async (userId: string) => {
-      const docRef = doc(db, "users", userId);
-      const docSnap: any = await getDoc(docRef);
-      setScore(docSnap.data().currentScore);
-      setIsChallenging(docSnap.data().isChallenging);
-    };
-    getUserInfo(userId);
-  }, [userId]);
-
-  useEffect(() => {
-    //test
-    console.log("reviewingQuestions", reviewingQuestions);
-    console.log("correctVocab", correctVocab, "round", round);
-
-    const getRandomIndex = () => {
-      return Math.floor(Math.random() * questionsNumber);
-    };
-    let randomIndex1 = getRandomIndex();
-    let randomIndex2 = getRandomIndex();
-
-    //test
-    console.log("randomIndex1", randomIndex1);
-    console.log("randomIndex2", randomIndex2);
-
-    while (randomIndex1 === round) {
-      randomIndex1 = getRandomIndex();
-    }
-
-    while (randomIndex2 === round || randomIndex2 === randomIndex1) {
-      randomIndex2 = getRandomIndex();
-    }
-
-    //test
-    console.log("while randomIndex1", randomIndex1);
-    console.log("while randomIndex2", randomIndex2);
-
-    const wrongVocab1 = reviewingQuestions?.[randomIndex1];
-    const wrongVocab2 = reviewingQuestions?.[randomIndex2];
-
-    //test
-    console.log("wrongVocab1", wrongVocab1);
-    console.log("wrongVocab2", wrongVocab2);
-
-    const randomOptions = Object.entries({
-      [correctVocab?.vocab]: correctVocab?.definition,
-      [wrongVocab1?.vocab]: wrongVocab1?.definition,
-      [wrongVocab2?.vocab]: wrongVocab2?.definition,
-    }).sort(() => Math.random() - 0.5) as [string, string][];
-
-    setCurrentOptions(randomOptions);
-
-    //test
-    console.log("correctVocab?.vocab", correctVocab?.definition);
-    console.log("wrongVocab1?.vocab", wrongVocab1?.definition);
-    console.log("wrongVocab2?.vocab", wrongVocab2?.definition);
-    console.log("randomOptions", randomOptions);
-  }, [correctVocab, reviewingQuestions, round]);
-
-  //test
-  console.log("currentOptions", currentOptions);
 
   const handlePlayAudio = (audioLink: string) => {
     const audio = new Audio(audioLink);
@@ -226,6 +206,17 @@ export default function Review() {
     if ((answerCount.correct / questionsNumber) * 100 >= 80) updateScore();
   };
 
+  useEffect(() => {
+    getVocabBooks(userId);
+    const getUserInfo = async (userId: string) => {
+      const docRef = doc(db, "users", userId);
+      const docSnap: any = await getDoc(docRef);
+      setScore(docSnap.data().currentScore);
+      setIsChallenging(docSnap.data().isChallenging);
+    };
+    getUserInfo(userId);
+  }, [userId]);
+
   function renderTest() {
     return (
       <Main>
@@ -243,19 +234,20 @@ export default function Review() {
           )}
         </VocabWrapper>
         <Options>
-          {currentOptions?.map(([clickedVocab, def], index) => (
+          {randomOptions?.map(([clickedVocab, def], index) => (
             <Option
               showAnswer={showAnswerArr[index]}
               onClick={() => {
                 if (!showBtn) {
                   setShowBtn(true);
-                  let answerStatus = [...currentOptions].map(
+                  console.log("randomOptions", randomOptions);
+                  let answerStatus = [...randomOptions].map(
                     ([vocabOption, insideDef], index) => {
-                      if (vocabOption === correctVocab?.vocab)
+                      if (vocabOption === correctVocab.vocab)
                         return "correctAnswer";
                       if (
                         clickedVocab !== vocabOption &&
-                        vocabOption !== correctVocab?.vocab
+                        vocabOption !== correctVocab.vocab
                       )
                         return "notAnswer";
                       else return "wrongAnswer";
@@ -263,7 +255,7 @@ export default function Review() {
                   );
                   setShowAnswerArr(answerStatus);
 
-                  if (clickedVocab === correctVocab?.vocab) {
+                  if (clickedVocab === correctVocab.vocab) {
                     answerCount.correct += 1;
                     reviewingQuestions[round].isCorrect = true;
                     setReviewingQuestions(reviewingQuestions);
@@ -294,6 +286,14 @@ export default function Review() {
               onClick={() => {
                 setShowBtn(false);
                 setRound(round + 1);
+                setCurrentOptions(
+                  Object.entries({
+                    [reviewingQuestions?.[round + 1]?.vocab]:
+                      reviewingQuestions?.[round + 1].definition,
+                    [wrongVocab1?.vocab]: wrongVocab1?.definition,
+                    [wrongVocab2?.vocab]: wrongVocab2?.definition,
+                  }).sort(() => Math.random() - 0.5)
+                );
                 setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
               }}
             >
