@@ -1,66 +1,83 @@
 import { useContext, useState } from "react";
 import styled from "styled-components";
-import { Link, Outlet, useOutletContext } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 import { keywordContext } from "./context/keywordContext";
 import { authContext } from "./context/authContext";
+import logoName from "./logoName.png";
 
-const Wrapper = styled.div``;
-const Header = styled.header`
+const Wrapper = styled.div`
+  background-color: #e9eef1ff;
+  width: 100vw;
+  padding-top: 60px;
+  min-height: calc(100vh - 60px);
+  font-family: "Poppins";
+`;
+
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   position: fixed;
   top: 0px;
+  left: 0px;
+  height: 60px;
   width: 100vw;
-  height: 30px;
-  background-color: white;
+  background-color: #405c73ff;
   border-bottom: 1px solid gray;
-  padding: 20px;
   z-index: 1;
 `;
+
+const LogoImg = styled.img`
+  height: 30px;
+`;
+
+const HeaderNav = styled.div``;
+
 const Main = styled.main`
-  margin: 50px;
-  margin-top: 80px;
+  width: 100vw;
 `;
 
 const NavLink = styled(Link)`
-  margin-right: 20px;
+  margin-left: 20px;
+  color: white;
+  text-decoration: none;
 `;
 
 const Input = styled.input`
-  width: 100px;
+  width: 200px;
+  height: 20px;
+  border: none;
+  border-radius: 5px;
+  padding-left: 10px;
 `;
-
-type ContextType = {
-  // viewingBook: string;
-  // setViewingBook: React.Dispatch<React.SetStateAction<string>>;
-  // isSaved: boolean;
-  // setIsSaved: React.Dispatch<React.SetStateAction<boolean>>;
-};
 
 function App() {
   const { setKeyword } = useContext(keywordContext);
   const { isLogin } = useContext(authContext);
   const [inputVocab, setInputVocab] = useState<string>();
-  // const [viewingBook, setViewingBook] = useState<string>("unsorted");
-  // const [isSaved, setIsSaved] = useState<boolean>(false);
 
   return (
     <Wrapper>
       <Header>
-        <NavLink to="/">Home</NavLink>
-        <NavLink to={isLogin ? "/articles" : "/profile"}>Article</NavLink>
-        <NavLink to={isLogin ? "/vocabbook" : "/profile"}>VocabBook</NavLink>
-        <NavLink to={isLogin ? "/profile" : "/profile"}>Profile</NavLink>
-        <Input
-          placeholder="search..."
-          onChange={(e) => {
-            e.target.value = e.target.value.toLowerCase();
-            setInputVocab(e.target.value);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && inputVocab) setKeyword(inputVocab);
-          }}
-        />
+        <NavLink to="/">
+          <LogoImg src={logoName} alt="logo" />
+        </NavLink>
+        <HeaderNav>
+          <Input
+            placeholder="search..."
+            onChange={(e) => {
+              e.target.value = e.target.value.toLowerCase();
+              setInputVocab(e.target.value);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && inputVocab) setKeyword(inputVocab);
+            }}
+          />
+          <NavLink to={isLogin ? "/articles" : "/profile"}>Article</NavLink>
+          <NavLink to={isLogin ? "/vocabbook" : "/profile"}>VocabBook</NavLink>
+          <NavLink to={isLogin ? "/profile" : "/profile"}>Profile</NavLink>
+        </HeaderNav>
       </Header>
-
       <Main>
         <Outlet />
       </Main>
@@ -69,7 +86,3 @@ function App() {
 }
 
 export default App;
-
-export function useSaveVocab() {
-  return useOutletContext<ContextType>();
-}
