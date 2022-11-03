@@ -22,34 +22,34 @@ const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 root.render(
-  <React.StrictMode>
-    <AuthContextProvider>
-      <KeywordContextProvider>
-        <VocabBookContextProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<App />}>
-                <Route index element={<Home />} />
-                <Route path="articles" element={<ArticlesLayout />}>
-                  <Route index element={<Articles />} />
-                  <Route path="words" element={<ArticleWords />} />
-                  <Route path=":articleId" element={<Article />} />
-                  <Route path="add" element={<Article />} />
-                </Route>
-                <Route path="vocabbook" element={<VocabBookLayout />}>
-                  <Route index element={<VocabBook />} />
-                  <Route path="wordle" element={<Wordle />} />
-                  <Route path="review" element={<Review />} />
-                </Route>
-                <Route path="profile" element={<Profile />} />
-                <Route path="*" element={<NoPage />} />
+  // <React.StrictMode>
+  <AuthContextProvider>
+    <KeywordContextProvider>
+      <VocabBookContextProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<App />}>
+              <Route index element={<Home />} />
+              <Route path="articles" element={<ArticlesLayout />}>
+                <Route index element={<Articles />} />
+                <Route path="words" element={<ArticleWords />} />
+                <Route path=":articleId" element={<Article />} />
+                <Route path="add" element={<Article />} />
               </Route>
-            </Routes>
-          </BrowserRouter>
-        </VocabBookContextProvider>
-      </KeywordContextProvider>
-    </AuthContextProvider>
-  </React.StrictMode>
+              <Route path="vocabbook" element={<VocabBookLayout />}>
+                <Route index element={<VocabBook />} />
+                <Route path="wordle" element={<Wordle />} />
+                <Route path="review" element={<Review />} />
+              </Route>
+              <Route path="profile" element={<Profile />} />
+              <Route path="*" element={<NoPage />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </VocabBookContextProvider>
+    </KeywordContextProvider>
+  </AuthContextProvider>
+  // </React.StrictMode>
 );
 
 reportWebVitals();

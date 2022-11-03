@@ -5,6 +5,8 @@ import { authContext } from "../../../context/authContext";
 import audio from "../../../components/audio.png";
 import { useViewingBook } from "../VocabBookLayout";
 import { useNavigate } from "react-router-dom";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { db } from "../../../firebase/firebase";
 
 interface Props {
   correct?: boolean;
@@ -111,6 +113,8 @@ export default function Review() {
   const [round, setRound] = useState<number>(0);
   const [answerCount, setAnswerCount] = useState({ correct: 0, wrong: 0 });
   const [gameOver, setGameOver] = useState(false);
+  const [score, setScore] = useState<number>();
+  const [isChallenging, setIsChallenging] = useState<boolean>();
 
   const questionsNumber = 5;
   const questions = vocabBooks?.[viewingBook]
@@ -157,15 +161,40 @@ export default function Review() {
     audio.play();
   };
 
+  const handleGameOver = () => {
+    setShowBtn(true);
+    setGameOver(true);
+    setRound(0);
+    const updateScore = async () => {
+      const userRef = doc(db, "users", userId);
+      if (typeof score === "number" && score < 5 && isChallenging) {
+        setScore(score + 1);
+        await updateDoc(userRef, {
+          currentScore: score + 1,
+          lastTimeUpdateScore: new Date(),
+        });
+      }
+    };
+    if ((answerCount.correct / questionsNumber) * 100 >= 80) updateScore();
+  };
+
   useEffect(() => {
     getVocabBooks(userId);
-  }, []);
+    const getUserInfo = async (userId: string) => {
+      const docRef = doc(db, "users", userId);
+      const docSnap: any = await getDoc(docRef);
+      setScore(docSnap.data().currentScore);
+      setIsChallenging(docSnap.data().isChallenging);
+    };
+    getUserInfo(userId);
+  }, [userId]);
 
   function renderTest() {
     return (
       <Main>
         <VocabWrapper>
           <Vocab>{correctVocab?.vocab}</Vocab>
+          <p>({correctVocab?.partOfSpeech})</p>
           {correctVocab?.audioLink ? (
             <AudioImg
               src={audio}
@@ -218,9 +247,7 @@ export default function Review() {
             <Btn
               showBtn={showBtn}
               onClick={() => {
-                setShowBtn(true);
-                setGameOver(true);
-                setRound(0);
+                handleGameOver();
               }}
             >
               Done
@@ -255,7 +282,7 @@ export default function Review() {
       <Main>
         <OutcomeWrapper>
           <Message>
-            {(answerCount.correct / questionsNumber) * 100 > 80
+            {(answerCount.correct / questionsNumber) * 100 >= 80
               ? " 你太棒了！！！我服了你 "
               : "加油，好嗎？我對你太失望了"}
           </Message>
