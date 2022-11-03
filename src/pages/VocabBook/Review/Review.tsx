@@ -220,6 +220,7 @@ export default function Review() {
               onClick={() => {
                 setShowBtn(true);
                 setGameOver(true);
+                setRound(0);
               }}
             >
               Done
@@ -265,7 +266,7 @@ export default function Review() {
                 setGameOver(false);
                 setAnswerCount({ correct: 0, wrong: 0 });
                 setReviewingQuestions(questions);
-                setRound(0);
+
                 setShowBtn(false);
                 setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
               }}
@@ -338,7 +339,7 @@ export default function Review() {
   return (
     <Wrapper>
       <Header>
-        <div>Review Round: {round + 1}</div>
+        <div>Review Round: {gameOver ? questionsNumber : round + 1}</div>
         <div>
           O: {answerCount.correct} X: {answerCount.wrong} / Total:{" "}
           {questionsNumber} (
