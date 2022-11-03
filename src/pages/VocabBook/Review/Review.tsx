@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useContext, useState, useEffect, useRef } from "react";
+import { useContext, useState, useEffect } from "react";
 import { vocabBookContext } from "../../../context/vocabBookContext";
 import { authContext } from "../../../context/authContext";
 import audio from "../../../components/audio.png";
