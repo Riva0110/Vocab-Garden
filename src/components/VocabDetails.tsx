@@ -154,15 +154,6 @@ export default function VocabDetails() {
     setIsSaved(true);
     const vocabRef = doc(db, "vocabBooks", userId);
 
-    console.log({
-      [selectedvocabBook]: {
-        vocab: vocabDetails?.word,
-        audioLink: vocabDetails?.phonetics?.[0]?.audio,
-        partOfSpeech: vocabDetails?.meanings?.[0].partOfSpeech,
-        definition: vocabDetails?.meanings?.[0].definitions?.[0].definition,
-      },
-    });
-
     await updateDoc(vocabRef, {
       [selectedvocabBook]: arrayUnion({
         vocab: vocabDetails?.word,
