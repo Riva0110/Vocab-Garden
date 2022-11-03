@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import styled from "styled-components";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useOutletContext } from "react-router-dom";
 import { keywordContext } from "./context/keywordContext";
 import { authContext } from "./context/authContext";
 
@@ -28,10 +28,19 @@ const Input = styled.input`
   width: 100px;
 `;
 
+type ContextType = {
+  // viewingBook: string;
+  // setViewingBook: React.Dispatch<React.SetStateAction<string>>;
+  // isSaved: boolean;
+  // setIsSaved: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
 function App() {
   const { setKeyword } = useContext(keywordContext);
   const { isLogin } = useContext(authContext);
   const [inputVocab, setInputVocab] = useState<string>();
+  // const [viewingBook, setViewingBook] = useState<string>("unsorted");
+  // const [isSaved, setIsSaved] = useState<boolean>(false);
 
   return (
     <Wrapper>
@@ -60,3 +69,7 @@ function App() {
 }
 
 export default App;
+
+export function useSaveVocab() {
+  return useOutletContext<ContextType>();
+}

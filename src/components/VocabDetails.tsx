@@ -1,12 +1,21 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
 import styled from "styled-components";
 import { keywordContext } from "../context/keywordContext";
 import { authContext } from "../context/authContext";
 import { vocabBookContext } from "../context/vocabBookContext";
-import { updateDoc, doc, arrayUnion } from "firebase/firestore";
+// import { useSaveVocab } from "../App";
+import {
+  updateDoc,
+  doc,
+  arrayUnion,
+  setDoc,
+  getDoc,
+  deleteDoc,
+} from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import audio from "./audio.png";
 import save from "./save.png";
+import saved from "./saved.png";
 import spinner from "./spinner.gif";
 
 interface Props {
@@ -111,34 +120,20 @@ interface VocabDetailsInterface {
 }
 
 export default function VocabDetails() {
+  // const { isSaved, setIsSaved } = useSaveVocab();
   const { userId } = useContext(authContext);
   const { keyword, setKeyword } = useContext(keywordContext);
-  const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
+  const { vocabBooks, getVocabBooks, isSaved, setIsSaved } =
+    useContext(vocabBookContext);
   const [vocabDetails, setVocabDetails] = useState<VocabDetailsInterface>();
   const [newBook, setNewBook] = useState<string>();
   const [selectedvocabBook, setSelectedvocabBook] =
     useState<string>("unsorted");
   const [isLoading, setIsLoading] = useState(true);
   const [isPopuping, setIsPopuping] = useState(false);
+  const popup = useRef<HTMLDivElement>(null);
+  // const [isSaved, setIsSaved] = useState(false);
   const resourceUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${keyword}`;
-
-  useEffect(() => {
-    async function fetchVocabDetails(resourceUrl: string) {
-      try {
-        const response = await fetch(resourceUrl);
-        const data = await response.json();
-        setVocabDetails(data[0]);
-        setIsLoading(false);
-      } catch {
-        setIsLoading(false);
-      }
-    }
-    fetchVocabDetails(resourceUrl);
-  }, [resourceUrl]);
-
-  useEffect(() => {
-    getVocabBooks(userId);
-  }, []);
 
   const handlePlayAudio = () => {
     const audio = new Audio(vocabDetails?.phonetics?.[0].audio);
@@ -156,6 +151,7 @@ export default function VocabDetails() {
   };
 
   const handleSaveVocab = async (selectedvocabBook: string) => {
+    setIsSaved(true);
     const vocabRef = doc(db, "vocabBooks", userId);
     await updateDoc(vocabRef, {
       [selectedvocabBook]: arrayUnion({
@@ -165,8 +161,77 @@ export default function VocabDetails() {
         definition: vocabDetails?.meanings?.[0].definitions?.[0].definition,
       }),
     });
+    await setDoc(doc(db, "savedVocabs", `${userId}+${vocabDetails?.word}`), {
+      vocab: vocabDetails?.word,
+      vocabBook: selectedvocabBook,
+    });
     await getVocabBooks(userId);
   };
+
+  const handleDeleteVocabFromBook = async () => {
+    const docRef = doc(db, "savedVocabs", `${userId}+${keyword}`);
+    const docSnap = await getDoc(docRef);
+    const savedVocabBook = docSnap.data()?.vocabBook;
+
+    const yes = window.confirm(
+      `Are you sure to unsave "${keyword}" from "${savedVocabBook}"?`
+    );
+    if (yes) {
+      setIsSaved(false);
+      await deleteDoc(doc(db, "savedVocabs", `${userId}+${keyword}`));
+      const vocabRef = doc(db, "vocabBooks", userId);
+      const updateVocabCard = vocabBooks[savedVocabBook].filter(
+        (vocabcard) => vocabcard.vocab !== keyword
+      );
+      await updateDoc(vocabRef, {
+        [savedVocabBook]: updateVocabCard,
+      });
+      getVocabBooks(userId);
+      setTimeout(alert, 200, `Unsave vocab "${keyword}" sucessfully!`);
+    }
+  };
+
+  useEffect(() => {
+    async function fetchVocabDetails(resourceUrl: string) {
+      try {
+        const response = await fetch(resourceUrl);
+        const data = await response.json();
+        setVocabDetails(data[0]);
+        setIsLoading(false);
+      } catch {
+        setIsLoading(false);
+      }
+    }
+    fetchVocabDetails(resourceUrl);
+  }, [resourceUrl]);
+
+  // useEffect(() => {
+  //   getVocabBooks(userId);
+  //   document.addEventListener("click", handleClickElement, false);
+  //   return () => {
+  //     document.removeEventListener("click", handleClickElement, false);
+  //   };
+  // }, []);
+
+  // const handleClickElement = (e: any) => {
+  //   if (popup.current) console.log(1, popup.current.contains(e.target));
+  //   if (isPopuping && popup.current && !popup.current.contains(e.target)) {
+  //     console.log(2);
+  //     setIsPopuping(false);
+  //   }
+  // };
+
+  useEffect(() => {
+    setIsSaved(false);
+    const checkIfSaved = async () => {
+      const docRef = doc(db, "savedVocabs", `${userId}+${keyword}`);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.data()?.vocab === keyword) {
+        setIsSaved(true);
+      }
+    };
+    checkIfSaved();
+  }, [userId, keyword, setIsSaved]);
 
   return isLoading ? (
     <p>
@@ -183,11 +248,13 @@ export default function VocabDetails() {
             <AudioImg src={audio} alt="audio" onClick={handlePlayAudio} />
           )}
           <SaveVocabImg
-            src={save}
+            src={isSaved ? saved : save}
             alt="save"
-            onClick={() => setIsPopuping(true)}
+            onClick={() =>
+              isSaved ? handleDeleteVocabFromBook() : setIsPopuping(true)
+            }
           />
-          <SavePopup isPopuping={isPopuping}>
+          <SavePopup isPopuping={isPopuping} ref={popup}>
             <label>Book</label>
             <Select
               value={selectedvocabBook}
@@ -228,7 +295,13 @@ export default function VocabDetails() {
                   {partOfSpeech
                     ?.split(/([\s!]+)/)
                     .map((word: string, index: number) => (
-                      <span key={index} onClick={() => setKeyword(word)}>
+                      <span
+                        key={index}
+                        onClick={() => {
+                          setKeyword(word);
+                          setIsPopuping(false);
+                        }}
+                      >
                         {word}
                       </span>
                     ))}
@@ -244,7 +317,10 @@ export default function VocabDetails() {
                             .map((word: string, index: number) => (
                               <span
                                 key={index}
-                                onClick={() => setKeyword(word)}
+                                onClick={() => {
+                                  setKeyword(word);
+                                  setIsPopuping(false);
+                                }}
                               >
                                 {word}
                               </span>
@@ -258,7 +334,10 @@ export default function VocabDetails() {
                               .map((word: string, index: number) => (
                                 <span
                                   key={index}
-                                  onClick={() => setKeyword(word)}
+                                  onClick={() => {
+                                    setKeyword(word);
+                                    setIsPopuping(false);
+                                  }}
                                 >
                                   {word}
                                 </span>
@@ -274,7 +353,13 @@ export default function VocabDetails() {
                   <>
                     <p>Synonyms</p>
                     {synonyms?.map((synonym: string, index: number) => (
-                      <Synonyms key={index} onClick={() => setKeyword(synonym)}>
+                      <Synonyms
+                        key={index}
+                        onClick={() => {
+                          setKeyword(synonym);
+                          setIsPopuping(false);
+                        }}
+                      >
                         {synonym}
                       </Synonyms>
                     ))}

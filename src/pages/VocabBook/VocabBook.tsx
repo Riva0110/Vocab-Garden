@@ -5,10 +5,18 @@ import { keywordContext } from "../../context/keywordContext";
 import { authContext } from "../../context/authContext";
 import { vocabBookContext } from "../../context/vocabBookContext";
 import { useContext, useState, useEffect } from "react";
-import { doc, arrayUnion, updateDoc, deleteField } from "firebase/firestore";
+import {
+  doc,
+  arrayUnion,
+  updateDoc,
+  deleteField,
+  deleteDoc,
+} from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import saved from "../../components/saved.png";
 import VocabDetails from "../../components/VocabDetails";
+import { useViewingBook } from "./VocabBookLayout";
+// import { useSaveVocab } from "../../App";
 
 const Wrapper = styled.div``;
 const Nav = styled.nav`
@@ -86,11 +94,14 @@ interface Props {
 }
 
 export default function VocabBook() {
+  const { viewingBook, setViewingBook } = useViewingBook();
+  // const { isSaved, setIsSaved } = useSaveVocab();
   const { userId } = useContext(authContext);
   const { setKeyword } = useContext(keywordContext);
-  const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
+  const { vocabBooks, getVocabBooks, isSaved, setIsSaved } =
+    useContext(vocabBookContext);
   const [newBook, setNewBook] = useState<string>();
-  const [viewingBook, setViewingBook] = useState<string>("unsorted");
+
   const handlePlayAudio = (audioLink: string) => {
     const audio = new Audio(audioLink);
     audio.play();
@@ -103,7 +114,7 @@ export default function VocabBook() {
         [newBook]: arrayUnion(),
       });
       getVocabBooks(userId);
-      setTimeout(alert, 1000, `Add a "${newBook}" vocabbook successfully!`);
+      setTimeout(alert, 200, `Add a "${newBook}" vocabbook successfully!`);
     }
   };
 
@@ -116,7 +127,7 @@ export default function VocabBook() {
         [book]: deleteField(),
       });
       getVocabBooks(userId);
-      setTimeout(alert, 1000, `Delete book "${book}" sucessfully!`);
+      setTimeout(alert, 200, `Delete book "${book}" sucessfully!`);
     }
   };
 
@@ -132,10 +143,12 @@ export default function VocabBook() {
       await updateDoc(vocabRef, {
         [viewingBook]: updateVocabCard,
       });
+      await deleteDoc(doc(db, "savedVocabs", `${userId}+${vocab}`));
       getVocabBooks(userId);
+      if (isSaved) setIsSaved(false);
       setTimeout(
         alert,
-        1000,
+        200,
         `Remove vocab "${vocab}" from "${viewingBook}" sucessfully!`
       );
     }
@@ -149,7 +162,18 @@ export default function VocabBook() {
     <Wrapper>
       <Nav>
         <NavLink to="wordle">Wordle</NavLink>
-        <NavLink to="review">Review</NavLink>
+        {vocabBooks[viewingBook]?.length >= 5 ? (
+          <NavLink to="review">Review</NavLink>
+        ) : (
+          <span
+            onClick={() =>
+              alert("Please save at least 5 vocab cards in this book!")
+            }
+          >
+            Review
+          </span>
+        )}
+
         <input onChange={(e) => setNewBook(e.target.value)} />
         <Button onClick={handleAddBook}>Add a Book</Button>
       </Nav>
