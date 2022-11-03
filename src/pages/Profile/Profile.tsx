@@ -37,6 +37,7 @@ export default function Profile() {
   const [isMember, setIsMember] = useState<boolean>(true);
   const [score, setScore] = useState<number>(0);
   const [isChallenging, setIsChallenging] = useState<boolean>();
+  const [messages, setMessages] = useState<string>("");
 
   useEffect(() => {
     if (isLogin) {
@@ -45,9 +46,12 @@ export default function Profile() {
         const docSnap: any = await getDoc(docRef);
         setName(docSnap.data().name);
         setIsChallenging(docSnap.data().isChallenging);
-        if (docSnap.data().currentScore === 5) {
+        const currentScore = docSnap.data().currentScore;
+
+        if (currentScore === 5) {
           setIsChallenging(false);
-          setScore(docSnap.data().currentScore);
+          setScore(currentScore);
+          setMessages("恭喜你，植物長大了！再種一顆新的吧");
           const resetScore = async () => {
             const userRef = doc(db, "users", userId);
             await updateDoc(userRef, {
@@ -62,17 +66,21 @@ export default function Profile() {
           docSnap.data().currentScore > 0 &&
           isChallenging
         ) {
-          setScore(docSnap.data().currentScore - 1);
+          setMessages("好多天沒看到你了，植物想你囉！");
+          setScore(currentScore - 1);
           const resetScore = async () => {
             const userRef = doc(db, "users", userId);
             await updateDoc(userRef, {
-              currentScore: docSnap.data().currentScore - 1,
+              currentScore: currentScore - 1,
               lastTimeUpdateScore: new Date(),
             });
           };
           resetScore();
+        } else if (isChallenging) {
+          setMessages("加油加油，再努力一點，植物快長大囉！");
+          setScore(currentScore);
         } else {
-          setScore(docSnap.data().currentScore);
+          setMessages("種顆新植物，來挑戰你自己吧！");
         }
       };
       getUserInfo(userId);
@@ -99,9 +107,7 @@ export default function Profile() {
         <ScoreBar insideColor={true} score={score}>
           <ScoreBar>{score} / 5</ScoreBar>
         </ScoreBar>
-        {score === 5
-          ? "恭喜你，植物長大了！再種一顆新的吧"
-          : "加油加油，再努力一點，植物快長大囉！"}
+        <p>{messages}</p>
         {isChallenging ? (
           <></>
         ) : (
