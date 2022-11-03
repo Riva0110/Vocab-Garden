@@ -107,6 +107,14 @@ const VocabList = styled.div`
 
 const questionsNumber = 5;
 
+interface ReviewingQuestions {
+  vocab: string;
+  audioLink: string;
+  partOfSpeech: string;
+  definition: string;
+  isCorrect: boolean;
+}
+
 export default function Review() {
   const navigate = useNavigate();
   const { viewingBook } = useViewingBook();
@@ -122,24 +130,14 @@ export default function Review() {
   const questions = vocabBooks?.[viewingBook]
     ?.sort(() => Math.random() - 0.5)
     .slice(0, questionsNumber);
-  const [reviewingQuestions, setReviewingQuestions] = useState<
-    {
-      vocab: string;
-      audioLink: string;
-      partOfSpeech: string;
-      definition: string;
-      isCorrect: boolean;
-    }[]
-  >(questions);
+  const [reviewingQuestions, setReviewingQuestions] =
+    useState<ReviewingQuestions[]>(questions);
   const correctVocab = reviewingQuestions?.[round];
   const [showAnswerArr, setShowAnswerArr] = useState([
     "notAnswer",
     "notAnswer",
     "notAnswer",
   ]);
-
-  //test
-  console.log("questions", questions);
 
   useEffect(() => {
     getVocabBooks(userId);
@@ -153,19 +151,11 @@ export default function Review() {
   }, [userId]);
 
   useEffect(() => {
-    //test
-    console.log("reviewingQuestions", reviewingQuestions);
-    console.log("correctVocab", correctVocab, "round", round);
-
     const getRandomIndex = () => {
       return Math.floor(Math.random() * questionsNumber);
     };
     let randomIndex1 = getRandomIndex();
     let randomIndex2 = getRandomIndex();
-
-    //test
-    console.log("randomIndex1", randomIndex1);
-    console.log("randomIndex2", randomIndex2);
 
     while (randomIndex1 === round) {
       randomIndex1 = getRandomIndex();
@@ -175,16 +165,8 @@ export default function Review() {
       randomIndex2 = getRandomIndex();
     }
 
-    //test
-    console.log("while randomIndex1", randomIndex1);
-    console.log("while randomIndex2", randomIndex2);
-
     const wrongVocab1 = reviewingQuestions?.[randomIndex1];
     const wrongVocab2 = reviewingQuestions?.[randomIndex2];
-
-    //test
-    console.log("wrongVocab1", wrongVocab1);
-    console.log("wrongVocab2", wrongVocab2);
 
     const randomOptions = Object.entries({
       [correctVocab?.vocab]: correctVocab?.definition,
@@ -193,16 +175,7 @@ export default function Review() {
     }).sort(() => Math.random() - 0.5) as [string, string][];
 
     setCurrentOptions(randomOptions);
-
-    //test
-    console.log("correctVocab?.vocab", correctVocab?.definition);
-    console.log("wrongVocab1?.vocab", wrongVocab1?.definition);
-    console.log("wrongVocab2?.vocab", wrongVocab2?.definition);
-    console.log("randomOptions", randomOptions);
   }, [correctVocab, reviewingQuestions, round]);
-
-  //test
-  console.log("currentOptions", currentOptions);
 
   const handlePlayAudio = (audioLink: string) => {
     const audio = new Audio(audioLink);
