@@ -5,6 +5,8 @@ import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { useEffect } from "react";
 import { authContext } from "../../context/authContext";
+import Editor from "./Editor/LexicalEditor";
+import "./Editor/style.css";
 
 const ArticlesWrapper = styled.div`
   display: flex;
@@ -61,35 +63,38 @@ export default function Articles() {
   }, [userId]);
 
   return (
-    <ArticlesWrapper>
-      <Btn
-        onClick={() => {
-          navigate("/articles/words");
-        }}
-      >
-        Words
-      </Btn>
-      <Btn
-        onClick={() => {
-          navigate("/articles/add");
-        }}
-      >
-        +
-      </Btn>
-      {articleList?.map(({ time, title, id }, index) => {
-        const newDate = new Date(time.seconds * 1000);
-        return (
-          <ArticleTitle
-            key={index}
-            onClick={() => {
-              navigate(`/articles/${id}?title=${title}`);
-            }}
-          >
-            <Time>{newDate.toLocaleString()}</Time>
-            <Title>{title}</Title>
-          </ArticleTitle>
-        );
-      })}
-    </ArticlesWrapper>
+    <div className="App">
+      <ArticlesWrapper>
+        <Btn
+          onClick={() => {
+            navigate("/articles/words");
+          }}
+        >
+          Words
+        </Btn>
+        <Btn
+          onClick={() => {
+            navigate("/articles/add");
+          }}
+        >
+          +
+        </Btn>
+        {articleList?.map(({ time, title, id }, index) => {
+          const newDate = new Date(time.seconds * 1000);
+          return (
+            <ArticleTitle
+              key={index}
+              onClick={() => {
+                navigate(`/articles/${id}?title=${title}`);
+              }}
+            >
+              <Time>{newDate.toLocaleString()}</Time>
+              <Title>{title}</Title>
+            </ArticleTitle>
+          );
+        })}
+        <Editor />
+      </ArticlesWrapper>
+    </div>
   );
 }
