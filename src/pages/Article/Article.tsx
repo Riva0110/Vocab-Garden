@@ -18,6 +18,7 @@ const Wrapper = styled.div`
   display: flex;
   width: 50%;
 `;
+
 const ArticleWrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -26,27 +27,37 @@ const ArticleWrapper = styled.div`
   height: calc(100vh - 30px);
   overflow-y: scroll;
 `;
+
+const TitleBtnWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
 const TitleLabel = styled.label``;
 const TitleInput = styled.input``;
 const ContentLabel = styled(TitleLabel)`
   white-space: pre-line;
 `;
+
 const ContentTextArea = styled.textarea`
   height: 100%;
 `;
 
 const Title = styled.div`
+  line-height: 100%;
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 20px;
+  color: black;
 `;
+
 const Content = styled.div`
   font-size: 14px;
 `;
 
 const Btns = styled.div`
   display: flex;
-  justify-content: flex-end;
   gap: 10px;
 `;
 
@@ -81,24 +92,26 @@ export default function Article() {
 
   const renderReadMode = () => (
     <>
-      <Btns>
-        <BackBtn onClick={() => navigate("/articles")}>Back</BackBtn>
-        <EditBtn
-          onClick={() => {
-            setIsEditing(true);
-            navigate(`/articles/${articlePathName}?title=${title}&edit=true`);
-          }}
-        >
-          Edit
-        </EditBtn>
-      </Btns>
-      <Title>
-        {title.split(/([\s!]+)/).map((word: string, index: number) => (
-          <span key={index} onClick={() => setKeyword(word)}>
-            {word}
-          </span>
-        ))}
-      </Title>
+      <TitleBtnWrapper>
+        <Title>
+          {title.split(/([\s!]+)/).map((word: string, index: number) => (
+            <span key={index} onClick={() => setKeyword(word)}>
+              {word}
+            </span>
+          ))}
+        </Title>
+        <Btns>
+          <BackBtn onClick={() => navigate("/articles")}>Back</BackBtn>
+          <EditBtn
+            onClick={() => {
+              setIsEditing(true);
+              navigate(`/articles/${articlePathName}?title=${title}&edit=true`);
+            }}
+          >
+            Edit
+          </EditBtn>
+        </Btns>
+      </TitleBtnWrapper>
       <Content>
         {content.split(/([\s!]+)/).map((word: string, index: number) => (
           <span key={index} onClick={() => setKeyword(word)}>
