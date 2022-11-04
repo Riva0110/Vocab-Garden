@@ -147,6 +147,7 @@ export default function Article() {
                 content,
                 time: new Date(),
               });
+              navigate(`/articles/${docRef.id}?title=${title}`);
             } else {
               alert("Title and content cannot be left blank!");
             }

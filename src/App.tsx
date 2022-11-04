@@ -1,9 +1,16 @@
 import { useContext, useState } from "react";
-import styled from "styled-components";
+import styled, { createGlobalStyle } from "styled-components";
 import { Link, Outlet } from "react-router-dom";
 import { keywordContext } from "./context/keywordContext";
 import { authContext } from "./context/authContext";
 import logoName from "./logoName.png";
+
+const GlobalStyle = createGlobalStyle`
+  body {
+    margin: 0;
+    padding: 0;
+  }
+`;
 
 const Wrapper = styled.div`
   background-color: #e9eef1ff;
@@ -31,10 +38,13 @@ const LogoImg = styled.img`
   height: 30px;
 `;
 
-const HeaderNav = styled.div``;
+const HeaderNav = styled.div`
+  margin-right: 20px;
+`;
 
 const Main = styled.main`
   width: 100vw;
+  padding: 20px;
 `;
 
 const NavLink = styled(Link)`
@@ -58,6 +68,7 @@ function App() {
 
   return (
     <Wrapper>
+      <GlobalStyle />
       <Header>
         <NavLink to="/">
           <LogoImg src={logoName} alt="logo" />
