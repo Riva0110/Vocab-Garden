@@ -27,8 +27,7 @@ const ScoreBar = styled.div`
     props.insideColor &&
     css`
       border: 0px;
-      border: 1px solid white;
-      background-color: white;
+      background-color: #95caca;
       width: ${(props: Props) =>
         props.score ? `${props.score * 40}px` : "0px"};
       z-index: -1;
