@@ -3,7 +3,6 @@ import styled from "styled-components";
 import { keywordContext } from "../context/keywordContext";
 import { authContext } from "../context/authContext";
 import { vocabBookContext } from "../context/vocabBookContext";
-// import { useSaveVocab } from "../App";
 import {
   updateDoc,
   doc,
@@ -24,6 +23,7 @@ interface Props {
 
 const Wrapper = styled.div`
   font-size: 12px;
+  padding-right: 20px;
   height: calc(100vh - 30px);
   overflow-y: scroll;
 `;
@@ -33,7 +33,9 @@ const SpinnerImg = styled.img`
 const VocabWrapper = styled.div``;
 const TitleContainer = styled.div`
   display: flex;
+  align-items: center;
   gap: 10px;
+  color: black;
 `;
 const Vocab = styled.div`
   font-size: 20px;
@@ -42,9 +44,11 @@ const Vocab = styled.div`
 const Phonetic = styled.div``;
 const AudioImg = styled.img`
   width: 20px;
+  height: 20px;
 `;
 const SaveVocabImg = styled.img`
   width: 20px;
+  height: 20px;
 `;
 const SavePopup = styled.div`
   position: absolute;
@@ -69,25 +73,25 @@ const Meanings = styled.div``;
 const PartOfSpeech = styled.div`
   color: green;
   margin-top: 30px;
+  margin-bottom: 20px;
   border-bottom: 1px gray solid;
+  font-size: 14px;
+`;
+
+const SubTitle = styled.div`
+  font-weight: 800;
+  font-size: 14px;
 `;
 
 const DefinitionWrapper = styled.div`
-  font-size: 10px;
   margin-bottom: 5px;
 `;
 
-const Definition = styled.li`
-  font-weight: 600;
-`;
+const Definition = styled.li``;
 
-const Synonyms = styled.div`
-  font-size: 10px;
-`;
+const Synonyms = styled.div``;
 
-const Example = styled.div`
-  font-size: 10px;
-`;
+const Example = styled.div``;
 
 const LastVocabBtn = styled.button`
   width: 50px;
@@ -120,7 +124,6 @@ interface VocabDetailsInterface {
 }
 
 export default function VocabDetails() {
-  // const { isSaved, setIsSaved } = useSaveVocab();
   const { userId } = useContext(authContext);
   const { keyword, setKeyword } = useContext(keywordContext);
   const { vocabBooks, getVocabBooks, isSaved, setIsSaved } =
@@ -132,7 +135,6 @@ export default function VocabDetails() {
   const [isLoading, setIsLoading] = useState(true);
   const [isPopuping, setIsPopuping] = useState(false);
   const popup = useRef<HTMLDivElement>(null);
-  // const [isSaved, setIsSaved] = useState(false);
   const resourceUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${keyword}`;
 
   const handlePlayAudio = () => {
@@ -241,7 +243,6 @@ export default function VocabDetails() {
   ) : vocabDetails ? (
     <Wrapper>
       <VocabWrapper>
-        <LastVocabBtn>Back</LastVocabBtn>
         <TitleContainer>
           <Vocab>{vocabDetails?.word}</Vocab>
           <Phonetic>{vocabDetails?.phonetic}</Phonetic>
@@ -307,7 +308,7 @@ export default function VocabDetails() {
                       </span>
                     ))}
                 </PartOfSpeech>
-                <p>Definitions</p>
+                <SubTitle>Definitions</SubTitle>
                 <ul>
                   {definitions?.map(
                     ({ definition, example }, index: number) => (
@@ -352,7 +353,7 @@ export default function VocabDetails() {
                 </ul>
                 {synonyms?.length !== 0 ? (
                   <>
-                    <p>Synonyms</p>
+                    <SubTitle>Synonyms</SubTitle>
                     {synonyms?.map((synonym: string, index: number) => (
                       <Synonyms
                         key={index}

@@ -3,6 +3,12 @@ import { authContext } from "../../context/authContext";
 import { useContext, useState, useEffect } from "react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
+import plant1_5 from "./plantImgs/plant1-5.png";
+import plant2_5 from "./plantImgs/plant2-5.png";
+import plant3_5 from "./plantImgs/plant3-5.png";
+import plant4_5 from "./plantImgs/plant4-5.png";
+import plant5_5 from "./plantImgs/plant5-5.png";
+import plant6_5 from "./plantImgs/plant6-5.png";
 
 interface Props {
   insideColor?: boolean;
@@ -10,6 +16,7 @@ interface Props {
 }
 
 const Wrapper = styled.div``;
+
 const ScoreBar = styled.div`
   width: 200px;
   height: 30px;
@@ -20,14 +27,31 @@ const ScoreBar = styled.div`
     props.insideColor &&
     css`
       border: 0px;
-      background-color: #00ff0080;
+      background-color: #95caca;
       width: ${(props: Props) =>
         props.score ? `${props.score * 40}px` : "0px"};
       z-index: -1;
       margin-bottom: 20px;
     `}
 `;
+
 const Btn = styled.button``;
+
+const Plants = styled.div`
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-top: 30px;
+`;
+const PlantImg = styled.img`
+  width: 200px;
+  height: 240px;
+  @media screen and (max-width: 600px) {
+    width: 100px;
+  }
+`;
+
+const plants = [plant1_5, plant2_5, plant3_5, plant4_5, plant5_5, plant6_5];
 
 export default function Profile() {
   const { isLogin, login, logout, signup, userId } = useContext(authContext);
@@ -114,6 +138,11 @@ export default function Profile() {
           <Btn onClick={() => handleStartChallenge()}>Start a challenge</Btn>
         )}
         <button onClick={() => logout()}>Log out</button>
+        <Plants>
+          {plants.map((plant) => (
+            <PlantImg src={plant} alt="plants" key={plant} />
+          ))}
+        </Plants>
       </>
     );
   }
