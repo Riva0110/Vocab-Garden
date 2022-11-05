@@ -17,6 +17,7 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
+import { StringifyOptions } from "querystring";
 
 interface Props {
   correct?: boolean;
@@ -166,35 +167,39 @@ interface RoomInfo {
   questions: [];
 }
 
+interface Questions {
+  audioLink?: string;
+  definition: string;
+  partOfSpeech: string;
+  vocab: string;
+}
+
 export default function BattleReview() {
   const navigate = useNavigate();
   const { viewingBook } = useViewingBook();
-  const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
+  const { vocabBooks } = useContext(vocabBookContext);
   const { isLogin, userId } = useContext(authContext);
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [round, setRound] = useState<number>(0);
-  // const [pin, setPin] = useState<number>();
   const [answerCount, setAnswerCount] = useState({ correct: 0, wrong: 0 });
 
   const questionsNumber = 5;
   const questions = vocabBooks?.[viewingBook]
     ?.sort(() => Math.random() - 0.5)
     .slice(0, questionsNumber);
-  const [reviewingQuestions, setReviewingQuestions] = useState(questions);
+  const [reviewingQuestions, setReviewingQuestions] =
+    useState<Questions[]>(questions);
   const [isWaiting, setIsWaiting] = useState<boolean>(true);
-  // const [round, setRound] = useState<number>(0);
-  // const [answerCount, setAnswerCount] = useState({ correct: 0, wrong: 0 });
-  // const [gameOver, setGameOver] = useState(false);
   // const [score, setScore] = useState<number>();
   // const [isChallenging, setIsChallenging] = useState<boolean>();
-  // const [currentOptions, setCurrentOptions] = useState<[string, string][]>([]);
-  // const [showBtn, setShowBtn] = useState<boolean>(false);
-  // const correctVocab = reviewingQuestions?.[round];
-  // const [showAnswerArr, setShowAnswerArr] = useState([
-  //   "notAnswer",
-  //   "notAnswer",
-  //   "notAnswer",
-  // ]);
+  const [currentOptions, setCurrentOptions] = useState<[string, string][]>([]);
+  const [showBtn, setShowBtn] = useState<boolean>(false);
+  const correctVocab = reviewingQuestions?.[round];
+  const [showAnswerArr, setShowAnswerArr] = useState([
+    "notAnswer",
+    "notAnswer",
+    "notAnswer",
+  ]);
   // const randomPin = Math.floor(Math.random() * 10000);
   const pin = window.location.pathname.slice(18);
   const [isOwner, setIsOwner] = useState<boolean>(false);
@@ -204,9 +209,6 @@ export default function BattleReview() {
   const [roomInfo, setRoomInfo] = useState<RoomInfo>();
 
   useEffect(() => {
-    console.log("battleMode");
-    let unsub;
-
     async function startRoom() {
       await setDoc(doc(db, "battleRooms", userId + pin), {
         pin: pin,
@@ -217,8 +219,12 @@ export default function BattleReview() {
       setOwnerId(userId);
     }
     startRoom();
+  }, [pin, reviewingQuestions, userId]);
 
-    const checkWhoIsPlaying = async () => {
+  useEffect(() => {
+    let unsub;
+
+    const getBattleRoomData = async () => {
       let data = {} as RoomInfo;
       const roomRef = collection(db, "battleRooms");
       const q = query(roomRef, where("pin", "==", pin));
@@ -230,6 +236,7 @@ export default function BattleReview() {
       if (data?.competitorId) setIsCompetitorIn(true);
       if (data?.competitorId === userId) setIsCompetitor(true);
       if (data?.ownerId === userId) setIsOwner(true);
+      if (data?.questions) setReviewingQuestions(data?.questions);
 
       if (data?.ownerId) {
         unsub = onSnapshot(
@@ -243,10 +250,48 @@ export default function BattleReview() {
         );
       }
     };
-    checkWhoIsPlaying();
+    getBattleRoomData();
 
     return unsub;
-  }, [isCompetitor, isCompetitorIn, ownerId, pin, reviewingQuestions, userId]);
+  }, [isCompetitor, isCompetitorIn, ownerId, pin, userId]);
+
+  useEffect(() => {
+    const getRandomIndex = () => {
+      return Math.floor(Math.random() * questionsNumber);
+    };
+    let randomIndex1 = getRandomIndex();
+    let randomIndex2 = getRandomIndex();
+
+    while (randomIndex1 === round) {
+      randomIndex1 = getRandomIndex();
+    }
+
+    while (randomIndex2 === round || randomIndex2 === randomIndex1) {
+      randomIndex2 = getRandomIndex();
+    }
+
+    const wrongVocab1 = reviewingQuestions?.[randomIndex1];
+    const wrongVocab2 = reviewingQuestions?.[randomIndex2];
+
+    const randomOptions = Object.entries({
+      [correctVocab?.vocab]: correctVocab?.definition,
+      [wrongVocab1?.vocab]: wrongVocab1?.definition,
+      [wrongVocab2?.vocab]: wrongVocab2?.definition,
+    }).sort(() => Math.random() - 0.5) as [string, string][];
+
+    setCurrentOptions(randomOptions);
+  }, [correctVocab, questionsNumber, reviewingQuestions, round]);
+
+  const handlePlayAudio = (audioLink: string) => {
+    const audio = new Audio(audioLink);
+    audio.play();
+  };
+
+  const handleGameOver = () => {
+    setShowBtn(true);
+    setGameOver(true);
+    setRound(0);
+  };
 
   function handleCompetitorJoinBattle() {
     const updateCompetitor = async () => {
@@ -254,8 +299,6 @@ export default function BattleReview() {
       await updateDoc(roomRef, {
         competitorId: userId,
       });
-      //應該讓 onsnapshot control
-      setIsCompetitorIn(true);
     };
     updateCompetitor();
   }
@@ -294,7 +337,86 @@ export default function BattleReview() {
   }
 
   const renderTest = () => {
-    return <Main>Battling TEST</Main>;
+    return (
+      <Main>
+        <VocabWrapper>
+          <Vocab>{correctVocab?.vocab}</Vocab>
+          <p>({correctVocab?.partOfSpeech})</p>
+          {correctVocab?.audioLink ? (
+            <AudioImg
+              src={audio}
+              alt="audio"
+              onClick={() =>
+                correctVocab?.audioLink &&
+                handlePlayAudio(correctVocab?.audioLink)
+              }
+            />
+          ) : (
+            ""
+          )}
+        </VocabWrapper>
+        <Options>
+          {currentOptions?.map(([clickedVocab, def], index) => (
+            <Option
+              key={clickedVocab}
+              showAnswer={showAnswerArr[index]}
+              onClick={() => {
+                if (!showBtn) {
+                  setShowBtn(true);
+                  let answerStatus = [...currentOptions].map(
+                    ([vocabOption, insideDef], index) => {
+                      if (vocabOption === correctVocab?.vocab)
+                        return "correctAnswer";
+                      if (
+                        clickedVocab !== vocabOption &&
+                        vocabOption !== correctVocab?.vocab
+                      )
+                        return "notAnswer";
+                      else return "wrongAnswer";
+                    }
+                  );
+                  setShowAnswerArr(answerStatus);
+
+                  if (clickedVocab === correctVocab?.vocab) {
+                    answerCount.correct += 1;
+                    // reviewingQuestions[round].isCorrect = true;
+                    setReviewingQuestions(reviewingQuestions);
+                  } else {
+                    answerCount.wrong += 1;
+                    // reviewingQuestions[round].isCorrect = false;
+                    setReviewingQuestions(reviewingQuestions);
+                  }
+                  setAnswerCount(answerCount);
+                }
+              }}
+            >
+              {def}
+            </Option>
+          ))}
+          {round === questionsNumber - 1 ? (
+            <Btn
+              showBtn={showBtn}
+              onClick={() => {
+                handleGameOver();
+              }}
+            >
+              Done
+            </Btn>
+          ) : (
+            <Btn
+              showBtn={showBtn}
+              onClick={() => {
+                setShowBtn(false);
+                setRound(round + 1);
+                setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
+              }}
+            >
+              Next
+            </Btn>
+          )}
+        </Options>
+      </Main>
+    );
   };
 
   return isLogin ? (
