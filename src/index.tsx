@@ -9,7 +9,9 @@ import VocabBookLayout from "./pages/VocabBook/VocabBookLayout";
 import Home from "./pages/Home/Home";
 import NoPage from "./pages/NoPage/NoPage";
 import Profile from "./pages/Profile/Profile";
+import ReviewLayout from "./pages/VocabBook/Review/Review";
 import Review from "./pages/VocabBook/Review/Review";
+import BattleReview from "./pages/VocabBook/Review/Review";
 import VocabBook from "./pages/VocabBook/VocabBook";
 import Wordle from "./pages/VocabBook/Wordle/Wordle";
 import { KeywordContextProvider } from "./context/keywordContext";
@@ -39,7 +41,10 @@ root.render(
               <Route path="vocabbook" element={<VocabBookLayout />}>
                 <Route index element={<VocabBook />} />
                 <Route path="wordle" element={<Wordle />} />
-                <Route path="review" element={<Review />} />
+                <Route path="review" element={<ReviewLayout />}>
+                  <Route index element={<Review />} />
+                  <Route path=":Id" element={<BattleReview />} />
+                </Route>
               </Route>
               <Route path="profile" element={<Profile />} />
               <Route path="*" element={<NoPage />} />

@@ -1,9 +1,9 @@
 import styled, { css } from "styled-components";
 import { useContext, useState, useEffect } from "react";
+import { useViewingBook } from "../VocabBookLayout";
 import { vocabBookContext } from "../../../context/vocabBookContext";
 import { authContext } from "../../../context/authContext";
 import audio from "../../../components/audio.png";
-import { useViewingBook } from "../VocabBookLayout";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
@@ -127,8 +127,6 @@ const VocabList = styled.div`
   margin-bottom: 10px;
 `;
 
-const questionsNumber = 5;
-
 interface ReviewingQuestions {
   vocab: string;
   audioLink: string;
@@ -139,22 +137,26 @@ interface ReviewingQuestions {
 
 export default function Review() {
   const navigate = useNavigate();
+  const [isBattle, setIsBattle] = useState<boolean>(false);
+  const [gameOver, setGameOver] = useState<boolean>(false);
+  const [round, setRound] = useState<number>(0);
+  const [pin, setPin] = useState<number>();
+  const [answerCount, setAnswerCount] = useState({ correct: 0, wrong: 0 });
+  const [reviewingQuestions, setReviewingQuestions] = useState<
+    ReviewingQuestions[]
+  >([]);
   const { viewingBook } = useViewingBook();
   const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
+  const questionsNumber = 5;
+  const questions = vocabBooks?.[viewingBook]
+    ?.sort(() => Math.random() - 0.5)
+    .slice(0, questionsNumber);
   const { isLogin, userId } = useContext(authContext);
-  const [isBattle, setIsBattle] = useState<boolean>(false);
-  const [round, setRound] = useState<number>(0);
-  const [answerCount, setAnswerCount] = useState({ correct: 0, wrong: 0 });
-  const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState<number>();
   const [isChallenging, setIsChallenging] = useState<boolean>();
   const [currentOptions, setCurrentOptions] = useState<[string, string][]>([]);
   const [showBtn, setShowBtn] = useState<boolean>(false);
-  const questions = vocabBooks?.[viewingBook]
-    ?.sort(() => Math.random() - 0.5)
-    .slice(0, questionsNumber);
-  const [reviewingQuestions, setReviewingQuestions] =
-    useState<ReviewingQuestions[]>(questions);
+
   const correctVocab = reviewingQuestions?.[round];
   const [showAnswerArr, setShowAnswerArr] = useState([
     "notAnswer",
@@ -162,7 +164,19 @@ export default function Review() {
     "notAnswer",
   ]);
 
+  // const reviewBattlePathName = window.location.pathname.slice(18);
+
   useEffect(() => {
+    const randomPin = Math.floor(Math.random() * 10000);
+    setPin(randomPin);
+    setReviewingQuestions(questions);
+    console.log(
+      "vocabBooks",
+      vocabBooks,
+      "questions",
+      questions,
+      questionsNumber
+    );
     getVocabBooks(userId);
     const getUserInfo = async (userId: string) => {
       const docRef = doc(db, "users", userId);
@@ -171,7 +185,7 @@ export default function Review() {
       setIsChallenging(docSnap.data().isChallenging);
     };
     getUserInfo(userId);
-  }, [userId]);
+  }, []);
 
   useEffect(() => {
     const getRandomIndex = () => {
@@ -198,7 +212,7 @@ export default function Review() {
     }).sort(() => Math.random() - 0.5) as [string, string][];
 
     setCurrentOptions(randomOptions);
-  }, [correctVocab, reviewingQuestions, round]);
+  }, [correctVocab, questionsNumber, reviewingQuestions, round]);
 
   const handlePlayAudio = (audioLink: string) => {
     const audio = new Audio(audioLink);
@@ -241,6 +255,7 @@ export default function Review() {
         <Options>
           {currentOptions?.map(([clickedVocab, def], index) => (
             <Option
+              key={clickedVocab}
               showAnswer={showAnswerArr[index]}
               onClick={() => {
                 if (!showBtn) {
@@ -335,7 +350,7 @@ export default function Review() {
                 ({ vocab, audioLink, partOfSpeech, definition, isCorrect }) => {
                   if (!isCorrect) {
                     return (
-                      <VocabList>
+                      <VocabList key={vocab + partOfSpeech}>
                         {vocab}{" "}
                         {audioLink ? (
                           <AudioImg
@@ -361,7 +376,7 @@ export default function Review() {
                 ({ vocab, audioLink, partOfSpeech, definition, isCorrect }) => {
                   if (isCorrect) {
                     return (
-                      <VocabList>
+                      <VocabList key={vocab + partOfSpeech}>
                         {vocab}{" "}
                         {audioLink ? (
                           <AudioImg
@@ -387,15 +402,27 @@ export default function Review() {
     );
   }
 
-  return (
+  return isLogin ? (
     <Wrapper>
       <Header>
         <div>Review Round: {gameOver ? questionsNumber : round + 1}</div>
         <ModeBtns>
-          <ReviewModeBtn isBattle={isBattle} onClick={() => setIsBattle(false)}>
+          <ReviewModeBtn
+            isBattle={isBattle}
+            onClick={() => {
+              setIsBattle(false);
+              navigate("/vocabbook/review");
+            }}
+          >
             Single Mode
           </ReviewModeBtn>
-          <ReviewModeBtn isBattle={!isBattle} onClick={() => setIsBattle(true)}>
+          <ReviewModeBtn
+            isBattle={!isBattle}
+            onClick={() => {
+              setIsBattle(true);
+              navigate(`/vocabbook/review/${pin}`);
+            }}
+          >
             Battle Mode
           </ReviewModeBtn>
         </ModeBtns>
@@ -406,6 +433,10 @@ export default function Review() {
         </div>
       </Header>
       {gameOver ? renderOutcome() : renderTest()}
+    </Wrapper>
+  ) : (
+    <Wrapper>
+      <p>Please log in to review!</p>
     </Wrapper>
   );
 }
