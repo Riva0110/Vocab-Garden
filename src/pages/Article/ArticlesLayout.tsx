@@ -9,6 +9,7 @@ const Wrapper = styled.div`
 `;
 
 export default function ArticlesLayout() {
+  console.log("ArticlesLayout");
   return (
     <Wrapper>
       <Outlet />

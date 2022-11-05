@@ -209,6 +209,8 @@ export default function BattleReview() {
   const [isCompetitorIn, setIsCompetitorIn] = useState<boolean>(false);
   const [roomInfo, setRoomInfo] = useState<RoomInfo>();
 
+  console.log("battleMode");
+
   useEffect(() => {
     let unsub;
     if (reviewBattlePathName === pin?.toString()) {
@@ -346,7 +348,7 @@ export default function BattleReview() {
           {Math.ceil((answerCount.correct / questionsNumber) * 100)}%)
         </div>
       </Header>
-      {isWaiting ? <>{waitingBattle()}</> : <></>}
+      {/* {isWaiting ? <>{waitingBattle()}</> : <></>} */}
     </Wrapper>
   ) : (
     <Wrapper>

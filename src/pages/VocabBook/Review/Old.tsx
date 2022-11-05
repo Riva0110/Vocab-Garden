@@ -105,7 +105,7 @@ const VocabList = styled.div`
   margin-bottom: 10px;
 `;
 
-export default function Review() {
+export default function OldReview() {
   const navigate = useNavigate();
   const { viewingBook } = useViewingBook();
   const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);

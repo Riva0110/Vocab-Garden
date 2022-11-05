@@ -19,33 +19,12 @@ interface Props {
 }
 
 const Wrapper = styled.div`
-  width: 100vw;
+  width: 100%;
 `;
 
 const Header = styled.div`
   display: flex;
   justify-content: space-between;
-`;
-
-const ModeBtns = styled.div`
-  display: flex;
-  gap: 20px;
-`;
-const ReviewModeBtn = styled.button`
-  cursor: pointer;
-  ${(props: Props) =>
-    props.isBattle &&
-    css`
-      border: 1px solid gray;
-      color: gray;
-    `}
-
-  ${(props: Props) =>
-    !props.isBattle &&
-    css`
-      border: none;
-      font-weight: 600;
-    `}
 `;
 
 const Main = styled.div`
@@ -137,10 +116,10 @@ interface ReviewingQuestions {
 
 export default function Review() {
   const navigate = useNavigate();
-  const [isBattle, setIsBattle] = useState<boolean>(false);
+
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [round, setRound] = useState<number>(0);
-  const [pin, setPin] = useState<number>();
+
   const [answerCount, setAnswerCount] = useState({ correct: 0, wrong: 0 });
   const [reviewingQuestions, setReviewingQuestions] = useState<
     ReviewingQuestions[]
@@ -164,19 +143,9 @@ export default function Review() {
     "notAnswer",
   ]);
 
-  // const reviewBattlePathName = window.location.pathname.slice(18);
-
   useEffect(() => {
-    const randomPin = Math.floor(Math.random() * 10000);
-    setPin(randomPin);
+    console.log("singleMode", "viewingBook", viewingBook);
     setReviewingQuestions(questions);
-    console.log(
-      "vocabBooks",
-      vocabBooks,
-      "questions",
-      questions,
-      questionsNumber
-    );
     getVocabBooks(userId);
     const getUserInfo = async (userId: string) => {
       const docRef = doc(db, "users", userId);
@@ -406,26 +375,7 @@ export default function Review() {
     <Wrapper>
       <Header>
         <div>Review Round: {gameOver ? questionsNumber : round + 1}</div>
-        <ModeBtns>
-          <ReviewModeBtn
-            isBattle={isBattle}
-            onClick={() => {
-              setIsBattle(false);
-              navigate("/vocabbook/review");
-            }}
-          >
-            Single Mode
-          </ReviewModeBtn>
-          <ReviewModeBtn
-            isBattle={!isBattle}
-            onClick={() => {
-              setIsBattle(true);
-              navigate(`/vocabbook/review/${pin}`);
-            }}
-          >
-            Battle Mode
-          </ReviewModeBtn>
-        </ModeBtns>
+
         <div>
           O: {answerCount.correct} X: {answerCount.wrong} / Total:{" "}
           {questionsNumber} (
