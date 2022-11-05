@@ -141,7 +141,7 @@ export default function Review() {
   const navigate = useNavigate();
   const { viewingBook } = useViewingBook();
   const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
-  const { userId } = useContext(authContext);
+  const { isLogin, userId } = useContext(authContext);
   const [isBattle, setIsBattle] = useState<boolean>(false);
   const [round, setRound] = useState<number>(0);
   const [answerCount, setAnswerCount] = useState({ correct: 0, wrong: 0 });

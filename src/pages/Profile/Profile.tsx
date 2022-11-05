@@ -73,6 +73,8 @@ export default function Profile() {
         setName(docSnap.data().name);
         setIsChallenging(docSnap.data().isChallenging);
         const currentScore = docSnap.data().currentScore;
+        const timeDifference =
+          Date.now() - docSnap.data().lastTimeUpdateScore.seconds * 1000;
 
         if (currentScore === 5) {
           setIsChallenging(false);
@@ -87,17 +89,17 @@ export default function Profile() {
           resetScore();
         } else if (
           // test 每 5 分鐘扣 1 分
-          Date.now() - docSnap.data().lastTimeUpdateScore.seconds * 1000 >
-            300000 &&
+          timeDifference > 300000 &&
           docSnap.data().currentScore > 0 &&
           isChallenging
         ) {
           setMessages("好多天沒看到你了，植物想你囉！");
-          setScore(currentScore - 1);
+          const dedction = Math.floor(timeDifference / 300000);
+          setScore(Math.max(currentScore - dedction, 0));
           const resetScore = async () => {
             const userRef = doc(db, "users", userId);
             await updateDoc(userRef, {
-              currentScore: currentScore - 1,
+              currentScore: Math.max(currentScore - dedction, 0),
               lastTimeUpdateScore: new Date(),
             });
           };
