@@ -13,16 +13,17 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
+import Editor from "./Editor/LexicalEditor";
+import "./Editor/style.css";
 
 const Wrapper = styled.div`
   display: flex;
-  width: 50%;
+  width: 50vw;
 `;
 
 const ArticleWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  margin-right: 50px;
   width: 80%;
   height: calc(100vh - 30px);
   overflow-y: scroll;
@@ -136,6 +137,7 @@ export default function Article() {
           defaultValue={articlePathName === "add" ? "" : content}
           onChange={(e) => setContent(e.target.value)}
         />
+        <Editor />
         <DoneBtn
           onClick={async () => {
             if (title && content && userId && articlePathName !== "add") {

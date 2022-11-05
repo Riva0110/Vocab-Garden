@@ -4,6 +4,8 @@ import { Outlet } from "react-router-dom";
 
 const Wrapper = styled.div`
   display: flex;
+  gap: 50px;
+  padding: 20px;
 `;
 
 export default function ArticlesLayout() {

@@ -9,8 +9,7 @@ import { authContext } from "../../context/authContext";
 const ArticlesWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  margin-right: 50px;
-  width: 50%;
+  width: 50vw;
 `;
 const ArticleTitle = styled.div`
   margin-bottom: 20px;
@@ -61,35 +60,37 @@ export default function Articles() {
   }, [userId]);
 
   return (
-    <ArticlesWrapper>
-      <Btn
-        onClick={() => {
-          navigate("/articles/words");
-        }}
-      >
-        Words
-      </Btn>
-      <Btn
-        onClick={() => {
-          navigate("/articles/add");
-        }}
-      >
-        +
-      </Btn>
-      {articleList?.map(({ time, title, id }, index) => {
-        const newDate = new Date(time.seconds * 1000);
-        return (
-          <ArticleTitle
-            key={index}
-            onClick={() => {
-              navigate(`/articles/${id}?title=${title}`);
-            }}
-          >
-            <Time>{newDate.toLocaleString()}</Time>
-            <Title>{title}</Title>
-          </ArticleTitle>
-        );
-      })}
-    </ArticlesWrapper>
+    <div className="App">
+      <ArticlesWrapper>
+        <Btn
+          onClick={() => {
+            navigate("/articles/words");
+          }}
+        >
+          Words
+        </Btn>
+        <Btn
+          onClick={() => {
+            navigate("/articles/add");
+          }}
+        >
+          +
+        </Btn>
+        {articleList?.map(({ time, title, id }, index) => {
+          const newDate = new Date(time.seconds * 1000);
+          return (
+            <ArticleTitle
+              key={index}
+              onClick={() => {
+                navigate(`/articles/${id}?title=${title}`);
+              }}
+            >
+              <Time>{newDate.toLocaleString()}</Time>
+              <Title>{title}</Title>
+            </ArticleTitle>
+          );
+        })}
+      </ArticlesWrapper>
+    </div>
   );
 }
