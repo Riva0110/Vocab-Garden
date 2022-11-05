@@ -197,7 +197,7 @@ export default function ToolbarPlugin() {
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
-  // const [isUnorderedList, setIsUnorderedList] = useState(false);
+  const [isUnorderedList, setIsUnorderedList] = useState(false);
 
   const updateToolbar = useCallback(() => {
     const selection = $getSelection();

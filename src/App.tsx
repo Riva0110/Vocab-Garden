@@ -45,7 +45,6 @@ const HeaderNav = styled.div`
 
 const Main = styled.main`
   width: 100vw;
-  padding: 20px;
 `;
 
 const NavLink = styled(Link)`

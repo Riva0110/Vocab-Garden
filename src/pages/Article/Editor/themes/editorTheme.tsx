@@ -1,4 +1,4 @@
-const exampleTheme = {
+const editorTheme = {
   placeholder: "editor-placeholder",
   paragraph: "editor-paragraph",
   list: {
@@ -16,4 +16,4 @@ const exampleTheme = {
   },
 };
 
-export default exampleTheme;
+export default editorTheme;

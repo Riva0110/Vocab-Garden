@@ -15,7 +15,9 @@ interface Props {
   score?: number;
 }
 
-const Wrapper = styled.div``;
+const Wrapper = styled.div`
+  padding: 20px;
+`;
 
 const ScoreBar = styled.div`
   width: 200px;
@@ -126,7 +128,7 @@ export default function Profile() {
 
   function renderProile() {
     return (
-      <>
+      <Wrapper>
         <p>{name}’s Vocab Garden</p>
         <ScoreBar insideColor={true} score={score}>
           <ScoreBar>{score} / 5</ScoreBar>
@@ -143,7 +145,7 @@ export default function Profile() {
             <PlantImg src={plant} alt="plants" key={plant} />
           ))}
         </Plants>
-      </>
+      </Wrapper>
     );
   }
 

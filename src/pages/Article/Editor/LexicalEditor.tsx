@@ -1,4 +1,4 @@
-import ExampleTheme from "./themes/ExampleTheme";
+import editorTheme from "./themes/editorTheme";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -8,7 +8,8 @@ import { ListItemNode, ListNode } from "@lexical/list";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
-
+// import { TRANSFORMERS } from "@lexical/markdown";
+// import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import ListMaxIndentLevelPlugin from "./plugins/ListMaxIndentLevelPlugin";
 import AutoLinkPlugin from "./plugins/AutoLinkPlugin";
 
@@ -18,7 +19,7 @@ function Placeholder() {
 
 const editorConfig = {
   // The editor theme
-  theme: ExampleTheme,
+  theme: editorTheme,
   // Handling of errors during update
   onError(error: Error) {
     throw error;
@@ -37,6 +38,7 @@ export default function Editor() {
             contentEditable={<ContentEditable className="editor-input" />}
             placeholder={<Placeholder />}
           />
+          {/* <MarkdownShortcutPlugin transformers={TRANSFORMERS} /> */}
           <AutoFocusPlugin />
           <ListPlugin />
           <LinkPlugin />
@@ -44,6 +46,13 @@ export default function Editor() {
           <ListMaxIndentLevelPlugin maxDepth={7} />
         </div>
       </div>
+      {/* <button
+        onClick={() => {
+          setEditable(true);
+        }}
+      >
+        DoneEdting
+      </button> */}
     </LexicalComposer>
   );
 }

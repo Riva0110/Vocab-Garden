@@ -5,14 +5,11 @@ import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { useEffect } from "react";
 import { authContext } from "../../context/authContext";
-import Editor from "./Editor/LexicalEditor";
-import "./Editor/style.css";
 
 const ArticlesWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  margin-right: 50px;
-  width: 50%;
+  width: 50vw;
 `;
 const ArticleTitle = styled.div`
   margin-bottom: 20px;
@@ -93,7 +90,6 @@ export default function Articles() {
             </ArticleTitle>
           );
         })}
-        <Editor />
       </ArticlesWrapper>
     </div>
   );
