@@ -78,11 +78,11 @@ export default function ReviewLayout() {
     <Wrapper>
       <ModeBtns>
         <ReviewModeBtn
-        // isBattle={isBattle}
-        // onClick={() => {
-        //   setIsBattle(false);
-        //   navigate("/vocabbook/review");
-        // }}
+          isBattle={isBattle}
+          onClick={() => {
+            setIsBattle(false);
+            navigate("/vocabbook/review");
+          }}
         >
           Single Mode
         </ReviewModeBtn>

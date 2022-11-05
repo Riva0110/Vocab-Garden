@@ -29,7 +29,7 @@ interface Props {
 }
 
 const Wrapper = styled.div`
-  width: 100vw;
+  width: 100%;
 `;
 
 const Header = styled.div`
@@ -171,18 +171,17 @@ export default function BattleReview() {
   const { viewingBook } = useViewingBook();
   const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
   const { isLogin, userId } = useContext(authContext);
-  const [isBattle, setIsBattle] = useState<boolean>(false);
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [round, setRound] = useState<number>(0);
-  const [pin, setPin] = useState<number>();
+  // const [pin, setPin] = useState<number>();
   const [answerCount, setAnswerCount] = useState({ correct: 0, wrong: 0 });
-  const [reviewingQuestions, setReviewingQuestions] = useState();
+
   const questionsNumber = 5;
   const questions = vocabBooks?.[viewingBook]
     ?.sort(() => Math.random() - 0.5)
     .slice(0, questionsNumber);
-  // const [isBattle, setIsBattle] = useState<boolean>(false);
-  const [isWaiting, setIsWaiting] = useState<boolean>(false);
+  const [reviewingQuestions, setReviewingQuestions] = useState(questions);
+  const [isWaiting, setIsWaiting] = useState<boolean>(true);
   // const [round, setRound] = useState<number>(0);
   // const [answerCount, setAnswerCount] = useState({ correct: 0, wrong: 0 });
   // const [gameOver, setGameOver] = useState(false);
@@ -190,11 +189,6 @@ export default function BattleReview() {
   // const [isChallenging, setIsChallenging] = useState<boolean>();
   // const [currentOptions, setCurrentOptions] = useState<[string, string][]>([]);
   // const [showBtn, setShowBtn] = useState<boolean>(false);
-  // const questions = vocabBooks?.[viewingBook]
-  //   ?.sort(() => Math.random() - 0.5)
-  //   .slice(0, questionsNumber);
-  // const [reviewingQuestions, setReviewingQuestions] =
-  //   useState<ReviewingQuestions[]>(questions);
   // const correctVocab = reviewingQuestions?.[round];
   // const [showAnswerArr, setShowAnswerArr] = useState([
   //   "notAnswer",
@@ -202,97 +196,85 @@ export default function BattleReview() {
   //   "notAnswer",
   // ]);
   // const randomPin = Math.floor(Math.random() * 10000);
-  const reviewBattlePathName = window.location.pathname.slice(18);
-  // const [pin, setPin] = useState<number>(randomPin);
+  const pin = window.location.pathname.slice(18);
   const [isOwner, setIsOwner] = useState<boolean>(false);
+  const [ownerId, setOwnerId] = useState<string>();
   const [isCompetitor, setIsCompetitor] = useState<boolean>(false);
   const [isCompetitorIn, setIsCompetitorIn] = useState<boolean>(false);
   const [roomInfo, setRoomInfo] = useState<RoomInfo>();
 
-  console.log("battleMode");
-
   useEffect(() => {
+    console.log("battleMode");
     let unsub;
-    if (reviewBattlePathName === pin?.toString()) {
-      unsub = onSnapshot(doc(db, "battleRooms", userId + pin), (doc) => {
-        console.log("Current data: ", doc.data());
-        const data = doc.data();
-        if (data && data.competitorId !== "") setIsCompetitorIn(true);
-        if (data && data.status !== "playing") setIsBattle(true);
+
+    async function startRoom() {
+      await setDoc(doc(db, "battleRooms", userId + pin), {
+        pin: pin,
+        ownerId: userId,
+        status: "waiting",
+        questions: reviewingQuestions,
       });
-
-      setIsBattle(true);
-      setIsWaiting(true);
-
-      const checkWhoIsPlaying = async () => {
-        let data = {} as RoomInfo;
-        const citiesRef = collection(db, "battleRooms");
-        const q = query(citiesRef, where("pin", "==", reviewBattlePathName));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-          console.log(doc.id, " => ", doc.data());
-          data = doc.data() as RoomInfo;
-        });
-        setRoomInfo(data);
-        if (data && data.competitorId !== "") setIsCompetitorIn(true);
-        if (data && data.competitorId === userId) setIsCompetitor(true);
-        if (data && data.ownerId === userId) setIsOwner(true);
-      };
-      checkWhoIsPlaying();
+      setOwnerId(userId);
     }
+    startRoom();
+
+    const checkWhoIsPlaying = async () => {
+      let data = {} as RoomInfo;
+      const roomRef = collection(db, "battleRooms");
+      const q = query(roomRef, where("pin", "==", pin));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) => {
+        data = doc.data() as RoomInfo;
+      });
+      setRoomInfo(data);
+      if (data?.competitorId) setIsCompetitorIn(true);
+      if (data?.competitorId === userId) setIsCompetitor(true);
+      if (data?.ownerId === userId) setIsOwner(true);
+
+      if (data?.ownerId) {
+        unsub = onSnapshot(
+          doc(db, "battleRooms", data?.ownerId + pin),
+          (doc) => {
+            console.log("onSnapshot Current data: ", doc.data());
+            const data = doc.data();
+            if (data?.competitorId) setIsCompetitorIn(true);
+            if (data?.status === "playing") setIsWaiting(false);
+          }
+        );
+      }
+    };
+    checkWhoIsPlaying();
+
     return unsub;
-  }, [pin, reviewBattlePathName, userId]);
+  }, [isCompetitor, isCompetitorIn, ownerId, pin, reviewingQuestions, userId]);
 
-  useEffect(() => {
-    if (reviewBattlePathName === pin?.toString()) {
-      if (userId === roomInfo?.ownerId) setIsOwner(true);
-    }
-  }, [userId, roomInfo, reviewBattlePathName, pin]);
-
-  const startRoom = async () => {
-    await setDoc(doc(db, "battleRooms", userId + reviewBattlePathName), {
-      pin: reviewBattlePathName,
-      ownerId: userId,
-      status: "waiting",
-      questions: reviewingQuestions,
-    });
-  };
-
-  function waitingBattle() {
-    function handleCompetitor() {
+  function handleCompetitorJoinBattle() {
+    const updateCompetitor = async () => {
+      const roomRef = doc(db, "battleRooms", roomInfo?.ownerId + pin);
+      await updateDoc(roomRef, {
+        competitorId: userId,
+      });
+      //應該讓 onsnapshot control
       setIsCompetitorIn(true);
-      const updateCompetitor = async () => {
-        const roomRef = doc(
-          db,
-          "battleRooms",
-          roomInfo?.ownerId + reviewBattlePathName
-        );
-        await updateDoc(roomRef, {
-          competitorId: userId,
-        });
-      };
-      updateCompetitor();
-    }
+    };
+    updateCompetitor();
+  }
 
-    function handleStartBattle() {
-      setIsBattle(true);
-      const updatePlaying = async () => {
-        const roomRef = doc(
-          db,
-          "battleRooms",
-          roomInfo?.ownerId + reviewBattlePathName
-        );
-        await updateDoc(roomRef, {
-          status: "playing",
-        });
-      };
-      updatePlaying();
-    }
+  function handleStartBattle() {
+    const updatePlaying = async () => {
+      const roomRef = doc(db, "battleRooms", roomInfo?.ownerId + pin);
+      await updateDoc(roomRef, {
+        status: "playing",
+      });
+    };
+    updatePlaying();
+  }
 
+  function renderWaiting() {
     return (
       <Main>
         <WaitingRoomWrapper>
-          PIN Code: {reviewBattlePathName}
+          PIN Code: {pin}
           {isOwner ? (
             isCompetitorIn ? (
               <StartGame onClick={handleStartBattle}>Start</StartGame>
@@ -302,61 +284,34 @@ export default function BattleReview() {
           ) : isCompetitorIn ? (
             <p>Waiting for the owner starting the battle</p>
           ) : (
-            <button onClick={handleCompetitor}>Join the battle!</button>
+            <button onClick={handleCompetitorJoinBattle}>
+              Join the battle!
+            </button>
           )}
         </WaitingRoomWrapper>
       </Main>
     );
   }
 
+  const renderTest = () => {
+    return <Main>Battling TEST</Main>;
+  };
+
   return isLogin ? (
     <Wrapper>
       <Header>
         <div>Review Round: {gameOver ? questionsNumber : round + 1}</div>
-        <ModeBtns>
-          {isOwner ? (
-            <ReviewModeBtn
-              isBattle={isBattle}
-              onClick={() => {
-                setIsBattle(false);
-                setIsWaiting(false);
-                navigate("/vocabbook/review");
-              }}
-            >
-              Single Mode
-            </ReviewModeBtn>
-          ) : (
-            <></>
-          )}
-          <ReviewModeBtn
-            isBattle={!isBattle}
-            onClick={() => {
-              setIsBattle(true);
-              setIsWaiting(true);
-              startRoom();
-              navigate(
-                `/vocabbook/review/${Math.floor(Math.random() * 10000)}`
-              );
-            }}
-          >
-            Battle Mode
-          </ReviewModeBtn>
-        </ModeBtns>
         <div>
           O: {answerCount.correct} X: {answerCount.wrong} / Total:{" "}
           {questionsNumber} (
           {Math.ceil((answerCount.correct / questionsNumber) * 100)}%)
         </div>
       </Header>
-      {/* {isWaiting ? <>{waitingBattle()}</> : <></>} */}
+      {isWaiting ? <>{renderWaiting()}</> : <>{renderTest()}</>}
     </Wrapper>
   ) : (
     <Wrapper>
-      {reviewBattlePathName === pin?.toString() ? (
-        <p>Please log in to battle!</p>
-      ) : (
-        <p>Please log in to review!</p>
-      )}
+      <p>Please log in to battle!</p>
     </Wrapper>
   );
 }
