@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { useContext, useState, useEffect } from "react";
 import { vocabBookContext } from "../../../context/vocabBookContext";
 import { authContext } from "../../../context/authContext";
@@ -15,6 +15,7 @@ interface Props {
   isClick?: boolean;
   showBtn?: boolean;
   showAnswer?: string;
+  isBattle?: boolean;
 }
 
 const Wrapper = styled.div`
@@ -24,6 +25,27 @@ const Wrapper = styled.div`
 const Header = styled.div`
   display: flex;
   justify-content: space-between;
+`;
+
+const ModeBtns = styled.div`
+  display: flex;
+  gap: 20px;
+`;
+const ReviewModeBtn = styled.button`
+  cursor: pointer;
+  ${(props: Props) =>
+    props.isBattle &&
+    css`
+      border: 1px solid gray;
+      color: gray;
+    `}
+
+  ${(props: Props) =>
+    !props.isBattle &&
+    css`
+      border: none;
+      font-weight: 600;
+    `}
 `;
 
 const Main = styled.div`
@@ -120,6 +142,7 @@ export default function Review() {
   const { viewingBook } = useViewingBook();
   const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
   const { userId } = useContext(authContext);
+  const [isBattle, setIsBattle] = useState<boolean>(false);
   const [round, setRound] = useState<number>(0);
   const [answerCount, setAnswerCount] = useState({ correct: 0, wrong: 0 });
   const [gameOver, setGameOver] = useState(false);
@@ -368,6 +391,14 @@ export default function Review() {
     <Wrapper>
       <Header>
         <div>Review Round: {gameOver ? questionsNumber : round + 1}</div>
+        <ModeBtns>
+          <ReviewModeBtn isBattle={isBattle} onClick={() => setIsBattle(false)}>
+            Single Mode
+          </ReviewModeBtn>
+          <ReviewModeBtn isBattle={!isBattle} onClick={() => setIsBattle(true)}>
+            Battle Mode
+          </ReviewModeBtn>
+        </ModeBtns>
         <div>
           O: {answerCount.correct} X: {answerCount.wrong} / Total:{" "}
           {questionsNumber} (
