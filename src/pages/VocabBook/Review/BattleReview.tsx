@@ -274,9 +274,21 @@ export default function BattleReview() {
           (doc) => {
             console.log("onSnapshot Current data: ", doc.data());
             const data = doc.data();
-            if (data?.competitorId) setIsCompetitorIn(true);
-            if (data?.status === "playing") setIsWaiting(false);
+            const ownerAnswerCount =
+              data?.answerCount.owner.correct + data?.answerCount.owner.wrong;
+            const competitorAnswerCount =
+              data?.answerCount.competitor.correct +
+              data?.answerCount.competitor.wrong;
+            if (!isCompetitorIn && data?.competitorId) setIsCompetitorIn(true);
+            if (isWaiting && data?.status === "playing") setIsWaiting(false);
             if (data?.answerCount) setAnswerCount(data?.answerCount);
+            if (
+              ownerAnswerCount === competitorAnswerCount &&
+              ownerAnswerCount !== 0
+            ) {
+              setRound(round + 1);
+              setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
+            }
           }
         );
       }
@@ -403,7 +415,6 @@ export default function BattleReview() {
               showAnswer={showAnswerArr[index]}
               onClick={() => {
                 if (!showBtn) {
-                  // setShowBtn(true);
                   let answerStatus = [...currentOptions].map(
                     ([vocabOption, insideDef], index) => {
                       if (vocabOption === correctVocab?.vocab)
