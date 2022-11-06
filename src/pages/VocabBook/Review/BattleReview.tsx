@@ -193,7 +193,9 @@ interface RoomInfo {
   }>;
   pin: string;
   ownerId: string;
+  ownerName: string;
   competitorId: string;
+  competitorName: string;
   status: string;
   questions: [];
 }
@@ -229,11 +231,24 @@ export default function BattleReview() {
   // const randomPin = Math.floor(Math.random() * 10000);
   const pin = window.location.pathname.slice(18);
   const [isOwner, setIsOwner] = useState<boolean>(false);
+  const [isAnswered, setIsAnswered] = useState<boolean>(false);
   const [ownerId, setOwnerId] = useState<string>();
   const [isCompetitor, setIsCompetitor] = useState<boolean>(false);
   const [isCompetitorIn, setIsCompetitorIn] = useState<boolean>(false);
   const [roomInfo, setRoomInfo] = useState<RoomInfo>();
   const [countDown, setCountDown] = useState<number>(5);
+  // const [ownerName, setOwnerName] = useState<string>();
+  // const [competitorName, setCompetitorName] = useState<string>();
+
+  // useEffect(() => {
+  //   const getUserInfo = async () => {
+  //     const docRef = doc(db, "users", userId);
+  //     const docSnap: any = await getDoc(docRef);
+  //     if (isOwner) setOwnerName(docSnap.data().name);
+  //     if (isCompetitor) setCompetitorName(docSnap.data().name);
+  //   };
+  //   getUserInfo();
+  // }, [isCompetitor, isOwner, userId]);
 
   useEffect(() => {
     let interval: string | number | NodeJS.Timeout | undefined;
@@ -249,6 +264,8 @@ export default function BattleReview() {
       await setDoc(doc(db, "battleRooms", userId + pin), {
         pin: pin,
         ownerId: userId,
+        competitorId: "",
+        // ownerName: ownerName,
         status: "waiting",
         questions: reviewingQuestions,
         answerCount: answerCount,
@@ -256,7 +273,7 @@ export default function BattleReview() {
       setOwnerId(userId);
     }
     startRoom();
-  }, [answerCount, pin, reviewingQuestions, userId]);
+  }, []);
 
   useEffect(() => {
     let unsub;
@@ -270,11 +287,13 @@ export default function BattleReview() {
         data = doc.data() as RoomInfo;
       });
       setRoomInfo(data);
-      console.log();
       if (data?.competitorId) setIsCompetitorIn(true);
-      if (data?.competitorId === userId) setIsCompetitor(true);
+      if (data?.competitorId === userId) {
+        setIsCompetitor(true);
+      }
       if (data?.ownerId === userId) setIsOwner(true);
       if (data?.questions) setReviewingQuestions(data?.questions);
+      // if (data?.ownerName) setOwnerName(data?.ownerName);
 
       if (data?.ownerId) {
         unsub = onSnapshot(
@@ -287,7 +306,11 @@ export default function BattleReview() {
             const competitorAnswerCount =
               data?.answerCount.competitor.correct +
               data?.answerCount.competitor.wrong;
-            if (!isCompetitorIn && data?.competitorId) setIsCompetitorIn(true);
+            if (data?.competitorId) {
+              console.log("data?.competitorId", data?.competitorId);
+              setIsCompetitorIn(true);
+              // setCompetitorName(data?.competitorName);
+            }
             if (isWaiting && data?.status === "playing") setIsWaiting(false);
             if (data?.answerCount) setAnswerCount(data?.answerCount);
             if (
@@ -297,12 +320,12 @@ export default function BattleReview() {
               ownerAnswerCount < questionsNumber
             ) {
               setTimeout(() => {
-                setRound(round + 1);
+                setIsAnswered(false);
+                setRound((round) => round + 1);
                 setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
                 setCountDown(5);
-              }, 2000);
+              }, 1000);
             }
-            console.log("round", round);
           }
         );
       }
@@ -310,7 +333,36 @@ export default function BattleReview() {
     getBattleRoomData();
 
     return unsub;
-  }, [isCompetitor, isCompetitorIn, isWaiting, ownerId, pin, round, userId]);
+  }, [isWaiting, pin, round, userId]);
+
+  useEffect(() => {
+    if (countDown === 0) {
+      if (answerCount.owner.correct + answerCount.owner.wrong < round + 1)
+        answerCount.owner.wrong += 1;
+      if (
+        answerCount.competitor.correct + answerCount.competitor.wrong <
+        round + 1
+      )
+        answerCount.competitor.wrong += 1;
+
+      handleSyncScore();
+      setIsAnswered(false);
+    }
+    if (countDown === 0 && round + 1 < questionsNumber) {
+      handleSyncScore();
+      setTimeout(() => {
+        setRound(round + 1);
+        setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
+        setCountDown(5);
+      }, 1000);
+    }
+  }, [
+    answerCount.competitor,
+    answerCount.owner,
+    countDown,
+    handleSyncScore,
+    round,
+  ]);
 
   useEffect(() => {
     const getRandomIndex = () => {
@@ -355,9 +407,11 @@ export default function BattleReview() {
       const roomRef = doc(db, "battleRooms", roomInfo?.ownerId + pin);
       await updateDoc(roomRef, {
         competitorId: userId,
+        // competitorName: competitorName,
       });
     };
     updateCompetitor();
+    console.log(userId);
   }
 
   function handleStartBattle() {
@@ -428,7 +482,8 @@ export default function BattleReview() {
               key={clickedVocab}
               showAnswer={showAnswerArr[index]}
               onClick={() => {
-                if (!showBtn) {
+                if (!isAnswered) {
+                  setIsAnswered(true);
                   let answerStatus = [...currentOptions].map(
                     ([vocabOption, insideDef], index) => {
                       if (vocabOption === correctVocab?.vocab)
@@ -462,27 +517,6 @@ export default function BattleReview() {
               {def}
             </Option>
           ))}
-          {round === questionsNumber - 1 ? (
-            <Btn
-              showBtn={showBtn}
-              onClick={() => {
-                handleGameOver();
-              }}
-            >
-              Done
-            </Btn>
-          ) : (
-            <Btn
-              showBtn={showBtn}
-              onClick={() => {
-                setShowBtn(false);
-                setRound(round + 1);
-                setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
-              }}
-            >
-              Next
-            </Btn>
-          )}
         </Options>
       </Main>
     );
@@ -494,7 +528,7 @@ export default function BattleReview() {
       <Header>
         <OwnerCount>
           <div>
-            <p>Owner</p>
+            <p>Owner: ownerName</p>
             O: {answerCount.owner.correct} X: {answerCount.owner.wrong} / Total:{" "}
             {questionsNumber} (
             {Math.ceil((answerCount.owner.correct / questionsNumber) * 100)}%)
@@ -508,7 +542,7 @@ export default function BattleReview() {
         {isWaiting ? <></> : <p>{countDown} seconds left</p>}
         <CompetitorCount>
           <div>
-            <p>Competitor</p>
+            <p>Competitor: competitorName</p>
             O: {answerCount.competitor.correct} X:{" "}
             {answerCount.competitor.wrong} / Total: {questionsNumber} (
             {Math.ceil(

@@ -44,8 +44,8 @@ const ReviewModeBtn = styled.button`
 `;
 
 // type ContextType = {
-//   isBattle: boolean;
-//   setIsBattle: React.Dispatch<React.SetStateAction<boolean>>;
+//   isBattle?: boolean;
+//   setIsBattle?: React.Dispatch<React.SetStateAction<boolean>>;
 //   gameOver: boolean;
 //   setGameOver: React.Dispatch<React.SetStateAction<boolean>>;
 //   round: number;
@@ -74,6 +74,12 @@ export default function ReviewLayout() {
     setPin(randomPin);
   }, []);
 
+  // useEffect(() => {
+  //   if (pin?.toString() === window.location.pathname.slice(18)) {
+  //     setIsBattle(true);
+  //   }
+  // }, [pin]);
+
   return (
     <Wrapper>
       <ModeBtns>
@@ -100,3 +106,7 @@ export default function ReviewLayout() {
     </Wrapper>
   );
 }
+
+// export function useReviewLayout() {
+//   return useOutletContext<ContextType>();
+// }
