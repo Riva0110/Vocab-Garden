@@ -26,6 +26,8 @@ interface Props {
   showBtn?: boolean;
   showAnswer?: string;
   isBattle?: boolean;
+  insideColor?: boolean;
+  score?: number;
 }
 
 const Wrapper = styled.div`
@@ -39,6 +41,24 @@ const Header = styled.div`
 
 const OwnerCount = styled.div``;
 const CompetitorCount = styled.div``;
+
+const ScoreBar = styled.div`
+  width: 200px;
+  height: 30px;
+  line-height: 30px;
+  border: 1px solid gray;
+  border-radius: 20px;
+  ${(props: Props) =>
+    props.insideColor &&
+    css`
+      border: 0px;
+      background-color: #95caca;
+      width: ${(props: Props) =>
+        props.score ? `${props.score * 40}px` : "0px"};
+      z-index: -1;
+      margin-bottom: 20px;
+    `}
+`;
 
 const ModeBtns = styled.div`
   display: flex;
@@ -274,7 +294,7 @@ export default function BattleReview() {
               ownerAnswerCount === competitorAnswerCount &&
               ownerAnswerCount !== 0 &&
               ownerAnswerCount === round + 1 &&
-              ownerAnswerCount <= questionsNumber
+              ownerAnswerCount < questionsNumber
             ) {
               setTimeout(() => {
                 setRound(round + 1);
@@ -479,6 +499,11 @@ export default function BattleReview() {
             {questionsNumber} (
             {Math.ceil((answerCount.owner.correct / questionsNumber) * 100)}%)
           </div>
+          <ScoreBar insideColor={true} score={answerCount.owner.correct}>
+            <ScoreBar>
+              {Math.ceil((answerCount.owner.correct / questionsNumber) * 100)}%
+            </ScoreBar>
+          </ScoreBar>
         </OwnerCount>
         {isWaiting ? <></> : <p>{countDown} seconds left</p>}
         <CompetitorCount>
@@ -491,6 +516,14 @@ export default function BattleReview() {
             )}
             %)
           </div>
+          <ScoreBar insideColor={true} score={answerCount.competitor.correct}>
+            <ScoreBar>
+              {Math.ceil(
+                (answerCount.competitor.correct / questionsNumber) * 100
+              )}
+              %
+            </ScoreBar>
+          </ScoreBar>
         </CompetitorCount>
       </Header>
       {isWaiting ? <>{renderWaiting()}</> : <>{renderTest()}</>}
