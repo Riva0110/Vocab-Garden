@@ -346,21 +346,41 @@ export default function BattleReview() {
         answerCount.competitor.wrong += 1;
 
       handleSyncScore();
-      setIsAnswered(false);
     }
+
     if (countDown === 0 && round + 1 < questionsNumber) {
       handleSyncScore();
+      setIsAnswered(false);
       setTimeout(() => {
         setRound(round + 1);
         setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
         setCountDown(5);
       }, 1000);
     }
+
+    if (countDown === 0 && round + 1 === questionsNumber) {
+      setGameOver(true);
+      setIsAnswered(true);
+      // function handleGameOver() {
+      // setShowBtn(true);
+
+      // setRound(0);
+      const updateFinished = async () => {
+        const roomRef = doc(db, "battleRooms", roomInfo?.ownerId + pin);
+        await updateDoc(roomRef, {
+          status: "finished",
+        });
+      };
+      updateFinished();
+      // }
+      // handleGameOver();
+    }
   }, [
     answerCount.competitor,
     answerCount.owner,
     countDown,
-    handleSyncScore,
+    pin,
+    roomInfo?.ownerId,
     round,
   ]);
 
@@ -396,12 +416,6 @@ export default function BattleReview() {
     audio.play();
   };
 
-  const handleGameOver = () => {
-    setShowBtn(true);
-    setGameOver(true);
-    setRound(0);
-  };
-
   function handleCompetitorJoinBattle() {
     const updateCompetitor = async () => {
       const roomRef = doc(db, "battleRooms", roomInfo?.ownerId + pin);
@@ -411,7 +425,6 @@ export default function BattleReview() {
       });
     };
     updateCompetitor();
-    console.log(userId);
   }
 
   function handleStartBattle() {
