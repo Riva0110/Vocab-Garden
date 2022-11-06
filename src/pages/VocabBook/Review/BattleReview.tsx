@@ -185,6 +185,7 @@ export default function BattleReview() {
   const { isLogin, userId } = useContext(authContext);
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [round, setRound] = useState<number>(0);
+  const [isWaiting, setIsWaiting] = useState<boolean>(true);
   const [answerCount, setAnswerCount] = useState({
     owner: { correct: 0, wrong: 0 },
     competitor: { correct: 0, wrong: 0 },
@@ -196,9 +197,7 @@ export default function BattleReview() {
     .slice(0, questionsNumber);
   const [reviewingQuestions, setReviewingQuestions] =
     useState<Questions[]>(questions);
-  const [isWaiting, setIsWaiting] = useState<boolean>(true);
-  // const [score, setScore] = useState<number>();
-  // const [isChallenging, setIsChallenging] = useState<boolean>();
+
   const [currentOptions, setCurrentOptions] = useState<[string, string][]>([]);
   const [showBtn, setShowBtn] = useState<boolean>(false);
   const correctVocab = reviewingQuestions?.[round];
@@ -257,17 +256,6 @@ export default function BattleReview() {
       if (data?.ownerId === userId) setIsOwner(true);
       if (data?.questions) setReviewingQuestions(data?.questions);
 
-      console.log(
-        "answerCount",
-        data?.answerCount,
-        "data?.ownerId",
-        data?.ownerId,
-        "data?.questions",
-        data?.questions,
-        "data?.competitorId",
-        data?.competitorId
-      );
-
       if (data?.ownerId) {
         unsub = onSnapshot(
           doc(db, "battleRooms", data?.ownerId + pin),
@@ -284,11 +272,17 @@ export default function BattleReview() {
             if (data?.answerCount) setAnswerCount(data?.answerCount);
             if (
               ownerAnswerCount === competitorAnswerCount &&
-              ownerAnswerCount !== 0
+              ownerAnswerCount !== 0 &&
+              ownerAnswerCount === round + 1 &&
+              ownerAnswerCount <= questionsNumber
             ) {
-              setRound(round + 1);
-              setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
+              setTimeout(() => {
+                setRound(round + 1);
+                setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
+                setCountDown(5);
+              }, 2000);
             }
+            console.log("round", round);
           }
         );
       }
@@ -296,7 +290,7 @@ export default function BattleReview() {
     getBattleRoomData();
 
     return unsub;
-  }, [isCompetitor, isCompetitorIn, ownerId, pin, userId]);
+  }, [isCompetitor, isCompetitorIn, isWaiting, ownerId, pin, round, userId]);
 
   useEffect(() => {
     const getRandomIndex = () => {
