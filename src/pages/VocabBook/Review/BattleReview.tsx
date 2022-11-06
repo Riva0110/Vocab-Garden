@@ -171,15 +171,9 @@ const VocabList = styled.div`
   margin-bottom: 10px;
 `;
 
-interface ReviewingQuestions {
-  vocab: string;
-  audioLink: string;
-  partOfSpeech: string;
-  definition: string;
-  isCorrect: boolean;
-}
-
 interface Questions {
+  ownerIsCorrect?: boolean;
+  competitorIsCorrect?: boolean;
   audioLink?: string;
   definition: string;
   partOfSpeech: string;
@@ -233,6 +227,7 @@ export default function BattleReview() {
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [isAnswered, setIsAnswered] = useState<boolean>(false);
   const [ownerId, setOwnerId] = useState<string>();
+  // const [competitorId, setCompetitorId] = useState<string>();
   const [isCompetitor, setIsCompetitor] = useState<boolean>(false);
   const [isCompetitorIn, setIsCompetitorIn] = useState<boolean>(false);
   const [roomInfo, setRoomInfo] = useState<RoomInfo>();
@@ -293,6 +288,7 @@ export default function BattleReview() {
       }
       if (data?.ownerId === userId) setIsOwner(true);
       if (data?.questions) setReviewingQuestions(data?.questions);
+
       // if (data?.ownerName) setOwnerName(data?.ownerName);
 
       if (data?.ownerId) {
@@ -313,18 +309,19 @@ export default function BattleReview() {
             }
             if (isWaiting && data?.status === "playing") setIsWaiting(false);
             if (data?.answerCount) setAnswerCount(data?.answerCount);
+
             if (
               ownerAnswerCount === competitorAnswerCount &&
               ownerAnswerCount !== 0 &&
               ownerAnswerCount === round + 1 &&
               ownerAnswerCount < questionsNumber
             ) {
+              setIsAnswered(false);
               setTimeout(() => {
-                setIsAnswered(false);
                 setRound((round) => round + 1);
                 setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
                 setCountDown(5);
-              }, 1000);
+              }, 500);
             }
           }
         );
@@ -355,7 +352,7 @@ export default function BattleReview() {
         setRound(round + 1);
         setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
         setCountDown(5);
-      }, 1000);
+      }, 500);
     }
 
     if (countDown === 0 && round + 1 === questionsNumber) {
@@ -442,6 +439,7 @@ export default function BattleReview() {
       const roomRef = doc(db, "battleRooms", roomInfo?.ownerId + pin);
       await updateDoc(roomRef, {
         answerCount: answerCount,
+        // quentions: reviewingQuestions,
       });
     };
     updateScore();
@@ -512,21 +510,32 @@ export default function BattleReview() {
                   setShowAnswerArr(answerStatus);
 
                   if (clickedVocab === correctVocab?.vocab) {
-                    if (isOwner) answerCount.owner.correct += 1;
-                    if (isCompetitor) answerCount.competitor.correct += 1;
-                    // reviewingQuestions[round].isCorrect = true;
-                    setReviewingQuestions(reviewingQuestions);
+                    if (isOwner) {
+                      answerCount.owner.correct += 1;
+                      reviewingQuestions[round].ownerIsCorrect = true;
+                    }
+                    if (isCompetitor) {
+                      answerCount.competitor.correct += 1;
+                      reviewingQuestions[round].competitorIsCorrect = true;
+                    }
                   } else {
-                    if (isOwner) answerCount.owner.wrong += 1;
-                    if (isCompetitor) answerCount.competitor.wrong += 1;
-                    // reviewingQuestions[round].isCorrect = false;
-                    setReviewingQuestions(reviewingQuestions);
+                    if (isOwner) {
+                      answerCount.owner.wrong += 1;
+                      reviewingQuestions[round].ownerIsCorrect = false;
+                    }
+                    if (isCompetitor) {
+                      answerCount.competitor.wrong += 1;
+                      reviewingQuestions[round].competitorIsCorrect = false;
+                    }
                   }
                   // setAnswerCount(answerCount);
+                  // setReviewingQuestions(reviewingQuestions);
                   handleSyncScore();
+                  console.log(reviewingQuestions);
                 }
               }}
             >
+              {" "}
               {def}
             </Option>
           ))}
@@ -534,6 +543,148 @@ export default function BattleReview() {
       </Main>
     );
   };
+
+  function renderOutcomeVocabList(
+    vocab: string,
+    partOfSpeech: string,
+    definition: string,
+    audioLink?: string
+  ) {
+    return (
+      <VocabList key={vocab + partOfSpeech}>
+        {vocab}{" "}
+        {audioLink ? (
+          <AudioImg
+            src={audio}
+            alt="audio"
+            onClick={() => handlePlayAudio(audioLink)}
+          />
+        ) : (
+          ""
+        )}
+        : ({partOfSpeech}) {definition}
+      </VocabList>
+    );
+  }
+
+  function renderOutcome() {
+    return (
+      <Main>
+        <OutcomeWrapper>
+          <Message>
+            {isOwner
+              ? (answerCount.owner.correct / questionsNumber) * 100 >= 80
+                ? " 你太棒了！！！我服了你 "
+                : "加油，好嗎？我對你太失望了"
+              : (answerCount.competitor.correct / questionsNumber) * 100 >= 80
+              ? " 你太棒了！！！我服了你 "
+              : "加油，好嗎？我對你太失望了"}
+          </Message>
+          <Btns>
+            <Btn showBtn={showBtn} onClick={() => navigate("/vocabbook")}>
+              Back to VocabBooks
+            </Btn>
+          </Btns>
+          <ReviewVocabs>
+            <WrongVocabs>
+              <LabelDiv>Wrong vocab:</LabelDiv>{" "}
+              {isOwner &&
+                reviewingQuestions.map(
+                  ({
+                    vocab,
+                    audioLink,
+                    partOfSpeech,
+                    definition,
+                    ownerIsCorrect,
+                    competitorIsCorrect,
+                  }) => {
+                    if (!ownerIsCorrect) {
+                      return renderOutcomeVocabList(
+                        vocab,
+                        partOfSpeech,
+                        definition,
+                        audioLink
+                      );
+                    } else {
+                      return <></>;
+                    }
+                  }
+                )}
+              {isCompetitor &&
+                reviewingQuestions.map(
+                  ({
+                    vocab,
+                    audioLink,
+                    partOfSpeech,
+                    definition,
+                    ownerIsCorrect,
+                    competitorIsCorrect,
+                  }) => {
+                    if (!competitorIsCorrect) {
+                      return renderOutcomeVocabList(
+                        vocab,
+                        partOfSpeech,
+                        definition,
+                        audioLink
+                      );
+                    } else {
+                      return <></>;
+                    }
+                  }
+                )}
+            </WrongVocabs>
+            <CorrectVocabs>
+              <LabelDiv>Correct vocab:</LabelDiv>{" "}
+              {isOwner &&
+                reviewingQuestions.map(
+                  ({
+                    vocab,
+                    audioLink,
+                    partOfSpeech,
+                    definition,
+                    ownerIsCorrect,
+                    competitorIsCorrect,
+                  }) => {
+                    if (ownerIsCorrect) {
+                      return renderOutcomeVocabList(
+                        vocab,
+                        partOfSpeech,
+                        definition,
+                        audioLink
+                      );
+                    } else {
+                      return <></>;
+                    }
+                  }
+                )}
+              {isCompetitor &&
+                reviewingQuestions.map(
+                  ({
+                    vocab,
+                    audioLink,
+                    partOfSpeech,
+                    definition,
+                    ownerIsCorrect,
+                    competitorIsCorrect,
+                  }) => {
+                    if (competitorIsCorrect) {
+                      return renderOutcomeVocabList(
+                        vocab,
+                        partOfSpeech,
+                        definition,
+                        audioLink
+                      );
+                    } else {
+                      return <></>;
+                    }
+                  }
+                )}
+            </CorrectVocabs>
+          </ReviewVocabs>
+        </OutcomeWrapper>
+      </Main>
+    );
+  }
 
   return isLogin ? (
     <Wrapper>
@@ -573,7 +724,7 @@ export default function BattleReview() {
           </ScoreBar>
         </CompetitorCount>
       </Header>
-      {isWaiting ? <>{renderWaiting()}</> : <>{renderTest()}</>}
+      {isWaiting ? renderWaiting() : gameOver ? renderOutcome() : renderTest()}
     </Wrapper>
   ) : (
     <Wrapper>
