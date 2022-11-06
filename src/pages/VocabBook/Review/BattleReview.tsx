@@ -214,6 +214,16 @@ export default function BattleReview() {
   const [isCompetitor, setIsCompetitor] = useState<boolean>(false);
   const [isCompetitorIn, setIsCompetitorIn] = useState<boolean>(false);
   const [roomInfo, setRoomInfo] = useState<RoomInfo>();
+  const [countDown, setCountDown] = useState<number>(5);
+
+  useEffect(() => {
+    let interval: string | number | NodeJS.Timeout | undefined;
+    if (countDown > 0 && !isWaiting) {
+      interval = setTimeout(() => setCountDown((prev) => prev - 1), 1000);
+      console.log("countDown", countDown);
+    }
+    return () => clearTimeout(interval);
+  }, [countDown, isWaiting]);
 
   useEffect(() => {
     async function startRoom() {
@@ -227,7 +237,7 @@ export default function BattleReview() {
       setOwnerId(userId);
     }
     startRoom();
-  }, [pin, reviewingQuestions, userId]);
+  }, [answerCount, pin, reviewingQuestions, userId]);
 
   useEffect(() => {
     let unsub;
@@ -465,6 +475,7 @@ export default function BattleReview() {
             {Math.ceil((answerCount.owner.correct / questionsNumber) * 100)}%)
           </div>
         </OwnerCount>
+        {isWaiting ? <></> : <p>{countDown} seconds left</p>}
         <CompetitorCount>
           <div>
             <p>Competitor</p>
