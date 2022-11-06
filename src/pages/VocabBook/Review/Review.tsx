@@ -375,7 +375,6 @@ export default function Review() {
     <Wrapper>
       <Header>
         <div>Review Round: {gameOver ? questionsNumber : round + 1}</div>
-
         <div>
           O: {answerCount.correct} X: {answerCount.wrong} / Total:{" "}
           {questionsNumber} (

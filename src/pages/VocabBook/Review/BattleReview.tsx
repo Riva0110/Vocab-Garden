@@ -1,5 +1,5 @@
 import styled, { css } from "styled-components";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, SetStateAction } from "react";
 import { vocabBookContext } from "../../../context/vocabBookContext";
 import { authContext } from "../../../context/authContext";
 import audio from "../../../components/audio.png";
@@ -17,7 +17,6 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
-import { StringifyOptions } from "querystring";
 
 interface Props {
   correct?: boolean;
@@ -37,6 +36,9 @@ const Header = styled.div`
   display: flex;
   justify-content: space-between;
 `;
+
+const OwnerCount = styled.div``;
+const CompetitorCount = styled.div``;
 
 const ModeBtns = styled.div`
   display: flex;
@@ -149,22 +151,12 @@ const VocabList = styled.div`
   margin-bottom: 10px;
 `;
 
-const questionsNumber = 5;
-
 interface ReviewingQuestions {
   vocab: string;
   audioLink: string;
   partOfSpeech: string;
   definition: string;
   isCorrect: boolean;
-}
-
-interface RoomInfo {
-  pin: string;
-  ownerId: string;
-  competitorId: string;
-  status: string;
-  questions: [];
 }
 
 interface Questions {
@@ -174,6 +166,18 @@ interface Questions {
   vocab: string;
 }
 
+interface RoomInfo {
+  answerCount: SetStateAction<{
+    owner: { correct: number; wrong: number };
+    competitor: { correct: number; wrong: number };
+  }>;
+  pin: string;
+  ownerId: string;
+  competitorId: string;
+  status: string;
+  questions: [];
+}
+
 export default function BattleReview() {
   const navigate = useNavigate();
   const { viewingBook } = useViewingBook();
@@ -181,7 +185,10 @@ export default function BattleReview() {
   const { isLogin, userId } = useContext(authContext);
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [round, setRound] = useState<number>(0);
-  const [answerCount, setAnswerCount] = useState({ correct: 0, wrong: 0 });
+  const [answerCount, setAnswerCount] = useState({
+    owner: { correct: 0, wrong: 0 },
+    competitor: { correct: 0, wrong: 0 },
+  });
 
   const questionsNumber = 5;
   const questions = vocabBooks?.[viewingBook]
@@ -215,6 +222,7 @@ export default function BattleReview() {
         ownerId: userId,
         status: "waiting",
         questions: reviewingQuestions,
+        answerCount: answerCount,
       });
       setOwnerId(userId);
     }
@@ -233,10 +241,22 @@ export default function BattleReview() {
         data = doc.data() as RoomInfo;
       });
       setRoomInfo(data);
+      console.log();
       if (data?.competitorId) setIsCompetitorIn(true);
       if (data?.competitorId === userId) setIsCompetitor(true);
       if (data?.ownerId === userId) setIsOwner(true);
       if (data?.questions) setReviewingQuestions(data?.questions);
+
+      console.log(
+        "answerCount",
+        data?.answerCount,
+        "data?.ownerId",
+        data?.ownerId,
+        "data?.questions",
+        data?.questions,
+        "data?.competitorId",
+        data?.competitorId
+      );
 
       if (data?.ownerId) {
         unsub = onSnapshot(
@@ -246,6 +266,7 @@ export default function BattleReview() {
             const data = doc.data();
             if (data?.competitorId) setIsCompetitorIn(true);
             if (data?.status === "playing") setIsWaiting(false);
+            if (data?.answerCount) setAnswerCount(data?.answerCount);
           }
         );
       }
@@ -313,6 +334,16 @@ export default function BattleReview() {
     updatePlaying();
   }
 
+  function handleSyncScore() {
+    const updateScore = async () => {
+      const roomRef = doc(db, "battleRooms", roomInfo?.ownerId + pin);
+      await updateDoc(roomRef, {
+        answerCount: answerCount,
+      });
+    };
+    updateScore();
+  }
+
   function renderWaiting() {
     return (
       <Main>
@@ -362,7 +393,7 @@ export default function BattleReview() {
               showAnswer={showAnswerArr[index]}
               onClick={() => {
                 if (!showBtn) {
-                  setShowBtn(true);
+                  // setShowBtn(true);
                   let answerStatus = [...currentOptions].map(
                     ([vocabOption, insideDef], index) => {
                       if (vocabOption === correctVocab?.vocab)
@@ -378,15 +409,18 @@ export default function BattleReview() {
                   setShowAnswerArr(answerStatus);
 
                   if (clickedVocab === correctVocab?.vocab) {
-                    answerCount.correct += 1;
+                    if (isOwner) answerCount.owner.correct += 1;
+                    if (isCompetitor) answerCount.competitor.correct += 1;
                     // reviewingQuestions[round].isCorrect = true;
                     setReviewingQuestions(reviewingQuestions);
                   } else {
-                    answerCount.wrong += 1;
+                    if (isOwner) answerCount.owner.wrong += 1;
+                    if (isCompetitor) answerCount.competitor.wrong += 1;
                     // reviewingQuestions[round].isCorrect = false;
                     setReviewingQuestions(reviewingQuestions);
                   }
-                  setAnswerCount(answerCount);
+                  // setAnswerCount(answerCount);
+                  handleSyncScore();
                 }
               }}
             >
@@ -421,13 +455,27 @@ export default function BattleReview() {
 
   return isLogin ? (
     <Wrapper>
+      <div>Review Round: {gameOver ? questionsNumber : round + 1}</div>
       <Header>
-        <div>Review Round: {gameOver ? questionsNumber : round + 1}</div>
-        <div>
-          O: {answerCount.correct} X: {answerCount.wrong} / Total:{" "}
-          {questionsNumber} (
-          {Math.ceil((answerCount.correct / questionsNumber) * 100)}%)
-        </div>
+        <OwnerCount>
+          <div>
+            <p>Owner</p>
+            O: {answerCount.owner.correct} X: {answerCount.owner.wrong} / Total:{" "}
+            {questionsNumber} (
+            {Math.ceil((answerCount.owner.correct / questionsNumber) * 100)}%)
+          </div>
+        </OwnerCount>
+        <CompetitorCount>
+          <div>
+            <p>Competitor</p>
+            O: {answerCount.competitor.correct} X:{" "}
+            {answerCount.competitor.wrong} / Total: {questionsNumber} (
+            {Math.ceil(
+              (answerCount.competitor.correct / questionsNumber) * 100
+            )}
+            %)
+          </div>
+        </CompetitorCount>
       </Header>
       {isWaiting ? <>{renderWaiting()}</> : <>{renderTest()}</>}
     </Wrapper>
