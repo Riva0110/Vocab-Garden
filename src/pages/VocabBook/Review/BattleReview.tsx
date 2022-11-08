@@ -188,6 +188,7 @@ export default function BattleReview() {
   const [isOwner, setIsOwner] = useState<boolean>(true);
   const [ownerName, setOwnerName] = useState<string>("");
   const [competitorName, setCompetitorName] = useState<string>("");
+  const [isVisitor, setIsVisitor] = useState<boolean>(false);
   const [isCompetitorIn, setIsCompetitorIn] = useState<boolean>(false);
   const [isAnswered, setIsAnswered] = useState<boolean>(false);
   const [answerCount, setAnswerCount] = useState({
@@ -270,6 +271,10 @@ export default function BattleReview() {
         const competitorAnswerCount =
           data?.answerCount.competitor.correct +
           data?.answerCount.competitor.wrong;
+
+        if (isCompetitorIn && !isOwner && userId !== data.competitorId)
+          setIsVisitor(true);
+        console.log(isOwner, userId, data.competitorId);
         if (data.ownerId !== userId) setIsOwner(false);
         if (data.competitorId) setIsCompetitorIn(true);
         if (data.competitorName !== "") setCompetitorName(data.competitorName);
@@ -292,7 +297,7 @@ export default function BattleReview() {
     }
 
     return unsub;
-  }, [isWaiting, pin, questionsNumber, round, userId]);
+  }, [isCompetitorIn, isOwner, isWaiting, pin, questionsNumber, round, userId]);
 
   useEffect(() => {
     let countDownTimer: string | number | NodeJS.Timeout | undefined;
@@ -338,6 +343,7 @@ export default function BattleReview() {
     if (countDown === 0 && round + 1 === questionsNumber) {
       setGameOver(true);
       setIsAnswered(true);
+      setShowBtn(true);
 
       const updateFinished = async () => {
         if (pin) {
@@ -348,7 +354,37 @@ export default function BattleReview() {
         }
       };
       updateFinished();
-      setShowBtn(true);
+
+      const checkUserScoreStatus = async () => {
+        const docRef = doc(db, "users", userId);
+        const docSnap: any = await getDoc(docRef);
+
+        const score = docSnap.data().currentScore;
+        const isChallenging = docSnap.data().isChallenging;
+
+        if (isChallenging) {
+          if (typeof score === "number" && score < 5) {
+            await updateDoc(docRef, {
+              currentScore: score + 1,
+              lastTimeUpdateScore: new Date(),
+            });
+          }
+        }
+      };
+
+      if (
+        isOwner &&
+        (answerCount.owner.correct / questionsNumber) * 100 >= 80 &&
+        answerCount.owner.correct > answerCount.competitor.correct
+      )
+        checkUserScoreStatus();
+
+      if (
+        !isOwner &&
+        (answerCount.competitor.correct / questionsNumber) * 100 >= 80 &&
+        answerCount.owner.correct < answerCount.competitor.correct
+      )
+        checkUserScoreStatus();
     }
   }, [
     answerCount.competitor,
@@ -356,10 +392,12 @@ export default function BattleReview() {
     countDown,
     handleSyncScore,
     isAnswered,
+    isOwner,
     outcomeVocabList,
     pin,
     questionsNumber,
     round,
+    userId,
   ]);
 
   const handlePlayAudio = (audioLink: string) => {
@@ -584,45 +622,56 @@ export default function BattleReview() {
   }
 
   return isLogin ? (
-    <Wrapper>
-      <div>Review Round: {round + 1}</div>
-      <Header>
-        <OwnerCount>
-          <div>
-            <p>Owner: {ownerName}</p>
-            O: {answerCount.owner.correct} X: {answerCount.owner.wrong} / Total:{" "}
-            {questionsNumber} (
-            {Math.ceil((answerCount.owner.correct / questionsNumber) * 100)}%)
-          </div>
-          <ScoreBar insideColor={true} score={answerCount.owner.correct}>
-            <ScoreBar>
-              {Math.ceil((answerCount.owner.correct / questionsNumber) * 100)}%
+    !isVisitor ? (
+      <Wrapper>
+        <div>Review Round: {round + 1}</div>
+        <Header>
+          <OwnerCount>
+            <div>
+              <p>Owner: {ownerName}</p>
+              O: {answerCount.owner.correct} X: {answerCount.owner.wrong} /
+              Total: {questionsNumber} (
+              {Math.ceil((answerCount.owner.correct / questionsNumber) * 100)}%)
+            </div>
+            <ScoreBar insideColor={true} score={answerCount.owner.correct}>
+              <ScoreBar>
+                {Math.ceil((answerCount.owner.correct / questionsNumber) * 100)}
+                %
+              </ScoreBar>
             </ScoreBar>
-          </ScoreBar>
-        </OwnerCount>
-        {isWaiting ? <></> : <p>{countDown} seconds left</p>}
-        <CompetitorCount>
-          <div>
-            <p>Competitor: {competitorName}</p>
-            O: {answerCount.competitor.correct} X:{" "}
-            {answerCount.competitor.wrong} / Total: {questionsNumber} (
-            {Math.ceil(
-              (answerCount.competitor.correct / questionsNumber) * 100
-            )}
-            %)
-          </div>
-          <ScoreBar insideColor={true} score={answerCount.competitor.correct}>
-            <ScoreBar>
+          </OwnerCount>
+          {isWaiting ? <></> : <p>{countDown} seconds left</p>}
+          <CompetitorCount>
+            <div>
+              <p>Competitor: {competitorName}</p>
+              O: {answerCount.competitor.correct} X:{" "}
+              {answerCount.competitor.wrong} / Total: {questionsNumber} (
               {Math.ceil(
                 (answerCount.competitor.correct / questionsNumber) * 100
               )}
-              %
+              %)
+            </div>
+            <ScoreBar insideColor={true} score={answerCount.competitor.correct}>
+              <ScoreBar>
+                {Math.ceil(
+                  (answerCount.competitor.correct / questionsNumber) * 100
+                )}
+                %
+              </ScoreBar>
             </ScoreBar>
-          </ScoreBar>
-        </CompetitorCount>
-      </Header>
-      {isWaiting ? renderWaiting() : gameOver ? renderOutcome() : renderTest()}
-    </Wrapper>
+          </CompetitorCount>
+        </Header>
+        {isWaiting
+          ? renderWaiting()
+          : gameOver
+          ? renderOutcome()
+          : renderTest()}
+      </Wrapper>
+    ) : (
+      <Wrapper>
+        <p>The game has started.</p>
+      </Wrapper>
+    )
   ) : (
     <Wrapper>
       <p>Please log in to battle!</p>
