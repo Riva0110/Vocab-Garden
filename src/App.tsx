@@ -31,7 +31,6 @@ const Header = styled.div`
   height: 60px;
   width: 100vw;
   background-color: #405c73ff;
-  border-bottom: 1px solid gray;
   z-index: 1;
 `;
 

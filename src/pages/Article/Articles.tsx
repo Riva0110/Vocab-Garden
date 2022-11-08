@@ -59,6 +59,8 @@ export default function Articles() {
     getArticles(userId);
   }, [userId]);
 
+  console.log("Articles");
+
   return (
     <div className="App">
       <ArticlesWrapper>

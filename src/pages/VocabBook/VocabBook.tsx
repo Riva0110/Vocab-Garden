@@ -37,22 +37,32 @@ const BookWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
-  margin-bottom: 20px;
-  height: 100px;
+  height: 200px;
   overflow-y: scroll;
+  margin-bottom: 20px;
   margin-right: 30px;
+  align-items: center;
 `;
+
 const Book = styled.div`
   text-align: center;
-  width: 100px;
-  height: 50px;
-  border: 1px solid ${(props: Props) => (props.selected ? "red" : "gray")};
+  width: 150px;
+  height: 80px;
+  border: gray solid ${(props: Props) => (props.selected ? "2px" : "1px")};
+  color: ${(props: Props) => (props.selected ? "black" : "gray")};
+  background-color: lightgray;
+  padding: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
 `;
+
 const CardWrapper = styled.div`
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
 `;
+
 const Card = styled.div`
   display: flex;
   flex-direction: column;
@@ -62,6 +72,7 @@ const Card = styled.div`
   height: 100px;
   border: 1px gray solid;
   overflow-y: scroll;
+  padding: 10px;
 `;
 
 const CardText = styled.div`
@@ -187,8 +198,9 @@ export default function VocabBook() {
                     setViewingBook(book);
                   }}
                 >
-                  {book.toLocaleLowerCase()}
-                  <br />({vocabBooks?.[book]?.length})
+                  {book.toLocaleLowerCase()}({vocabBooks?.[book]?.length})
+                  <br />
+                  <br />
                   <button onClick={() => handleDeleteBook(book)}>Delete</button>
                 </Book>
               ))}
@@ -199,11 +211,9 @@ export default function VocabBook() {
                 <>
                   <Card>
                     <VocabTitle>
-                      <p>
-                        <span key={index} onClick={() => setKeyword(vocab)}>
-                          {vocab}
-                        </span>
-                      </p>
+                      <span key={index} onClick={() => setKeyword(vocab)}>
+                        {vocab}
+                      </span>
                       {audioLink ? (
                         <AudioImg
                           src={audio}
@@ -219,7 +229,7 @@ export default function VocabBook() {
                         onClick={() => handleDeleteVocabFromBook(vocab)}
                       />
                     </VocabTitle>
-                    <CardText weight={true}>{partOfSpeech}</CardText>
+                    <CardText weight={true}>({partOfSpeech})</CardText>
                     <CardText>
                       {definition
                         ?.split(/([\s!]+)/)
