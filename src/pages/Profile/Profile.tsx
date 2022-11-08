@@ -39,6 +39,8 @@ const ScoreBar = styled.div`
 
 const Btn = styled.button``;
 
+const Plant = styled.div``;
+
 const Plants = styled.div`
   display: flex;
   gap: 30px;
@@ -131,17 +133,25 @@ export default function Profile() {
   function renderProile() {
     return (
       <Wrapper>
-        <p>{name}’s Vocab Garden</p>
-        <ScoreBar insideColor={true} score={score}>
-          <ScoreBar>{score} / 5</ScoreBar>
-        </ScoreBar>
-        <p>{messages}</p>
-        {isChallenging ? (
-          <></>
-        ) : (
-          <Btn onClick={() => handleStartChallenge()}>Start a challenge</Btn>
-        )}
-        <button onClick={() => logout()}>Log out</button>
+        <div>
+          <div>
+            <p>{name}’s Vocab Garden</p>
+
+            <ScoreBar insideColor={true} score={score}>
+              <ScoreBar>{score} / 5</ScoreBar>
+            </ScoreBar>
+            <p>{messages}</p>
+            {isChallenging ? (
+              <></>
+            ) : (
+              <Btn onClick={() => handleStartChallenge()}>
+                Start a challenge
+              </Btn>
+            )}
+            <button onClick={() => logout()}>Log out</button>
+          </div>
+          <Plant></Plant>
+        </div>
         <Plants>
           {plants.map((plant) => (
             <PlantImg src={plant} alt="plants" key={plant} />
