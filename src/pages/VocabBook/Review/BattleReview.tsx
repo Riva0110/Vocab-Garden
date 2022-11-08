@@ -1,22 +1,12 @@
 import styled, { css } from "styled-components";
-import { useContext, useState, useEffect, SetStateAction } from "react";
-import { vocabBookContext } from "../../../context/vocabBookContext";
+import { useContext, useState, useEffect, useCallback } from "react";
 import { authContext } from "../../../context/authContext";
 import audio from "../../../components/audio.png";
-import { useViewingBook } from "../VocabBookLayout";
+import { useReviewLayout } from "./ReviewLayout";
 import { useNavigate } from "react-router-dom";
-import {
-  doc,
-  getDoc,
-  updateDoc,
-  setDoc,
-  onSnapshot,
-  collection,
-  query,
-  where,
-  getDocs,
-} from "firebase/firestore";
+import { doc, getDoc, updateDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
+import { useParams } from "react-router-dom";
 
 interface Props {
   correct?: boolean;
@@ -57,27 +47,6 @@ const ScoreBar = styled.div`
         props.score ? `${props.score * 40}px` : "0px"};
       z-index: -1;
       margin-bottom: 20px;
-    `}
-`;
-
-const ModeBtns = styled.div`
-  display: flex;
-  gap: 20px;
-`;
-const ReviewModeBtn = styled.button`
-  cursor: pointer;
-  ${(props: Props) =>
-    props.isBattle &&
-    css`
-      border: 1px solid gray;
-      color: gray;
-    `}
-
-  ${(props: Props) =>
-    !props.isBattle &&
-    css`
-      border: none;
-      font-weight: 600;
     `}
 `;
 
@@ -166,10 +135,16 @@ const LabelDiv = styled.div`
   margin-bottom: 20px;
   width: 100%;
   font-weight: 600;
+  color: green;
 `;
 const VocabList = styled.div`
   margin-bottom: 10px;
 `;
+
+interface AnswerCount {
+  owner: { correct: number; wrong: number };
+  competitor: { correct: number; wrong: number };
+}
 
 interface Questions {
   ownerIsCorrect?: boolean;
@@ -178,208 +153,74 @@ interface Questions {
   definition: string;
   partOfSpeech: string;
   vocab: string;
+  isCorrect?: boolean;
 }
 
 interface RoomInfo {
-  answerCount: SetStateAction<{
-    owner: { correct: number; wrong: number };
-    competitor: { correct: number; wrong: number };
-  }>;
-  pin: string;
+  answerCount: AnswerCount;
+  roomId: string;
   ownerId: string;
-  ownerName: string;
+  ownerName?: string;
   competitorId: string;
   competitorName: string;
   status: string;
-  questions: [];
+  questions: Questions[];
 }
 
 export default function BattleReview() {
   const navigate = useNavigate();
-  const { viewingBook } = useViewingBook();
-  const { vocabBooks } = useContext(vocabBookContext);
+  const { pin } = useParams();
   const { isLogin, userId } = useContext(authContext);
+  const { questionsNumber } = useReviewLayout();
+  const [isWaiting, setIsWaiting] = useState<boolean>(true);
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [round, setRound] = useState<number>(0);
-  const [isWaiting, setIsWaiting] = useState<boolean>(true);
+
+  const [reviewingQuestionsArr, setReviewingQuestionsArr] =
+    useState<Questions[]>();
+  const [outcomeVocabList, setOutcomeVocabList] = useState<Questions[]>();
+
+  const correctVocab = reviewingQuestionsArr?.[round];
+  const [currentOptions, setCurrentOptions] = useState<[string, string][]>([]);
+
+  const [isOwner, setIsOwner] = useState<boolean>(false);
+  const [isCompetitorIn, setIsCompetitorIn] = useState<boolean>(false);
+  const [isAnswered, setIsAnswered] = useState<boolean>(false);
   const [answerCount, setAnswerCount] = useState({
     owner: { correct: 0, wrong: 0 },
     competitor: { correct: 0, wrong: 0 },
   });
-
-  const questionsNumber = 5;
-  const questions = vocabBooks?.[viewingBook]
-    ?.sort(() => Math.random() - 0.5)
-    .slice(0, questionsNumber);
-  const [reviewingQuestions, setReviewingQuestions] =
-    useState<Questions[]>(questions);
-
-  const [currentOptions, setCurrentOptions] = useState<[string, string][]>([]);
-  const [showBtn, setShowBtn] = useState<boolean>(false);
-  const correctVocab = reviewingQuestions?.[round];
   const [showAnswerArr, setShowAnswerArr] = useState([
     "notAnswer",
     "notAnswer",
     "notAnswer",
   ]);
-  // const randomPin = Math.floor(Math.random() * 10000);
-  const pin = window.location.pathname.slice(18);
-  const [isOwner, setIsOwner] = useState<boolean>(false);
-  const [isAnswered, setIsAnswered] = useState<boolean>(false);
-  const [ownerId, setOwnerId] = useState<string>();
-  // const [competitorId, setCompetitorId] = useState<string>();
-  const [isCompetitor, setIsCompetitor] = useState<boolean>(false);
-  const [isCompetitorIn, setIsCompetitorIn] = useState<boolean>(false);
-  const [roomInfo, setRoomInfo] = useState<RoomInfo>();
   const [countDown, setCountDown] = useState<number>(5);
-  // const [ownerName, setOwnerName] = useState<string>();
-  // const [competitorName, setCompetitorName] = useState<string>();
-
-  // useEffect(() => {
-  //   const getUserInfo = async () => {
-  //     const docRef = doc(db, "users", userId);
-  //     const docSnap: any = await getDoc(docRef);
-  //     if (isOwner) setOwnerName(docSnap.data().name);
-  //     if (isCompetitor) setCompetitorName(docSnap.data().name);
-  //   };
-  //   getUserInfo();
-  // }, [isCompetitor, isOwner, userId]);
-
-  useEffect(() => {
-    let interval: string | number | NodeJS.Timeout | undefined;
-    if (countDown > 0 && !isWaiting) {
-      interval = setTimeout(() => setCountDown((prev) => prev - 1), 1000);
-      console.log("countDown", countDown);
-    }
-    return () => clearTimeout(interval);
-  }, [countDown, isWaiting]);
-
-  useEffect(() => {
-    async function startRoom() {
-      await setDoc(doc(db, "battleRooms", userId + pin), {
-        pin: pin,
-        ownerId: userId,
-        competitorId: "",
-        // ownerName: ownerName,
-        status: "waiting",
-        questions: reviewingQuestions,
-        answerCount: answerCount,
-      });
-      setOwnerId(userId);
-    }
-    startRoom();
-  }, []);
-
-  useEffect(() => {
-    let unsub;
-
-    const getBattleRoomData = async () => {
-      let data = {} as RoomInfo;
-      const roomRef = collection(db, "battleRooms");
-      const q = query(roomRef, where("pin", "==", pin));
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => {
-        data = doc.data() as RoomInfo;
-      });
-      setRoomInfo(data);
-      if (data?.competitorId) setIsCompetitorIn(true);
-      if (data?.competitorId === userId) {
-        setIsCompetitor(true);
-      }
-      if (data?.ownerId === userId) setIsOwner(true);
-      if (data?.questions) setReviewingQuestions(data?.questions);
-
-      // if (data?.ownerName) setOwnerName(data?.ownerName);
-
-      if (data?.ownerId) {
-        unsub = onSnapshot(
-          doc(db, "battleRooms", data?.ownerId + pin),
-          (doc) => {
-            console.log("onSnapshot Current data: ", doc.data());
-            const data = doc.data();
-            const ownerAnswerCount =
-              data?.answerCount.owner.correct + data?.answerCount.owner.wrong;
-            const competitorAnswerCount =
-              data?.answerCount.competitor.correct +
-              data?.answerCount.competitor.wrong;
-            if (data?.competitorId) {
-              console.log("data?.competitorId", data?.competitorId);
-              setIsCompetitorIn(true);
-              // setCompetitorName(data?.competitorName);
-            }
-            if (isWaiting && data?.status === "playing") setIsWaiting(false);
-            if (data?.answerCount) setAnswerCount(data?.answerCount);
-
-            if (
-              ownerAnswerCount === competitorAnswerCount &&
-              ownerAnswerCount !== 0 &&
-              ownerAnswerCount === round + 1 &&
-              ownerAnswerCount < questionsNumber
-            ) {
-              setIsAnswered(false);
-              setTimeout(() => {
-                setRound((round) => round + 1);
-                setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
-                setCountDown(5);
-              }, 500);
-            }
-          }
-        );
-      }
-    };
-    getBattleRoomData();
-
-    return unsub;
-  }, [isWaiting, pin, round, userId]);
-
-  useEffect(() => {
-    if (countDown === 0) {
-      if (answerCount.owner.correct + answerCount.owner.wrong < round + 1)
-        answerCount.owner.wrong += 1;
-      if (
-        answerCount.competitor.correct + answerCount.competitor.wrong <
-        round + 1
-      )
-        answerCount.competitor.wrong += 1;
-
-      handleSyncScore();
-    }
-
-    if (countDown === 0 && round + 1 < questionsNumber) {
-      handleSyncScore();
-      setIsAnswered(false);
-      setTimeout(() => {
-        setRound(round + 1);
-        setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
-        setCountDown(5);
-      }, 500);
-    }
-
-    if (countDown === 0 && round + 1 === questionsNumber) {
-      setGameOver(true);
-      setIsAnswered(true);
-      // function handleGameOver() {
-      // setShowBtn(true);
-
-      // setRound(0);
-      const updateFinished = async () => {
-        const roomRef = doc(db, "battleRooms", roomInfo?.ownerId + pin);
+  const [showBtn, setShowBtn] = useState<boolean>(false);
+  const handleSyncScore = useCallback(
+    async (answerCountAfterClick: AnswerCount) => {
+      if (pin) {
+        const roomRef = doc(db, "battleRooms", pin);
         await updateDoc(roomRef, {
-          status: "finished",
+          answerCount: answerCountAfterClick,
         });
-      };
-      updateFinished();
-      // }
-      // handleGameOver();
+      }
+    },
+    [pin]
+  );
+
+  useEffect(() => {
+    async function getQuestions() {
+      if (pin) {
+        const roomRef = doc(db, "battleRooms", pin);
+        const docSnap = await getDoc(roomRef);
+        const data = docSnap.data() as RoomInfo;
+        setReviewingQuestionsArr(data.questions);
+        setOutcomeVocabList(data.questions);
+      }
     }
-  }, [
-    answerCount.competitor,
-    answerCount.owner,
-    countDown,
-    pin,
-    roomInfo?.ownerId,
-    round,
-  ]);
+    getQuestions();
+  }, [pin]);
 
   useEffect(() => {
     const getRandomIndex = () => {
@@ -396,53 +237,145 @@ export default function BattleReview() {
       randomIndex2 = getRandomIndex();
     }
 
-    const wrongVocab1 = reviewingQuestions?.[randomIndex1];
-    const wrongVocab2 = reviewingQuestions?.[randomIndex2];
+    if (reviewingQuestionsArr && correctVocab) {
+      const wrongVocab1 = reviewingQuestionsArr[randomIndex1];
+      const wrongVocab2 = reviewingQuestionsArr[randomIndex2];
 
-    const randomOptions = Object.entries({
-      [correctVocab?.vocab]: correctVocab?.definition,
-      [wrongVocab1?.vocab]: wrongVocab1?.definition,
-      [wrongVocab2?.vocab]: wrongVocab2?.definition,
-    }).sort(() => Math.random() - 0.5) as [string, string][];
+      const randomOptions = Object.entries({
+        [correctVocab?.vocab]: correctVocab?.definition,
+        [wrongVocab1?.vocab]: wrongVocab1?.definition,
+        [wrongVocab2?.vocab]: wrongVocab2?.definition,
+      }).sort(() => Math.random() - 0.5) as [string, string][];
 
-    setCurrentOptions(randomOptions);
-  }, [correctVocab, questionsNumber, reviewingQuestions, round]);
+      setCurrentOptions(randomOptions);
+    }
+  }, [correctVocab, questionsNumber, reviewingQuestionsArr, round]);
+
+  useEffect(() => {
+    let unsub;
+
+    if (pin) {
+      unsub = onSnapshot(doc(db, "battleRooms", pin), (doc) => {
+        console.log("onSnapshot Current data: ", doc.data());
+        const data = doc.data() as RoomInfo;
+        const ownerAnswerCount =
+          data?.answerCount.owner.correct + data?.answerCount.owner.wrong;
+        const competitorAnswerCount =
+          data?.answerCount.competitor.correct +
+          data?.answerCount.competitor.wrong;
+        if (data.ownerId === userId) setIsOwner(true);
+        if (data.competitorId) setIsCompetitorIn(true);
+        if (isWaiting && data?.status === "playing") setIsWaiting(false);
+        if (data.answerCount) setAnswerCount(data.answerCount);
+        if (
+          ownerAnswerCount === competitorAnswerCount &&
+          ownerAnswerCount !== 0 &&
+          ownerAnswerCount === round + 1 &&
+          ownerAnswerCount < questionsNumber
+        ) {
+          setTimeout(() => {
+            setRound(round + 1);
+            setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
+            setCountDown(5);
+            setIsAnswered(false);
+          }, 500);
+        }
+      });
+    }
+
+    return unsub;
+  }, [isWaiting, pin, questionsNumber, round, userId]);
+
+  useEffect(() => {
+    let countDownTimer: string | number | NodeJS.Timeout | undefined;
+    if (countDown > 0 && !isWaiting) {
+      countDownTimer = setTimeout(() => setCountDown((prev) => prev - 1), 1000);
+      console.log("countDown", countDown);
+    }
+    return () => clearTimeout(countDownTimer);
+  }, [countDown, isWaiting]);
+
+  useEffect(() => {
+    if (countDown === 0 && !isAnswered && outcomeVocabList) {
+      const answerCountAfterClick = {
+        owner: { ...answerCount.owner },
+        competitor: { ...answerCount.competitor },
+      };
+
+      const vocabListAfterTimeup = [...outcomeVocabList];
+
+      if (answerCount.owner.correct + answerCount.owner.wrong < round + 1)
+        answerCountAfterClick.owner.wrong += 1;
+      vocabListAfterTimeup[round].isCorrect = false;
+      if (
+        answerCount.competitor.correct + answerCount.competitor.wrong <
+        round + 1
+      )
+        answerCountAfterClick.competitor.wrong += 1;
+      vocabListAfterTimeup[round].isCorrect = false;
+
+      handleSyncScore(answerCountAfterClick);
+      setOutcomeVocabList(vocabListAfterTimeup);
+    }
+
+    if (countDown === 0 && round + 1 < questionsNumber) {
+      setTimeout(() => {
+        setRound(round + 1);
+        setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
+        setCountDown(5);
+        setIsAnswered(false);
+      }, 500);
+    }
+
+    if (countDown === 0 && round + 1 === questionsNumber) {
+      setGameOver(true);
+      setIsAnswered(true);
+
+      const updateFinished = async () => {
+        if (pin) {
+          const roomRef = doc(db, "battleRooms", pin);
+          await updateDoc(roomRef, {
+            status: "finished",
+          });
+        }
+      };
+      updateFinished();
+      setShowBtn(true);
+    }
+  }, [
+    answerCount.competitor,
+    answerCount.owner,
+    countDown,
+    handleSyncScore,
+    isAnswered,
+    outcomeVocabList,
+    pin,
+    questionsNumber,
+    round,
+  ]);
 
   const handlePlayAudio = (audioLink: string) => {
     const audio = new Audio(audioLink);
     audio.play();
   };
 
-  function handleCompetitorJoinBattle() {
-    const updateCompetitor = async () => {
-      const roomRef = doc(db, "battleRooms", roomInfo?.ownerId + pin);
+  async function handleCompetitorJoinBattle() {
+    if (pin) {
+      const roomRef = doc(db, "battleRooms", pin);
       await updateDoc(roomRef, {
         competitorId: userId,
         // competitorName: competitorName,
       });
-    };
-    updateCompetitor();
+    }
   }
 
-  function handleStartBattle() {
-    const updatePlaying = async () => {
-      const roomRef = doc(db, "battleRooms", roomInfo?.ownerId + pin);
+  async function handleStartBattle() {
+    if (pin) {
+      const roomRef = doc(db, "battleRooms", pin);
       await updateDoc(roomRef, {
         status: "playing",
       });
-    };
-    updatePlaying();
-  }
-
-  function handleSyncScore() {
-    const updateScore = async () => {
-      const roomRef = doc(db, "battleRooms", roomInfo?.ownerId + pin);
-      await updateDoc(roomRef, {
-        answerCount: answerCount,
-        // quentions: reviewingQuestions,
-      });
-    };
-    updateScore();
+    }
   }
 
   function renderWaiting() {
@@ -459,16 +392,16 @@ export default function BattleReview() {
           ) : isCompetitorIn ? (
             <p>Waiting for the owner starting the battle</p>
           ) : (
-            <button onClick={handleCompetitorJoinBattle}>
+            <StartGame onClick={handleCompetitorJoinBattle}>
               Join the battle!
-            </button>
+            </StartGame>
           )}
         </WaitingRoomWrapper>
       </Main>
     );
   }
 
-  const renderTest = () => {
+  function renderTest() {
     return (
       <Main>
         <VocabWrapper>
@@ -495,6 +428,7 @@ export default function BattleReview() {
               onClick={() => {
                 if (!isAnswered) {
                   setIsAnswered(true);
+
                   let answerStatus = [...currentOptions].map(
                     ([vocabOption, insideDef], index) => {
                       if (vocabOption === correctVocab?.vocab)
@@ -509,40 +443,49 @@ export default function BattleReview() {
                   );
                   setShowAnswerArr(answerStatus);
 
-                  if (clickedVocab === correctVocab?.vocab) {
-                    if (isOwner) {
-                      answerCount.owner.correct += 1;
-                      reviewingQuestions[round].ownerIsCorrect = true;
+                  if (outcomeVocabList) {
+                    const answerCountAfterClick = {
+                      owner: { ...answerCount.owner },
+                      competitor: { ...answerCount.competitor },
+                    };
+
+                    const vocabListAfterClick = [...outcomeVocabList];
+
+                    console.log("vocabListAfterClick []", vocabListAfterClick);
+
+                    if (clickedVocab === correctVocab?.vocab) {
+                      if (isOwner) answerCountAfterClick.owner.correct += 1;
+                      else answerCountAfterClick.competitor.correct += 1;
+
+                      vocabListAfterClick[round].isCorrect = true;
+                    } else {
+                      if (isOwner) answerCountAfterClick.owner.wrong += 1;
+                      else answerCountAfterClick.competitor.wrong += 1;
+
+                      vocabListAfterClick[round].isCorrect = false;
                     }
-                    if (isCompetitor) {
-                      answerCount.competitor.correct += 1;
-                      reviewingQuestions[round].competitorIsCorrect = true;
-                    }
-                  } else {
-                    if (isOwner) {
-                      answerCount.owner.wrong += 1;
-                      reviewingQuestions[round].ownerIsCorrect = false;
-                    }
-                    if (isCompetitor) {
-                      answerCount.competitor.wrong += 1;
-                      reviewingQuestions[round].competitorIsCorrect = false;
-                    }
+
+                    console.log(
+                      "vocabListAfterClick [after]",
+                      vocabListAfterClick
+                    );
+                    handleSyncScore(answerCountAfterClick);
+                    setOutcomeVocabList(vocabListAfterClick);
+                    console.log("vocabListAfterClick", vocabListAfterClick);
                   }
-                  // setAnswerCount(answerCount);
-                  // setReviewingQuestions(reviewingQuestions);
-                  handleSyncScore();
-                  console.log(reviewingQuestions);
                 }
               }}
             >
-              {" "}
               {def}
             </Option>
           ))}
         </Options>
       </Main>
     );
-  };
+  }
+
+  if (outcomeVocabList)
+    console.log("outcomeVocabList [global]", outcomeVocabList);
 
   function renderOutcomeVocabList(
     vocab: string,
@@ -552,7 +495,7 @@ export default function BattleReview() {
   ) {
     return (
       <VocabList key={vocab + partOfSpeech}>
-        {vocab}{" "}
+        <strong>{vocab}</strong>{" "}
         {audioLink ? (
           <AudioImg
             src={audio}
@@ -588,97 +531,37 @@ export default function BattleReview() {
           <ReviewVocabs>
             <WrongVocabs>
               <LabelDiv>Wrong vocab:</LabelDiv>{" "}
-              {isOwner &&
-                reviewingQuestions.map(
-                  ({
-                    vocab,
-                    audioLink,
-                    partOfSpeech,
-                    definition,
-                    ownerIsCorrect,
-                    competitorIsCorrect,
-                  }) => {
-                    if (!ownerIsCorrect) {
-                      return renderOutcomeVocabList(
-                        vocab,
-                        partOfSpeech,
-                        definition,
-                        audioLink
-                      );
-                    } else {
-                      return <></>;
-                    }
+              {outcomeVocabList?.map(
+                ({ vocab, audioLink, partOfSpeech, definition, isCorrect }) => {
+                  if (!isCorrect) {
+                    return renderOutcomeVocabList(
+                      vocab,
+                      partOfSpeech,
+                      definition,
+                      audioLink
+                    );
+                  } else {
+                    return <></>;
                   }
-                )}
-              {isCompetitor &&
-                reviewingQuestions.map(
-                  ({
-                    vocab,
-                    audioLink,
-                    partOfSpeech,
-                    definition,
-                    ownerIsCorrect,
-                    competitorIsCorrect,
-                  }) => {
-                    if (!competitorIsCorrect) {
-                      return renderOutcomeVocabList(
-                        vocab,
-                        partOfSpeech,
-                        definition,
-                        audioLink
-                      );
-                    } else {
-                      return <></>;
-                    }
-                  }
-                )}
+                }
+              )}
             </WrongVocabs>
             <CorrectVocabs>
               <LabelDiv>Correct vocab:</LabelDiv>{" "}
-              {isOwner &&
-                reviewingQuestions.map(
-                  ({
-                    vocab,
-                    audioLink,
-                    partOfSpeech,
-                    definition,
-                    ownerIsCorrect,
-                    competitorIsCorrect,
-                  }) => {
-                    if (ownerIsCorrect) {
-                      return renderOutcomeVocabList(
-                        vocab,
-                        partOfSpeech,
-                        definition,
-                        audioLink
-                      );
-                    } else {
-                      return <></>;
-                    }
+              {outcomeVocabList?.map(
+                ({ vocab, audioLink, partOfSpeech, definition, isCorrect }) => {
+                  if (isCorrect) {
+                    return renderOutcomeVocabList(
+                      vocab,
+                      partOfSpeech,
+                      definition,
+                      audioLink
+                    );
+                  } else {
+                    return <></>;
                   }
-                )}
-              {isCompetitor &&
-                reviewingQuestions.map(
-                  ({
-                    vocab,
-                    audioLink,
-                    partOfSpeech,
-                    definition,
-                    ownerIsCorrect,
-                    competitorIsCorrect,
-                  }) => {
-                    if (competitorIsCorrect) {
-                      return renderOutcomeVocabList(
-                        vocab,
-                        partOfSpeech,
-                        definition,
-                        audioLink
-                      );
-                    } else {
-                      return <></>;
-                    }
-                  }
-                )}
+                }
+              )}
             </CorrectVocabs>
           </ReviewVocabs>
         </OutcomeWrapper>
@@ -688,7 +571,7 @@ export default function BattleReview() {
 
   return isLogin ? (
     <Wrapper>
-      <div>Review Round: {gameOver ? questionsNumber : round + 1}</div>
+      <div>Review Round: {round + 1}</div>
       <Header>
         <OwnerCount>
           <div>

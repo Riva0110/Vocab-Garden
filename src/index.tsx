@@ -43,7 +43,7 @@ root.render(
                 <Route path="wordle" element={<Wordle />} />
                 <Route path="review" element={<ReviewLayout />}>
                   <Route index element={<Review />} />
-                  <Route path=":roomId" element={<BattleReview />} />
+                  <Route path=":pin" element={<BattleReview />} />
                 </Route>
               </Route>
               <Route path="profile" element={<Profile />} />
