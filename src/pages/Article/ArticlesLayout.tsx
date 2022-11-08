@@ -6,6 +6,8 @@ const Wrapper = styled.div`
   display: flex;
   gap: 50px;
   padding: 20px;
+  margin-top: 60px;
+  /* height: calc(100vh - 60px); */
 `;
 
 export default function ArticlesLayout() {

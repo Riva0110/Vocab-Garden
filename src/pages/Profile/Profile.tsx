@@ -17,6 +17,7 @@ interface Props {
 
 const Wrapper = styled.div`
   padding: 20px;
+  margin-top: 60px;
 `;
 
 const ScoreBar = styled.div`
