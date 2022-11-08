@@ -5,17 +5,7 @@ import { authContext } from "../../../context/authContext";
 import { useViewingBook } from "../VocabBookLayout";
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  doc,
-  getDoc,
-  updateDoc,
-  setDoc,
-  onSnapshot,
-  collection,
-  query,
-  where,
-  getDocs,
-} from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
 
 interface Props {
@@ -59,23 +49,8 @@ const ReviewModeBtn = styled.button`
 
 type ContextType = {
   questionsNumber: number;
-
-  // isBattle?: boolean;
-  // setIsBattle?: React.Dispatch<React.SetStateAction<boolean>>;
-  // gameOver: boolean;
-  // setGameOver: React.Dispatch<React.SetStateAction<boolean>>;
-  // round: number;
-  // setRound: React.Dispatch<React.SetStateAction<number>>;
-  // pin: number;
-  // setPin: React.Dispatch<React.SetStateAction<number>>;
-  // answerCount: { correct: number; wrong: number };
-  // setAnswerCount: React.Dispatch<
-  //   React.SetStateAction<{ correct: number; wrong: number }>
-  // >;
-  // reviewingQuestions: ReviewingQuestions[];
-  // setReviewingQuestions: React.Dispatch<
-  //   React.SetStateAction<ReviewingQuestions[]>
-  // >;
+  isBattle: boolean;
+  setIsBattle: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const questionsNumber = 5;
@@ -87,14 +62,13 @@ export default function ReviewLayout() {
   const [roomId, setRoomId] = useState<number>();
   const { viewingBook } = useViewingBook();
   const { vocabBooks } = useContext(vocabBookContext);
+  const [name, setName] = useState<string>();
 
   const questionsArr = vocabBooks[viewingBook]
     ?.sort(() => Math.random() - 0.5)
     .slice(0, questionsNumber)
     .map((question) => ({
       ...question,
-      // ownerAnswer: "",
-      // competitorAnswer: "",
     }));
 
   useEffect(() => {
@@ -102,12 +76,22 @@ export default function ReviewLayout() {
     setRoomId(randomRoomId);
   }, [viewingBook]);
 
+  useEffect(() => {
+    const getUserInfo = async () => {
+      const docRef = doc(db, "users", userId);
+      const docSnap: any = await getDoc(docRef);
+      setName(docSnap.data().name);
+    };
+    getUserInfo();
+  }, [userId]);
+
   const handleSetBattleRoom = async () => {
     await setDoc(doc(db, "battleRooms", userId + roomId), {
       roomId: roomId,
       ownerId: userId,
       competitorId: "",
-      // ownerName: ownerName,
+      ownerName: name,
+      competitorName: "",
       status: "waiting",
       questions: questionsArr,
       answerCount: {
@@ -140,7 +124,9 @@ export default function ReviewLayout() {
           Battle Mode
         </ReviewModeBtn>
       </ModeBtns>
-      <Outlet context={{ viewingBook, questionsNumber }} />
+      <Outlet
+        context={{ viewingBook, questionsNumber, isBattle, setIsBattle }}
+      />
     </Wrapper>
   );
 }

@@ -66,6 +66,7 @@ const WaitingRoomWrapper = styled.div`
 
 const StartGame = styled.button`
   width: 300px;
+  margin-top: 20px;
 `;
 
 const VocabWrapper = styled.div`
@@ -108,6 +109,7 @@ const Option = styled.div`
 const Btns = styled.div`
   display: flex;
   gap: 10px;
+  margin-top: 20px;
 `;
 
 const Btn = styled.button`
@@ -160,7 +162,7 @@ interface RoomInfo {
   answerCount: AnswerCount;
   roomId: string;
   ownerId: string;
-  ownerName?: string;
+  ownerName: string;
   competitorId: string;
   competitorName: string;
   status: string;
@@ -171,7 +173,7 @@ export default function BattleReview() {
   const navigate = useNavigate();
   const { pin } = useParams();
   const { isLogin, userId } = useContext(authContext);
-  const { questionsNumber } = useReviewLayout();
+  const { questionsNumber, setIsBattle } = useReviewLayout();
   const [isWaiting, setIsWaiting] = useState<boolean>(true);
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [round, setRound] = useState<number>(0);
@@ -183,7 +185,9 @@ export default function BattleReview() {
   const correctVocab = reviewingQuestionsArr?.[round];
   const [currentOptions, setCurrentOptions] = useState<[string, string][]>([]);
 
-  const [isOwner, setIsOwner] = useState<boolean>(false);
+  const [isOwner, setIsOwner] = useState<boolean>(true);
+  const [ownerName, setOwnerName] = useState<string>("");
+  const [competitorName, setCompetitorName] = useState<string>("");
   const [isCompetitorIn, setIsCompetitorIn] = useState<boolean>(false);
   const [isAnswered, setIsAnswered] = useState<boolean>(false);
   const [answerCount, setAnswerCount] = useState({
@@ -197,6 +201,7 @@ export default function BattleReview() {
   ]);
   const [countDown, setCountDown] = useState<number>(5);
   const [showBtn, setShowBtn] = useState<boolean>(false);
+
   const handleSyncScore = useCallback(
     async (answerCountAfterClick: AnswerCount) => {
       if (pin) {
@@ -210,17 +215,19 @@ export default function BattleReview() {
   );
 
   useEffect(() => {
-    async function getQuestions() {
+    async function getRoomInfo() {
       if (pin) {
         const roomRef = doc(db, "battleRooms", pin);
         const docSnap = await getDoc(roomRef);
         const data = docSnap.data() as RoomInfo;
         setReviewingQuestionsArr(data.questions);
         setOutcomeVocabList(data.questions);
+        setOwnerName(data.ownerName);
       }
     }
-    getQuestions();
-  }, [pin]);
+    getRoomInfo();
+    setIsBattle(true);
+  }, [pin, setIsBattle]);
 
   useEffect(() => {
     const getRandomIndex = () => {
@@ -263,8 +270,9 @@ export default function BattleReview() {
         const competitorAnswerCount =
           data?.answerCount.competitor.correct +
           data?.answerCount.competitor.wrong;
-        if (data.ownerId === userId) setIsOwner(true);
+        if (data.ownerId !== userId) setIsOwner(false);
         if (data.competitorId) setIsCompetitorIn(true);
+        if (data.competitorName !== "") setCompetitorName(data.competitorName);
         if (isWaiting && data?.status === "playing") setIsWaiting(false);
         if (data.answerCount) setAnswerCount(data.answerCount);
         if (
@@ -360,13 +368,19 @@ export default function BattleReview() {
   };
 
   async function handleCompetitorJoinBattle() {
-    if (pin) {
-      const roomRef = doc(db, "battleRooms", pin);
-      await updateDoc(roomRef, {
-        competitorId: userId,
-        // competitorName: competitorName,
-      });
-    }
+    const getUserInfo = async () => {
+      const docRef = doc(db, "users", userId);
+      const docSnap: any = await getDoc(docRef);
+
+      if (pin) {
+        const roomRef = doc(db, "battleRooms", pin);
+        await updateDoc(roomRef, {
+          competitorId: userId,
+          competitorName: docSnap.data().name,
+        });
+      }
+    };
+    getUserInfo();
   }
 
   async function handleStartBattle() {
@@ -575,7 +589,7 @@ export default function BattleReview() {
       <Header>
         <OwnerCount>
           <div>
-            <p>Owner: ownerName</p>
+            <p>Owner: {ownerName}</p>
             O: {answerCount.owner.correct} X: {answerCount.owner.wrong} / Total:{" "}
             {questionsNumber} (
             {Math.ceil((answerCount.owner.correct / questionsNumber) * 100)}%)
@@ -589,7 +603,7 @@ export default function BattleReview() {
         {isWaiting ? <></> : <p>{countDown} seconds left</p>}
         <CompetitorCount>
           <div>
-            <p>Competitor: competitorName</p>
+            <p>Competitor: {competitorName}</p>
             O: {answerCount.competitor.correct} X:{" "}
             {answerCount.competitor.wrong} / Total: {questionsNumber} (
             {Math.ceil(
