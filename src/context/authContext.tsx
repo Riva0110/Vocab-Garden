@@ -57,15 +57,17 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
     const user = userCredential.user;
     await setDoc(doc(db, "users", user.uid), {
       name,
-      currentPlant: "",
+      currentPlant: "begonia",
       currentScore: 0,
       lastTimeUpdateScore: new Date(),
       isChallenging: false,
     });
     setIsLogin(true);
-    const docRef = doc(db, "vocabBooks", user.uid);
-    await setDoc(docRef, {
+    await setDoc(doc(db, "vocabBooks", user.uid), {
       unsorted: arrayUnion(),
+    });
+    await setDoc(doc(db, "plantsList", user.uid), {
+      plants: [],
     });
   };
 

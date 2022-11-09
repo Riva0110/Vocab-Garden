@@ -94,7 +94,16 @@ interface PlantsListInterface {
   time: {};
 }
 
-export default function Profile() {
+// const plantsList = [
+//   plantImgsObj.begonia["5"],
+//   plantImgsObj.mirrorGrass["5"],
+//   plantImgsObj.travelerBanana["5"],
+//   plantImgsObj.philodendron["5"],
+//   plantImgsObj.ceriman["5"],
+//   plantImgsObj.birdOfParadise["5"],
+// ];
+
+export default function OldProfile() {
   const { isLogin, login, logout, signup, userId } = useContext(authContext);
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -103,102 +112,117 @@ export default function Profile() {
   const [score, setScore] = useState<number>(0);
   const [isChallenging, setIsChallenging] = useState<boolean>();
   const [messages, setMessages] = useState<string>("");
-  const [currentPlant, setCurrentPlant] = useState("begonia");
+  const [currentPlant, setCurrentPlant] = useState("");
   const [plantPhase, setPlantPhase] = useState("0");
   const [isDying, setIsDying] = useState<boolean>(false);
   const [plantsList, setPlantsList] = useState<PlantsListInterface[]>([]);
 
   useEffect(() => {
-    const getAndUpdateUserInfo = async () => {
-      const userRef = doc(db, "users", userId);
-      const userDocSnap = await getDoc(userRef);
-      const data = userDocSnap.data();
-      setName(data?.name);
-      setIsChallenging(data?.isChallenging);
-      setIsDying(data?.isDying);
-      setCurrentPlant(data?.currentPlant);
-      setScore(data?.currentScore);
+    if (isLogin) {
+      const getUserInfo = async (userId: string) => {
+        const plantsRef = doc(db, "plantsList", userId);
+        const plantsSnap = await getDoc(plantsRef);
+        const plantData = plantsSnap.data()?.plants as PlantsListInterface[];
+        setPlantsList(plantData);
 
-      const timeDifference =
-        Date.now() - data?.lastTimeUpdateScore.seconds * 1000;
-      const deduction = Math.floor(timeDifference / 300000);
+        const docRef = doc(db, "users", userId);
+        const docSnap: any = await getDoc(docRef);
+        setName(docSnap.data().name);
+        setIsChallenging(docSnap.data().isChallenging);
+        setIsDying(docSnap.data().isDying);
+        if (docSnap.data().currentPlant)
+          setCurrentPlant(docSnap.data().currentPlant);
+        else setCurrentPlant("begonia");
 
-      if (deduction > 0) {
-        setIsDying(true);
-        setScore((prev) => Math.max(prev - deduction, 0));
+        const currentScore = docSnap.data().currentScore;
+        const timeDifference =
+          Date.now() - docSnap.data().lastTimeUpdateScore.seconds * 1000;
 
-        const userRef = doc(db, "users", userId);
-        await updateDoc(userRef, {
-          currentScore: Math.max(data?.currentScore - deduction, 0),
-          lastTimeUpdateScore: new Date(),
-          isDying: true,
-        });
-      }
-    };
+        const deduction = Math.floor(timeDifference / 300000);
+        const scoreAfterDeduction = Math.max(currentScore - deduction, 0);
 
-    getAndUpdateUserInfo();
-  }, [userId]);
-
-  useEffect(() => {
-    if (isChallenging) {
-      if (isDying) {
-        if (score === 0) {
+        if (currentScore === 5 && currentPlant !== "") {
           setIsChallenging(false);
-          setPlantPhase("minus1");
-          setMessages("植物被你養死了QQ 挑戰失敗！");
-        } else if (score <= 2) {
-          setPlantPhase("minus1");
-          setMessages("植物枯萎了，再加把勁！");
-        } else if (score <= 4) {
-          setPlantPhase("minus3");
-          setMessages("好多天沒看到你了，植物想你囉！");
-        }
-      } else {
-        if (score <= 2) {
-          setPlantPhase("0");
-          setMessages("加油加油，再努力一點，植物快長大囉！");
-        } else if (score <= 4) {
-          setPlantPhase("3");
-          setMessages("你好棒喔！植物長出新葉片了！");
-        } else if (score === 5) {
-          setIsChallenging(false);
+          setScore(currentScore);
           setPlantPhase("5");
-          setMessages("挑戰成功，植物長大了！趕快收藏到花園吧");
+          setMessages("恭喜你，植物長大了！趕快收藏到花園吧");
+
+          const resetScore = async () => {
+            const userRef = doc(db, "users", userId);
+            await updateDoc(userRef, {
+              isChallenging: false,
+            });
+          };
+          resetScore();
+        } else if (
+          // test 每 5 分鐘扣 1 分
+          timeDifference > 300000 &&
+          currentScore > 0 &&
+          isChallenging
+        ) {
+          setMessages("好多天沒看到你了，植物想你囉！");
+          setScore(scoreAfterDeduction);
+          setIsDying(true);
+          const resetScore = async () => {
+            const userRef = doc(db, "users", userId);
+            await updateDoc(userRef, {
+              currentScore: scoreAfterDeduction,
+              lastTimeUpdateScore: new Date(),
+              isDying: true,
+            });
+          };
+          resetScore();
+        } else if (currentScore === 0 && timeDifference > 300000) {
+          setIsChallenging(false);
+          setMessages("植物被你養死了QQ");
+          setIsDying(true);
+          const resetScore = async () => {
+            const userRef = doc(db, "users", userId);
+            await updateDoc(userRef, {
+              isDying: true,
+            });
+          };
+          resetScore();
+        } else if (isChallenging) {
+          setMessages("加油加油，再努力一點，植物快長大囉！");
+          setScore(currentScore);
+        } else {
+          setMessages("種顆新植物，來挑戰你自己吧！");
         }
 
-        if (score === 3 || score === 4) setPlantPhase("3");
-      }
+        if (isDying) {
+          if (scoreAfterDeduction === 3 || scoreAfterDeduction === 2)
+            setPlantPhase("minus3");
+          if (scoreAfterDeduction === 1 || scoreAfterDeduction === 0)
+            setPlantPhase("minus1");
+        } else {
+          if (currentScore === 0 || currentScore === 1 || currentScore === 2)
+            setPlantPhase("0");
+          if (currentScore === 3 || currentScore === 4) setPlantPhase("3");
+        }
+      };
+      getUserInfo(userId);
     }
+  }, [userId, isLogin, isChallenging, isDying, currentPlant]);
 
-    const updateUserInfo = async () => {
-      const userRef = doc(db, "users", userId);
-      await updateDoc(userRef, {
-        isDying,
-        isChallenging,
-      });
-    };
-
-    updateUserInfo();
-  }, [isChallenging, isDying, score, userId]);
-
-  function handleStartChallenge() {
+  const handleStartChallenge = () => {
     setIsChallenging(true);
     setScore(0);
     setIsDying(false);
+    setCurrentPlant("begonia");
     setPlantPhase("0");
-
-    const startChallenge = async () => {
+    const resetScore = async () => {
       const userRef = doc(db, "users", userId);
       await updateDoc(userRef, {
-        isChallenging: true,
         currentScore: 0,
-        isDying: false,
         currentPlant: currentPlant,
+        isChallenging: true,
+        isDying: false,
         lastTimeUpdateScore: new Date(),
       });
     };
-    startChallenge();
-  }
+    resetScore();
+  };
 
   const handleSavePlant = async () => {
     const plantsRef = doc(db, "plantsList", userId);
@@ -208,16 +232,7 @@ export default function Profile() {
         time: new Date(),
       }),
     });
-
-    const userRef = doc(db, "users", userId);
-    await updateDoc(userRef, {
-      currentScore: 0,
-      lastTimeUpdateScore: new Date(),
-      currentPlant,
-    });
-    setMessages("選擇喜歡的植物，開始新的挑戰吧！");
     setScore(0);
-    setPlantPhase("0");
     setPlantsList((prev) => [
       ...prev,
       {
@@ -225,6 +240,14 @@ export default function Profile() {
         time: new Date(),
       },
     ]);
+
+    const userRef = doc(db, "users", userId);
+    await updateDoc(userRef, {
+      currentScore: 0,
+      lastTimeUpdateScore: new Date(),
+      currentPlant: "",
+    });
+    setMessages("種顆新植物，來挑戰你自己吧！");
   };
 
   function renderProile() {
@@ -249,23 +272,23 @@ export default function Profile() {
           ) : score !== 5 ? (
             <>
               <Select
-                defaultValue={currentPlant}
-                onChange={async (e: any) => {
+                defaultValue={"begonia"}
+                onChange={(e: any) => {
                   setCurrentPlant(e.target.value);
                   setIsDying(false);
-                  setPlantPhase("0");
-                  setMessages("選擇喜歡的植物，開始新的挑戰吧！");
-                  const userRef = doc(db, "users", userId);
-                  await updateDoc(userRef, {
-                    isDying: false,
-                  });
+                  const resetScore = async () => {
+                    const userRef = doc(db, "users", userId);
+                    await updateDoc(userRef, {
+                      isDying: false,
+                    });
+                  };
+                  resetScore();
                 }}
               >
                 {Object.keys(plantImgsObj)?.map((plant, index) => (
                   <option key={plant}>{plant}</option>
                 ))}
               </Select>
-
               <Btn onClick={() => handleStartChallenge()}>
                 Start a challenge
               </Btn>
