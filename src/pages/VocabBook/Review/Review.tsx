@@ -199,6 +199,7 @@ export default function Review() {
         await updateDoc(userRef, {
           currentScore: score + 1,
           lastTimeUpdateScore: new Date(),
+          isDying: false,
         });
       }
     };

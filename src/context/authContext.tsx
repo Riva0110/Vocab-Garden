@@ -57,6 +57,7 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
     const user = userCredential.user;
     await setDoc(doc(db, "users", user.uid), {
       name,
+      currentPlant: "",
       currentScore: 0,
       lastTimeUpdateScore: new Date(),
       isChallenging: false,
