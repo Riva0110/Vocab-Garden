@@ -72,16 +72,20 @@ const Btn = styled.button``;
 
 const Plants = styled.div`
   display: flex;
-  gap: 20px;
   flex-wrap: wrap;
   margin-top: 30px;
   width: 65vw;
+  gap: 20px;
 `;
-const PlantImg = styled.img`
-  width: 200px;
-  height: 240px;
+
+const PlantBorder = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   border: 1px lightgray solid;
   border-radius: 10px;
+  width: 200px;
+  height: 260px;
   padding: 30px;
   @media screen and (max-width: 600px) {
     width: 100px;
@@ -89,9 +93,25 @@ const PlantImg = styled.img`
   }
 `;
 
+const PlantImg = styled.img`
+  width: 100%;
+  height: 85%;
+  margin-bottom: 20px;
+`;
+
+const PlantName = styled.div``;
+
+const Time = styled.div`
+  color: gray;
+  font-size: 12px;
+`;
+
 interface PlantsListInterface {
   plantName: string;
-  time: {};
+  time: {
+    seconds: number;
+    nanoseconds: number;
+  };
 }
 
 export default function Profile() {
@@ -110,6 +130,11 @@ export default function Profile() {
 
   useEffect(() => {
     const getAndUpdateUserInfo = async () => {
+      const plantsRef = doc(db, "plantsList", userId);
+      const plantsSnap = await getDoc(plantsRef);
+      const plantData = plantsSnap.data()?.plants as PlantsListInterface[];
+      setPlantsList(plantData);
+
       const userRef = doc(db, "users", userId);
       const userDocSnap = await getDoc(userRef);
       const data = userDocSnap.data();
@@ -218,13 +243,16 @@ export default function Profile() {
     setMessages("選擇喜歡的植物，開始新的挑戰吧！");
     setScore(0);
     setPlantPhase("0");
-    setPlantsList((prev) => [
-      ...prev,
-      {
-        plantName: currentPlant,
-        time: new Date(),
-      },
-    ]);
+    setPlantsList(
+      (prev) =>
+        [
+          ...prev,
+          {
+            plantName: currentPlant,
+            time: new Date(),
+          },
+        ] as PlantsListInterface[]
+    );
   };
 
   function renderProile() {
@@ -278,13 +306,20 @@ export default function Profile() {
           <button onClick={() => logout()}>Log out</button>
         </UserInfoWrapper>
         <Plants>
-          {plantsList?.map(({ plantName, time }, index) => (
-            <PlantImg
-              src={plantImgsObj[plantName]["5"]}
-              alt="plants"
-              key={plantName + index}
-            />
-          ))}
+          {plantsList?.map(({ plantName, time }, index) => {
+            const newDate = new Date(time.seconds * 1000);
+            return (
+              <PlantBorder>
+                <PlantImg
+                  src={plantImgsObj[plantName]["5"]}
+                  alt="plants"
+                  key={plantName + index}
+                />
+                <PlantName>{plantName}</PlantName>
+                <Time>{newDate.toLocaleString()}</Time>
+              </PlantBorder>
+            );
+          })}
         </Plants>
       </Wrapper>
     );
