@@ -45,29 +45,54 @@ const FriendRequest = styled.div`
   align-items: center;
 `;
 
-const Email = styled.div`
+const Email = styled.div``;
+
+const Friend = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-top: 20px;
 `;
 
 export default function Friends() {
-  const { userId } = useContext(authContext);
+  const { isLogin, userId } = useContext(authContext);
   const [myEmail, setMyEmail] = useState<string>();
   const [searchingEmail, setSearchingEmail] = useState<string>("");
   const [friendList, setFriendList] = useState<string[]>();
   const [friendRequest, setfriendRequest] = useState<string[]>();
+  const [friendState, setFriendState] = useState<string[]>([]);
   const [awaitingFriendReply, setAwaitingFriendReply] = useState<string[]>();
   const emailInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const unsub = onSnapshot(doc(db, "users", userId), (doc) => {
-      setMyEmail(doc.data()?.email);
-      setFriendList(doc.data()?.friendList);
-      setfriendRequest(doc.data()?.friendRequest);
-      setAwaitingFriendReply(doc.data()?.awaitingFriendReply);
-    });
-
+    let unsub;
+    if (isLogin) {
+      unsub = onSnapshot(doc(db, "users", userId), (doc) => {
+        setMyEmail(doc.data()?.email);
+        setFriendList(doc.data()?.friendList);
+        setfriendRequest(doc.data()?.friendRequest);
+        setAwaitingFriendReply(doc.data()?.awaitingFriendReply);
+      });
+    }
     return unsub;
-  }, [userId]);
+  }, [isLogin, userId]);
+
+  useEffect(() => {
+    let newFriendState: any = [];
+    friendList?.forEach((friendEmail) => {
+      async function checkState() {
+        const friendRef = collection(db, "users");
+        const q = query(friendRef, where("email", "==", friendEmail));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((friendDoc) => {
+          newFriendState = [...newFriendState, friendDoc.data().state];
+          console.log("newFriendState", newFriendState);
+        });
+        setFriendState(newFriendState);
+      }
+      checkState();
+    });
+  }, [friendList]);
 
   const handleSendRequest = async () => {
     const friendRef = collection(db, "users");
@@ -154,9 +179,13 @@ export default function Friends() {
           </FriendBtn>
         </FriendRequest>
         <Title>Friend List</Title>
-        {friendList?.map((friendEmail) => (
-          <Email key={friendEmail}>{friendEmail}</Email>
+        {friendList?.map((friendEmail: string, index: number) => (
+          <Friend>
+            <Email key={friendEmail}>{friendEmail}</Email>
+            <div>{friendState[index]}</div>
+          </Friend>
         ))}
+
         <Title>Friend Request</Title>
         {friendRequest?.map((friendEmail) => (
           <FriendRequest>

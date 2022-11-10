@@ -108,6 +108,9 @@ function App() {
       unsub = onSnapshot(doc(db, "users", userId), (doc) => {
         setBattleInvitation(doc.data()?.battleInvitation);
       });
+    } else {
+      setBattleInvitation([]);
+      setShowInvitation(false);
     }
     return unsub;
   }, [isLogin, userId]);
@@ -143,10 +146,14 @@ function App() {
               if (e.key === "Enter" && inputVocab) setKeyword(inputVocab);
             }}
           />
-          <BellImg
-            src={battleInvitation?.length !== 0 ? yellowBell : bell}
-            onClick={() => setShowInvitation((prev) => !prev)}
-          />
+          {isLogin ? (
+            <BellImg
+              src={battleInvitation?.length !== 0 ? yellowBell : bell}
+              onClick={() => setShowInvitation((prev) => !prev)}
+            />
+          ) : (
+            <></>
+          )}
           <NavLink to={isLogin ? "/articles" : "/profile"}>Article</NavLink>
           <NavLink to={isLogin ? "/vocabbook" : "/profile"}>VocabBook</NavLink>
           <NavLink to={isLogin ? "/friends" : "/profile"}>Friend</NavLink>

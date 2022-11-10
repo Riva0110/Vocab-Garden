@@ -13,7 +13,6 @@ import {
   where,
   query,
   getDocs,
-  arrayRemove,
   arrayUnion,
 } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
@@ -229,6 +228,7 @@ export default function BattleReview() {
   const [showBtn, setShowBtn] = useState<boolean>(false);
   const [friendList, setFriendList] = useState<string[]>();
   const [hasInvited, setHasInvited] = useState<boolean[]>([]);
+  const [friendState, setFriendState] = useState<string[]>(["offline"]);
 
   const handleSyncScore = useCallback(
     async (answerCountAfterClick: AnswerCount) => {
@@ -285,6 +285,23 @@ export default function BattleReview() {
       setCurrentOptions(randomOptions);
     }
   }, [correctVocab, questionsNumber, reviewingQuestionsArr, round]);
+
+  useEffect(() => {
+    let newFriendState: any = [];
+    friendList?.forEach((friendEmail) => {
+      async function checkState() {
+        const friendRef = collection(db, "users");
+        const q = query(friendRef, where("email", "==", friendEmail));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((friendDoc) => {
+          newFriendState = [...newFriendState, friendDoc.data().state];
+          console.log("newFriendState", newFriendState);
+        });
+        setFriendState(newFriendState);
+      }
+      checkState();
+    });
+  }, [friendList]);
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "users", userId), (doc) => {
@@ -503,6 +520,7 @@ export default function BattleReview() {
                 {friendList?.map((friendEmail, index) => (
                   <InviteWrapper>
                     <Email key={friendEmail}>{friendEmail}</Email>
+                    <div>{friendState[index]}</div>
                     <button
                       onClick={() => {
                         const newHasInvited = [...hasInvited];
