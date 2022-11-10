@@ -121,7 +121,7 @@ export default function Profile() {
   const [password, setPassword] = useState<string>("");
   const [isMember, setIsMember] = useState<boolean>(true);
   const [score, setScore] = useState<number>(0);
-  const [isChallenging, setIsChallenging] = useState<boolean>();
+  const [isChallenging, setIsChallenging] = useState<boolean>(false);
   const [messages, setMessages] =
     useState<string>("選擇喜歡的植物，開始新的挑戰吧！");
   const [currentPlant, setCurrentPlant] = useState("begonia");

@@ -65,6 +65,7 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
       friendList: [],
       friendRequest: [],
       awaitingFriendReply: [],
+      battleInvitation: [],
     });
     setIsLogin(true);
     await setDoc(doc(db, "vocabBooks", user.uid), {

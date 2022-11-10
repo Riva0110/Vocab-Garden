@@ -9,7 +9,6 @@ import {
   onSnapshot,
   updateDoc,
   arrayUnion,
-  getDoc,
   arrayRemove,
 } from "firebase/firestore";
 import styled from "styled-components";
@@ -60,19 +59,8 @@ export default function Friends() {
   const emailInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const getMyUserInfo = async () => {
-      const userSnap = await getDoc(doc(db, "users", userId));
-      setMyEmail(userSnap?.data()?.email);
-      setFriendList(userSnap?.data()?.friendList);
-      setfriendRequest(userSnap?.data()?.friendRequest);
-    };
-    getMyUserInfo();
-  }, [userId]);
-
-  useEffect(() => {
-    console.log(userId);
     const unsub = onSnapshot(doc(db, "users", userId), (doc) => {
-      console.log("Current data: ", doc.data());
+      setMyEmail(doc.data()?.email);
       setFriendList(doc.data()?.friendList);
       setfriendRequest(doc.data()?.friendRequest);
       setAwaitingFriendReply(doc.data()?.awaitingFriendReply);
