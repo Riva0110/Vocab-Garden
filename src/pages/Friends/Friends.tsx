@@ -1,5 +1,5 @@
 import { authContext } from "../../context/authContext";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import {
   collection,
   getDocs,
@@ -57,6 +57,7 @@ export default function Friends() {
   const [friendList, setFriendList] = useState<string[]>();
   const [friendRequest, setfriendRequest] = useState<string[]>();
   const [awaitingFriendReply, setAwaitingFriendReply] = useState<string[]>();
+  const emailInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const getMyUserInfo = async () => {
@@ -146,19 +147,32 @@ export default function Friends() {
       <FriendsWrapper>
         <FriendRequest>
           <Input
+            ref={emailInput}
             placeholder="search by email..."
             onChange={(e) => setSearchingEmail(e.target.value)}
           />
-          <FriendBtn onClick={handleSendRequest}>Send Request</FriendBtn>
+          <FriendBtn
+            onClick={() => {
+              if (
+                emailInput.current !== undefined &&
+                emailInput.current !== null
+              ) {
+                emailInput.current.value = "";
+              }
+              handleSendRequest();
+            }}
+          >
+            Send Request
+          </FriendBtn>
         </FriendRequest>
         <Title>Friend List</Title>
         {friendList?.map((friendEmail) => (
-          <Email>{friendEmail}</Email>
+          <Email key={friendEmail}>{friendEmail}</Email>
         ))}
         <Title>Friend Request</Title>
         {friendRequest?.map((friendEmail) => (
           <FriendRequest>
-            <Email>{friendEmail}</Email>
+            <Email key={friendEmail}>{friendEmail}</Email>
             <div>
               <FriendBtn onClick={() => handleAccept(friendEmail)}>
                 Accept
@@ -171,7 +185,7 @@ export default function Friends() {
         ))}
         <Title>Awaiting Reply</Title>
         {awaitingFriendReply?.map((friendEmail) => (
-          <Email>{friendEmail}</Email>
+          <Email key={friendEmail}>{friendEmail}</Email>
         ))}
       </FriendsWrapper>
     </Wrapper>
