@@ -17,7 +17,6 @@ const Wrapper = styled.div`
   background-color: white;
   width: 100vw;
   min-height: 100vh;
-  /* font-family: "Poppins"; */
 `;
 
 const Header = styled.div`
@@ -29,8 +28,6 @@ const Header = styled.div`
   left: 0px;
   height: 60px;
   width: 100vw;
-  /* background-color: white; */
-  /* #405c73ff; */
   z-index: 1;
 `;
 
@@ -60,7 +57,6 @@ const Input = styled.input`
   padding-left: 10px;
   &:focus {
     outline: none;
-    /* box-shadow: 0px 0px 2px green; */
   }
 `;
 
@@ -78,7 +74,7 @@ function App() {
         </NavLink>
         <HeaderNav>
           <Input
-            placeholder="search..."
+            placeholder="search a word..."
             onChange={(e) => {
               e.target.value = e.target.value.toLowerCase();
               setInputVocab(e.target.value);
@@ -89,6 +85,7 @@ function App() {
           />
           <NavLink to={isLogin ? "/articles" : "/profile"}>Article</NavLink>
           <NavLink to={isLogin ? "/vocabbook" : "/profile"}>VocabBook</NavLink>
+          <NavLink to={isLogin ? "/friends" : "/profile"}>Friend</NavLink>
           <NavLink to={isLogin ? "/profile" : "/profile"}>Profile</NavLink>
         </HeaderNav>
       </Header>

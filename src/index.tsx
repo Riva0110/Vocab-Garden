@@ -19,6 +19,7 @@ import { AuthContextProvider } from "./context/authContext";
 import { VocabBookContextProvider } from "./context/vocabBookContext";
 import { ArticleWords } from "./pages/Article/ArticleWords";
 import reportWebVitals from "./reportWebVitals";
+import Friends from "./pages/Friends/Friends";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -46,6 +47,7 @@ root.render(
                   <Route path=":pin" element={<BattleReview />} />
                 </Route>
               </Route>
+              <Route path="friends" element={<Friends />} />
               <Route path="profile" element={<Profile />} />
               <Route path="*" element={<NoPage />} />
             </Route>

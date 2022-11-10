@@ -122,7 +122,8 @@ export default function Profile() {
   const [isMember, setIsMember] = useState<boolean>(true);
   const [score, setScore] = useState<number>(0);
   const [isChallenging, setIsChallenging] = useState<boolean>();
-  const [messages, setMessages] = useState<string>("");
+  const [messages, setMessages] =
+    useState<string>("選擇喜歡的植物，開始新的挑戰吧！");
   const [currentPlant, setCurrentPlant] = useState("begonia");
   const [plantPhase, setPlantPhase] = useState("0");
   const [isDying, setIsDying] = useState<boolean>(false);
@@ -148,7 +149,7 @@ export default function Profile() {
         Date.now() - data?.lastTimeUpdateScore.seconds * 1000;
       const deduction = Math.floor(timeDifference / 300000);
 
-      if (deduction > 0) {
+      if (data?.isChallenging && deduction > 0) {
         setIsDying(true);
         setScore((prev) => Math.max(prev - deduction, 0));
 
