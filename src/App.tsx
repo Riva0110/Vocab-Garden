@@ -14,11 +14,10 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 const Wrapper = styled.div`
-  background-color: #e9eef1ff;
+  background-color: white;
   width: 100vw;
-  padding-top: 60px;
-  min-height: calc(100vh - 60px);
-  font-family: "Poppins";
+  min-height: 100vh;
+  /* font-family: "Poppins"; */
 `;
 
 const Header = styled.div`
@@ -30,7 +29,8 @@ const Header = styled.div`
   left: 0px;
   height: 60px;
   width: 100vw;
-  background-color: #405c73ff;
+  /* background-color: white; */
+  /* #405c73ff; */
   z-index: 1;
 `;
 
@@ -48,7 +48,7 @@ const Main = styled.main`
 
 const NavLink = styled(Link)`
   margin-left: 20px;
-  color: white;
+  color: #4f4f4f;
   text-decoration: none;
 `;
 
@@ -58,6 +58,10 @@ const Input = styled.input`
   border: none;
   border-radius: 5px;
   padding-left: 10px;
+  &:focus {
+    outline: none;
+    /* box-shadow: 0px 0px 2px green; */
+  }
 `;
 
 function App() {

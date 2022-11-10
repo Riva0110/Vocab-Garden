@@ -367,6 +367,7 @@ export default function BattleReview() {
             await updateDoc(docRef, {
               currentScore: score + 1,
               lastTimeUpdateScore: new Date(),
+              isDying: false,
             });
           }
         }

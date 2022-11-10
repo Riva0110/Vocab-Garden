@@ -5,6 +5,7 @@ import { useState } from "react";
 const Wrapper = styled.div`
   display: flex;
   padding: 20px;
+  margin-top: 60px;
 `;
 
 type ContextType = {

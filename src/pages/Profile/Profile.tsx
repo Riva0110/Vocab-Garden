@@ -1,22 +1,31 @@
 import styled, { css } from "styled-components";
 import { authContext } from "../../context/authContext";
 import { useContext, useState, useEffect } from "react";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
-import plant1_5 from "./plantImgs/plant1-5.png";
-import plant2_5 from "./plantImgs/plant2-5.png";
-import plant3_5 from "./plantImgs/plant3-5.png";
-import plant4_5 from "./plantImgs/plant4-5.png";
-import plant5_5 from "./plantImgs/plant5-5.png";
-import plant6_5 from "./plantImgs/plant6-5.png";
+import { plantImgsObj } from "./plantImgs";
 
 interface Props {
   insideColor?: boolean;
   score?: number;
 }
 
+const LoginWrapper = styled.div`
+  padding: 20px;
+  margin-top: 60px;
+  display: block;
+`;
+
 const Wrapper = styled.div`
   padding: 20px;
+  margin-top: 60px;
+  display: flex;
+`;
+
+const Select = styled.select``;
+
+const ScoreBarWrapper = styled.div`
+  width: 200px;
 `;
 
 const ScoreBar = styled.div`
@@ -37,23 +46,73 @@ const ScoreBar = styled.div`
     `}
 `;
 
+const ScoreDiv = styled.div`
+  padding-right: 10px;
+  text-align: end;
+`;
+
+const UserInfoWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 35vw;
+`;
+
+const GrowingPlantImg = styled.img`
+  width: 250px;
+  height: 300px;
+  @media screen and (max-width: 600px) {
+    width: 100px;
+    height: 120px;
+  }
+`;
+
 const Btn = styled.button``;
 
 const Plants = styled.div`
   display: flex;
-  gap: 30px;
   flex-wrap: wrap;
   margin-top: 30px;
+  width: 65vw;
+  gap: 20px;
 `;
-const PlantImg = styled.img`
+
+const PlantBorder = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px lightgray solid;
+  border-radius: 10px;
   width: 200px;
-  height: 240px;
+  height: 260px;
+  padding: 30px;
   @media screen and (max-width: 600px) {
     width: 100px;
+    height: 120px;
   }
 `;
 
-const plants = [plant1_5, plant2_5, plant3_5, plant4_5, plant5_5, plant6_5];
+const PlantImg = styled.img`
+  width: 100%;
+  height: 85%;
+  margin-bottom: 20px;
+`;
+
+const PlantName = styled.div``;
+
+const Time = styled.div`
+  color: gray;
+  font-size: 12px;
+`;
+
+interface PlantsListInterface {
+  plantName: string;
+  time: {
+    seconds: number;
+    nanoseconds: number;
+  };
+}
 
 export default function Profile() {
   const { isLogin, login, logout, signup, userId } = useContext(authContext);
@@ -64,88 +123,203 @@ export default function Profile() {
   const [score, setScore] = useState<number>(0);
   const [isChallenging, setIsChallenging] = useState<boolean>();
   const [messages, setMessages] = useState<string>("");
+  const [currentPlant, setCurrentPlant] = useState("begonia");
+  const [plantPhase, setPlantPhase] = useState("0");
+  const [isDying, setIsDying] = useState<boolean>(false);
+  const [plantsList, setPlantsList] = useState<PlantsListInterface[]>([]);
 
   useEffect(() => {
-    if (isLogin) {
-      const getUserInfo = async (userId: string) => {
-        const docRef = doc(db, "users", userId);
-        const docSnap: any = await getDoc(docRef);
-        setName(docSnap.data().name);
-        setIsChallenging(docSnap.data().isChallenging);
-        const currentScore = docSnap.data().currentScore;
-        const timeDifference =
-          Date.now() - docSnap.data().lastTimeUpdateScore.seconds * 1000;
+    const getAndUpdateUserInfo = async () => {
+      const plantsRef = doc(db, "plantsList", userId);
+      const plantsSnap = await getDoc(plantsRef);
+      const plantData = plantsSnap.data()?.plants as PlantsListInterface[];
+      setPlantsList(plantData);
 
-        if (currentScore === 5) {
+      const userRef = doc(db, "users", userId);
+      const userDocSnap = await getDoc(userRef);
+      const data = userDocSnap.data();
+      setName(data?.name);
+      setIsChallenging(data?.isChallenging);
+      setIsDying(data?.isDying);
+      setCurrentPlant(data?.currentPlant);
+      setScore(data?.currentScore);
+
+      const timeDifference =
+        Date.now() - data?.lastTimeUpdateScore.seconds * 1000;
+      const deduction = Math.floor(timeDifference / 300000);
+
+      if (deduction > 0) {
+        setIsDying(true);
+        setScore((prev) => Math.max(prev - deduction, 0));
+
+        const userRef = doc(db, "users", userId);
+        await updateDoc(userRef, {
+          currentScore: Math.max(data?.currentScore - deduction, 0),
+          lastTimeUpdateScore: new Date(),
+          isDying: true,
+        });
+      }
+    };
+
+    getAndUpdateUserInfo();
+  }, [userId]);
+
+  useEffect(() => {
+    if (isChallenging) {
+      if (isDying) {
+        if (score === 0) {
           setIsChallenging(false);
-          setScore(currentScore);
-          setMessages("恭喜你，植物長大了！再種一顆新的吧");
-          const resetScore = async () => {
-            const userRef = doc(db, "users", userId);
-            await updateDoc(userRef, {
-              isChallenging: false,
-            });
-          };
-          resetScore();
-        } else if (
-          // test 每 5 分鐘扣 1 分
-          timeDifference > 300000 &&
-          docSnap.data().currentScore > 0 &&
-          isChallenging
-        ) {
+          setPlantPhase("minus1");
+          setMessages("植物被你養死了QQ 挑戰失敗！");
+        } else if (score <= 2) {
+          setPlantPhase("minus1");
+          setMessages("植物枯萎了，再加把勁！");
+        } else if (score <= 4) {
+          setPlantPhase("minus3");
           setMessages("好多天沒看到你了，植物想你囉！");
-          const dedction = Math.floor(timeDifference / 300000);
-          setScore(Math.max(currentScore - dedction, 0));
-          const resetScore = async () => {
-            const userRef = doc(db, "users", userId);
-            await updateDoc(userRef, {
-              currentScore: Math.max(currentScore - dedction, 0),
-              lastTimeUpdateScore: new Date(),
-            });
-          };
-          resetScore();
-        } else if (isChallenging) {
-          setMessages("加油加油，再努力一點，植物快長大囉！");
-          setScore(currentScore);
-        } else {
-          setMessages("種顆新植物，來挑戰你自己吧！");
         }
-      };
-      getUserInfo(userId);
-    }
-  }, [userId, isLogin, isChallenging]);
+      } else {
+        if (score <= 2) {
+          setPlantPhase("0");
+          setMessages("加油加油，再努力一點，植物快長大囉！");
+        } else if (score <= 4) {
+          setPlantPhase("3");
+          setMessages("你好棒喔！植物長出新葉片了！");
+        } else if (score === 5) {
+          setIsChallenging(false);
+          setPlantPhase("5");
+          setMessages("挑戰成功，植物長大了！趕快收藏到花園吧");
+        }
 
-  const handleStartChallenge = () => {
-    setIsChallenging(true);
-    setScore(0);
-    const resetScore = async () => {
+        if (score === 3 || score === 4) setPlantPhase("3");
+      }
+    }
+
+    const updateUserInfo = async () => {
       const userRef = doc(db, "users", userId);
       await updateDoc(userRef, {
-        currentScore: 0,
-        isChallenging: true,
+        isDying,
+        isChallenging,
       });
     };
-    resetScore();
+
+    updateUserInfo();
+  }, [isChallenging, isDying, score, userId]);
+
+  function handleStartChallenge() {
+    setIsChallenging(true);
+    setScore(0);
+    setIsDying(false);
+    setPlantPhase("0");
+
+    const startChallenge = async () => {
+      const userRef = doc(db, "users", userId);
+      await updateDoc(userRef, {
+        isChallenging: true,
+        currentScore: 0,
+        isDying: false,
+        currentPlant: currentPlant,
+        lastTimeUpdateScore: new Date(),
+      });
+    };
+    startChallenge();
+  }
+
+  const handleSavePlant = async () => {
+    const plantsRef = doc(db, "plantsList", userId);
+    await updateDoc(plantsRef, {
+      plants: arrayUnion({
+        plantName: currentPlant,
+        time: new Date(),
+      }),
+    });
+
+    const userRef = doc(db, "users", userId);
+    await updateDoc(userRef, {
+      currentScore: 0,
+      lastTimeUpdateScore: new Date(),
+      currentPlant,
+    });
+    setMessages("選擇喜歡的植物，開始新的挑戰吧！");
+    setScore(0);
+    setPlantPhase("0");
+    setPlantsList(
+      (prev) =>
+        [
+          ...prev,
+          {
+            plantName: currentPlant,
+            time: new Date(),
+          },
+        ] as PlantsListInterface[]
+    );
   };
 
   function renderProile() {
     return (
       <Wrapper>
-        <p>{name}’s Vocab Garden</p>
-        <ScoreBar insideColor={true} score={score}>
-          <ScoreBar>{score} / 5</ScoreBar>
-        </ScoreBar>
-        <p>{messages}</p>
-        {isChallenging ? (
-          <></>
-        ) : (
-          <Btn onClick={() => handleStartChallenge()}>Start a challenge</Btn>
-        )}
-        <button onClick={() => logout()}>Log out</button>
+        <UserInfoWrapper>
+          <p>{name}’s Vocab Garden</p>
+          <GrowingPlantImg
+            src={plantImgsObj[currentPlant]?.[plantPhase]}
+            alt="plants"
+          />
+          <ScoreBarWrapper>
+            <ScoreBar insideColor={true} score={score}>
+              <ScoreBar>
+                <ScoreDiv>{score} / 5</ScoreDiv>
+              </ScoreBar>
+            </ScoreBar>
+          </ScoreBarWrapper>
+          <p>{messages}</p>
+          {isChallenging ? (
+            <></>
+          ) : score !== 5 ? (
+            <>
+              <Select
+                defaultValue={currentPlant}
+                onChange={async (e: any) => {
+                  setCurrentPlant(e.target.value);
+                  setIsDying(false);
+                  setPlantPhase("0");
+                  setMessages("選擇喜歡的植物，開始新的挑戰吧！");
+                  const userRef = doc(db, "users", userId);
+                  await updateDoc(userRef, {
+                    isDying: false,
+                  });
+                }}
+              >
+                {Object.keys(plantImgsObj)?.map((plant, index) => (
+                  <option key={plant}>{plant}</option>
+                ))}
+              </Select>
+
+              <Btn onClick={() => handleStartChallenge()}>
+                Start a challenge
+              </Btn>
+            </>
+          ) : (
+            <Btn onClick={() => handleSavePlant()}>
+              Save the plant in your garden!
+            </Btn>
+          )}
+          <button onClick={() => logout()}>Log out</button>
+        </UserInfoWrapper>
         <Plants>
-          {plants.map((plant) => (
-            <PlantImg src={plant} alt="plants" key={plant} />
-          ))}
+          {plantsList?.map(({ plantName, time }, index) => {
+            const newDate = new Date(time.seconds * 1000);
+            return (
+              <PlantBorder>
+                <PlantImg
+                  src={plantImgsObj[plantName]["5"]}
+                  alt="plants"
+                  key={plantName + index}
+                />
+                <PlantName>{plantName}</PlantName>
+                <Time>{newDate.toLocaleString()}</Time>
+              </PlantBorder>
+            );
+          })}
         </Plants>
       </Wrapper>
     );
@@ -153,7 +327,7 @@ export default function Profile() {
 
   function renderLoginPage() {
     return isMember ? (
-      <Wrapper>
+      <LoginWrapper>
         <p>登入 / 註冊會員，享有完整功能！</p>
         <div>Login</div>
         <input placeholder="email" onChange={(e) => setEmail(e.target.value)} />
@@ -164,9 +338,9 @@ export default function Profile() {
         />
         <button onClick={() => login(email, password)}>Log in</button>
         <p onClick={() => setIsMember(false)}>還不是會員？</p>
-      </Wrapper>
+      </LoginWrapper>
     ) : (
-      <Wrapper>
+      <LoginWrapper>
         <p>登入 / 註冊會員，享有完整功能！</p>
         <div>Signup</div>
         <input placeholder="name" onChange={(e) => setName(e.target.value)} />
@@ -178,7 +352,7 @@ export default function Profile() {
         />
         <button onClick={() => signup(email, password, name)}>Signup</button>
         <p onClick={() => setIsMember(true)}>已經是會員？</p>
-      </Wrapper>
+      </LoginWrapper>
     );
   }
 
