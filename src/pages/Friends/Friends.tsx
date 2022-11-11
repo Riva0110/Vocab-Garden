@@ -31,6 +31,7 @@ const Input = styled.input`
 `;
 
 const FriendBtn = styled.button`
+  width: 200px;
   height: 20px;
 `;
 
