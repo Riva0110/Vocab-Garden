@@ -78,6 +78,32 @@ export default function Friends() {
   }, [isLogin, userId]);
 
   useEffect(() => {
+    let unsub;
+    if (isLogin && friendList?.length) {
+      unsub = onSnapshot(
+        query(collection(db, "users"), where("email", "in", friendList)),
+        (doc) => {
+          let newFriendState: any = [];
+          friendList?.forEach((friendEmail) => {
+            async function checkState() {
+              const friendRef = collection(db, "users");
+              const q = query(friendRef, where("email", "==", friendEmail));
+              const querySnapshot = await getDocs(q);
+              querySnapshot.forEach((friendDoc) => {
+                newFriendState = [...newFriendState, friendDoc.data().state];
+                console.log("newFriendState", newFriendState);
+              });
+              setFriendState(newFriendState);
+            }
+            checkState();
+          });
+        }
+      );
+    }
+    return unsub;
+  }, [friendList, isLogin, userId]);
+
+  useEffect(() => {
     let newFriendState: any = [];
     friendList?.forEach((friendEmail) => {
       async function checkState() {
