@@ -15,11 +15,11 @@ exports.onUserStatusChanged = functions.database
     const statusSnapshot = await change.after.ref.once("value");
     const status = statusSnapshot.val();
     functions.logger.log(status, eventStatus);
-    if (status.last_changed > eventStatus.last_changed) {
+    if (status.state_last_changed > eventStatus.state_last_changed) {
       return null;
     }
 
-    eventStatus.last_changed = new Date(eventStatus.last_changed);
+    eventStatus.state_last_changed = new Date(eventStatus.state_last_changed);
 
     return userStatusFirestoreRef.set(eventStatus, { merge: true });
   });

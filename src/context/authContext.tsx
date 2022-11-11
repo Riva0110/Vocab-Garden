@@ -65,12 +65,12 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
 
     const isOfflineForDatabase = {
       state: "offline",
-      last_changed: serverTimestamp(),
+      state_last_changed: serverTimestamp(),
     };
 
     const isOnlineForDatabase = {
       state: "online",
-      last_changed: serverTimestamp(),
+      state_last_changed: serverTimestamp(),
     };
 
     onValue(connectedRef, (snap) => {
@@ -118,6 +118,7 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
     const updateState = async () => {
       await updateDoc(doc(db, "users", res.user.uid), {
         state: "online",
+        state_last_changed: new Date(),
       });
     };
     updateState();
@@ -127,6 +128,7 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
     const updateState = async () => {
       await updateDoc(doc(db, "users", userId), {
         state: "offline",
+        state_last_changed: new Date(),
       });
     };
     updateState();
