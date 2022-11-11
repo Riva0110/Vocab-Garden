@@ -4,7 +4,17 @@ import { authContext } from "../../../context/authContext";
 import audio from "../../../components/audio.png";
 import { useReviewLayout } from "./ReviewLayout";
 import { useNavigate } from "react-router-dom";
-import { doc, getDoc, updateDoc, onSnapshot } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  onSnapshot,
+  collection,
+  where,
+  query,
+  getDocs,
+  arrayUnion,
+} from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
 import { useParams } from "react-router-dom";
 
@@ -143,6 +153,20 @@ const VocabList = styled.div`
   margin-bottom: 10px;
 `;
 
+const Title = styled.div`
+  margin-top: 50px;
+  border-bottom: 1px solid gray;
+`;
+
+const InviteWrapper = styled.div`
+  margin-top: 20px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+`;
+
+const Email = styled.div``;
+
 interface AnswerCount {
   owner: { correct: number; wrong: number };
   competitor: { correct: number; wrong: number };
@@ -202,6 +226,9 @@ export default function BattleReview() {
   ]);
   const [countDown, setCountDown] = useState<number>(5);
   const [showBtn, setShowBtn] = useState<boolean>(false);
+  const [friendList, setFriendList] = useState<string[]>();
+  const [hasInvited, setHasInvited] = useState<boolean[]>([]);
+  const [friendState, setFriendState] = useState<string[]>(["offline"]);
 
   const handleSyncScore = useCallback(
     async (answerCountAfterClick: AnswerCount) => {
@@ -258,6 +285,57 @@ export default function BattleReview() {
       setCurrentOptions(randomOptions);
     }
   }, [correctVocab, questionsNumber, reviewingQuestionsArr, round]);
+
+  useEffect(() => {
+    let newFriendState: any = [];
+    friendList?.forEach((friendEmail) => {
+      async function checkState() {
+        const friendRef = collection(db, "users");
+        const q = query(friendRef, where("email", "==", friendEmail));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((friendDoc) => {
+          newFriendState = [...newFriendState, friendDoc.data().state];
+          console.log("newFriendState", newFriendState);
+        });
+        setFriendState(newFriendState);
+      }
+      checkState();
+    });
+  }, [friendList]);
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "users", userId), (doc) => {
+      setFriendList(doc.data()?.friendList);
+    });
+
+    return unsub;
+  }, [userId]);
+
+  useEffect(() => {
+    let unsub;
+    if (isLogin && friendList?.length) {
+      unsub = onSnapshot(
+        query(collection(db, "users"), where("email", "in", friendList)),
+        (doc) => {
+          let newFriendState: any = [];
+          friendList?.forEach((friendEmail) => {
+            async function checkState() {
+              const friendRef = collection(db, "users");
+              const q = query(friendRef, where("email", "==", friendEmail));
+              const querySnapshot = await getDocs(q);
+              querySnapshot.forEach((friendDoc) => {
+                newFriendState = [...newFriendState, friendDoc.data().state];
+                console.log("newFriendState", newFriendState);
+              });
+              setFriendState(newFriendState);
+            }
+            checkState();
+          });
+        }
+      );
+    }
+    return unsub;
+  }, [friendList, isLogin, userId]);
 
   useEffect(() => {
     let unsub;
@@ -431,6 +509,28 @@ export default function BattleReview() {
     }
   }
 
+  const handleInviteFriendBattle = async (
+    friendEmail: string,
+    index: number
+  ) => {
+    if (hasInvited[index]) return;
+    const friendRef = collection(db, "users");
+    const q = query(friendRef, where("email", "==", friendEmail));
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) alert("The user doesn't exist!");
+    querySnapshot.forEach((friendDoc) => {
+      const updateFriendStatus = async () => {
+        await updateDoc(doc(db, "users", friendDoc.id), {
+          battleInvitation: arrayUnion({
+            ownerName,
+            pin: pin,
+          }),
+        });
+      };
+      updateFriendStatus();
+    });
+  };
+
   function renderWaiting() {
     return (
       <Main>
@@ -440,7 +540,27 @@ export default function BattleReview() {
             isCompetitorIn ? (
               <StartGame onClick={handleStartBattle}>Start</StartGame>
             ) : (
-              <p>Waiting for the competitor joining the battle</p>
+              <>
+                <p>Waiting for the competitor joining the battle</p>
+                <Title>Friend List</Title>
+                {friendList?.map((friendEmail, index) => (
+                  <InviteWrapper>
+                    <Email key={friendEmail}>{friendEmail}</Email>
+                    <div>{friendState[index]}</div>
+                    <button
+                      onClick={() => {
+                        const newHasInvited = [...hasInvited];
+                        newHasInvited[index] = true;
+                        setHasInvited(newHasInvited);
+                        handleInviteFriendBattle(friendEmail, index);
+                      }}
+                    >
+                      {" "}
+                      {!hasInvited[index] ? "Invite" : "Inviting"}
+                    </button>
+                  </InviteWrapper>
+                ))}
+              </>
             )
           ) : isCompetitorIn ? (
             <p>Waiting for the owner starting the battle</p>

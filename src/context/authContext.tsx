@@ -1,6 +1,15 @@
 import { createContext, useState } from "react";
-import { doc, setDoc, arrayUnion } from "firebase/firestore";
+import { doc, setDoc, arrayUnion, updateDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/firebase";
+import {
+  getDatabase,
+  ref,
+  onValue,
+  onDisconnect,
+  set,
+  serverTimestamp,
+} from "firebase/database";
+
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -46,7 +55,34 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
         setIsLogin(false);
       }
     });
-  }, []);
+  }, [userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+    const db = getDatabase();
+    const myConnectionsRef = ref(db, `/status/${userId}`);
+    const connectedRef = ref(db, ".info/connected");
+
+    const isOfflineForDatabase = {
+      state: "offline",
+      state_last_changed: serverTimestamp(),
+    };
+
+    const isOnlineForDatabase = {
+      state: "online",
+      state_last_changed: serverTimestamp(),
+    };
+
+    onValue(connectedRef, (snap) => {
+      if (snap.val() === true) {
+        onDisconnect(myConnectionsRef)
+          .set(isOfflineForDatabase)
+          .then(function () {
+            set(myConnectionsRef, isOnlineForDatabase);
+          });
+      }
+    });
+  }, [userId]);
 
   const signup = async (email: string, password: string, name: string) => {
     const userCredential = await createUserWithEmailAndPassword(
@@ -57,10 +93,16 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
     const user = userCredential.user;
     await setDoc(doc(db, "users", user.uid), {
       name,
+      email,
+      state: "online",
       currentPlant: "begonia",
       currentScore: 0,
       lastTimeUpdateScore: new Date(),
       isChallenging: false,
+      friendList: [],
+      friendRequest: [],
+      awaitingFriendReply: [],
+      battleInvitation: [],
     });
     setIsLogin(true);
     await setDoc(doc(db, "vocabBooks", user.uid), {
@@ -72,16 +114,38 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
   };
 
   const login = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
+    const res = await signInWithEmailAndPassword(auth, email, password);
+    const updateState = async () => {
+      await updateDoc(doc(db, "users", res.user.uid), {
+        state: "online",
+        state_last_changed: new Date(),
+      });
+    };
+    updateState();
   };
 
   const logout = async () => {
+    const updateState = async () => {
+      await updateDoc(doc(db, "users", userId), {
+        state: "offline",
+        state_last_changed: new Date(),
+      });
+    };
+    updateState();
     await signOut(auth);
   };
 
   return (
     <authContext.Provider
-      value={{ userId, setUserId, isLogin, setIsLogin, signup, login, logout }}
+      value={{
+        userId,
+        setUserId,
+        isLogin,
+        setIsLogin,
+        signup,
+        login,
+        logout,
+      }}
     >
       {children}
     </authContext.Provider>
