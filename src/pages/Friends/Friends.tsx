@@ -15,6 +15,7 @@ import styled from "styled-components";
 import { db } from "../../firebase/firebase";
 import plant from "./plant.png";
 import plant2 from "./plant2.png";
+import plant3 from "./plant3.png";
 
 const Wrapper = styled.div`
   display: flex;
@@ -36,6 +37,15 @@ const Img2 = styled.img`
   left: 40px;
   top: 0px;
 `;
+
+// const Img3 = styled.img`
+//   position: absolute;
+//   height: 100vh;
+//   min-width: 400px;
+//   max-width: 500px;
+//   right: 0px;
+//   bottom: 0px;
+// `;
 
 const FriendsWrapper = styled.div`
   display: flex;

@@ -69,8 +69,7 @@ const Book = styled.div`
   border: solid
     ${(props: Props) => (props.selected ? "2px  darkgreen" : "1px gray")};
   color: ${(props: Props) => (props.selected ? "black" : "gray")};
-  background-color: ${(props: Props) =>
-    props.selected ? "rgba(183, 196, 167, 0.7)" : "lightgray"};
+  background-color: lightgray;
   padding: 10px;
   font-size: 18px;
   font-weight: 600;
