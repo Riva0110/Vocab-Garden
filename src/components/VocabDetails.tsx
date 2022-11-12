@@ -162,11 +162,19 @@ export default function VocabDetails() {
         audioLink: vocabDetails?.phonetics?.[0]?.audio || "",
         partOfSpeech: vocabDetails?.meanings?.[0].partOfSpeech,
         definition: vocabDetails?.meanings?.[0].definitions?.[0].definition,
+        correctRate: 0,
+        log: [],
       }),
     });
     await setDoc(doc(db, "savedVocabs", `${userId}+${vocabDetails?.word}`), {
+      userId,
       vocab: vocabDetails?.word,
       vocabBook: selectedvocabBook,
+      audioLink: vocabDetails?.phonetics?.[0]?.audio || "",
+      partOfSpeech: vocabDetails?.meanings?.[0].partOfSpeech,
+      definition: vocabDetails?.meanings?.[0].definitions?.[0].definition,
+      correctRate: 0,
+      log: [],
     });
     await getVocabBooks(userId);
   };
@@ -194,16 +202,21 @@ export default function VocabDetails() {
     }
   };
 
+  function getSelectedText() {
+    if (window.getSelection) {
+      const txt = window.getSelection()?.toString();
+      if (typeof txt !== "undefined") setKeyword(txt);
+    }
+  }
+
   useEffect(() => {
     async function fetchVocabDetails(resourceUrl: string) {
-      try {
-        const response = await fetch(resourceUrl);
-        const data = await response.json();
-        setVocabDetails(data[0]);
-        setIsLoading(false);
-      } catch {
-        setIsLoading(false);
-      }
+      const response = await fetch(resourceUrl);
+      const data = await response.json();
+      if (data.title === "No Definitions Found")
+        return alert("Sorry......No result.");
+      setVocabDetails(data[0]);
+      setIsLoading(false);
     }
     fetchVocabDetails(resourceUrl);
   }, [resourceUrl]);
@@ -240,7 +253,7 @@ export default function VocabDetails() {
     <p>
       <SpinnerImg src={spinner} alt="spinner" />
     </p>
-  ) : vocabDetails ? (
+  ) : (
     <Wrapper>
       <VocabWrapper>
         <TitleContainer>
@@ -293,58 +306,28 @@ export default function VocabDetails() {
           {vocabDetails?.meanings?.map(
             ({ partOfSpeech, definitions, synonyms }) => (
               <>
-                <PartOfSpeech key={partOfSpeech}>
-                  {partOfSpeech
-                    ?.split(/([\s!]+)/)
-                    .map((word: string, index: number) => (
-                      <span
-                        key={index}
-                        onClick={() => {
-                          setKeyword(word);
-                          setIsPopuping(false);
-                        }}
-                      >
-                        {word}
-                      </span>
-                    ))}
+                <PartOfSpeech
+                  key={partOfSpeech}
+                  onClick={() => getSelectedText()}
+                >
+                  {partOfSpeech}
                 </PartOfSpeech>
-                <SubTitle>Definitions</SubTitle>
+                <SubTitle onClick={() => getSelectedText()}>
+                  Definitions
+                </SubTitle>
                 <ul>
                   {definitions?.map(
                     ({ definition, example }, index: number) => (
                       <DefinitionWrapper key={index}>
-                        <Definition key={definition}>
-                          {definition
-                            ?.split(/([\s!]+)/)
-                            .map((word: string, index: number) => (
-                              <span
-                                key={index}
-                                onClick={() => {
-                                  setKeyword(word);
-                                  setIsPopuping(false);
-                                }}
-                              >
-                                {word}
-                              </span>
-                            ))}
+                        <Definition
+                          key={definition}
+                          onClick={() => getSelectedText()}
+                        >
+                          {definition}
                         </Definition>
                         {example && (
-                          <Example>
-                            "
-                            {example
-                              ?.split(/([\s!]+)/)
-                              .map((word: string, index: number) => (
-                                <span
-                                  key={index}
-                                  onClick={() => {
-                                    setKeyword(word);
-                                    setIsPopuping(false);
-                                  }}
-                                >
-                                  {word}
-                                </span>
-                              ))}
-                            "
+                          <Example onClick={() => getSelectedText()}>
+                            "{example}"
                           </Example>
                         )}
                       </DefinitionWrapper>
@@ -353,7 +336,9 @@ export default function VocabDetails() {
                 </ul>
                 {synonyms?.length !== 0 ? (
                   <>
-                    <SubTitle>Synonyms</SubTitle>
+                    <SubTitle onClick={() => getSelectedText()}>
+                      Synonyms
+                    </SubTitle>
                     {synonyms?.map((synonym: string, index: number) => (
                       <Synonyms
                         key={index}
@@ -375,10 +360,5 @@ export default function VocabDetails() {
         </Meanings>
       </VocabWrapper>
     </Wrapper>
-  ) : (
-    <>
-      <LastVocabBtn>Back</LastVocabBtn>
-      <Wrapper>Sorry......No result.</Wrapper>
-    </>
   );
 }

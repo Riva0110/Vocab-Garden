@@ -87,6 +87,11 @@ const VocabTitle = styled.div`
   font-size: 20px;
   font-weight: 600;
 `;
+
+const Vocab = styled.span`
+  cursor: pointer;
+`;
+
 const AudioImg = styled.img`
   width: 20px;
   height: 20px;
@@ -163,9 +168,16 @@ export default function VocabBook() {
     }
   };
 
+  function getSelectedText() {
+    if (window.getSelection) {
+      const txt = window.getSelection()?.toString();
+      if (typeof txt !== "undefined") setKeyword(txt);
+    }
+  }
+
   useEffect(() => {
     getVocabBooks(userId);
-  }, []);
+  });
 
   return (
     <Wrapper>
@@ -211,9 +223,9 @@ export default function VocabBook() {
                 <>
                   <Card>
                     <VocabTitle>
-                      <span key={index} onClick={() => setKeyword(vocab)}>
+                      <Vocab key={index} onClick={() => setKeyword(vocab)}>
                         {vocab}
-                      </span>
+                      </Vocab>
                       {audioLink ? (
                         <AudioImg
                           src={audio}
@@ -229,15 +241,11 @@ export default function VocabBook() {
                         onClick={() => handleDeleteVocabFromBook(vocab)}
                       />
                     </VocabTitle>
-                    <CardText weight={true}>({partOfSpeech})</CardText>
-                    <CardText>
-                      {definition
-                        ?.split(/([\s!]+)/)
-                        .map((word: string, index: number) => (
-                          <span key={index} onClick={() => setKeyword(word)}>
-                            {word}
-                          </span>
-                        ))}
+                    <CardText weight={true} onClick={() => getSelectedText()}>
+                      ({partOfSpeech})
+                    </CardText>
+                    <CardText onClick={() => getSelectedText()}>
+                      {definition}
                     </CardText>
                   </Card>
                 </>

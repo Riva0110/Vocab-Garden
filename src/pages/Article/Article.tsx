@@ -13,7 +13,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
-import Editor from "./Editor/LexicalEditor";
+import QuillEditor from "./Editor/QuillEditor";
 import "./Editor/style.css";
 
 const Wrapper = styled.div`
@@ -42,7 +42,7 @@ const ContentLabel = styled(TitleLabel)`
 `;
 
 const ContentTextArea = styled.textarea`
-  height: 100%;
+  height: 50%;
 `;
 
 const Title = styled.div`
@@ -62,7 +62,10 @@ const Btns = styled.div`
   gap: 10px;
 `;
 
-const DoneBtn = styled.button``;
+const DoneBtn = styled.button`
+  margin-top: 50px;
+`;
+
 const BackBtn = styled.button`
   width: 50px;
 `;
@@ -91,16 +94,17 @@ export default function Article() {
     if (articlePathName === "add") setIsEditing(true);
   }, [userId, articlePathName]);
 
+  function getSelectedText() {
+    if (window.getSelection) {
+      const txt = window.getSelection()?.toString();
+      if (typeof txt !== "undefined") setKeyword(txt);
+    }
+  }
+
   const renderReadMode = () => (
     <>
       <TitleBtnWrapper>
-        <Title>
-          {title.split(/([\s!]+)/).map((word: string, index: number) => (
-            <span key={index} onClick={() => setKeyword(word)}>
-              {word}
-            </span>
-          ))}
-        </Title>
+        <Title onClick={() => getSelectedText()}>{title}</Title>
         <Btns>
           <BackBtn onClick={() => navigate("/articles")}>Back</BackBtn>
           <EditBtn
@@ -113,13 +117,10 @@ export default function Article() {
           </EditBtn>
         </Btns>
       </TitleBtnWrapper>
-      <Content>
-        {content.split(/([\s!]+)/).map((word: string, index: number) => (
-          <span key={index} onClick={() => setKeyword(word)}>
-            {word}
-          </span>
-        ))}
-      </Content>
+      <Content
+        dangerouslySetInnerHTML={{ __html: content }}
+        onClick={() => getSelectedText()}
+      />
     </>
   );
 
@@ -133,11 +134,11 @@ export default function Article() {
           onChange={(e) => setTitle(e.target.value)}
         />
         <ContentLabel>Content</ContentLabel>
-        <ContentTextArea
+        {/* <ContentTextArea
           defaultValue={articlePathName === "add" ? "" : content}
           onChange={(e) => setContent(e.target.value)}
-        />
-        <Editor />
+        /> */}
+        <QuillEditor content={content} setContent={setContent} />
         <DoneBtn
           onClick={async () => {
             if (title && content && userId && articlePathName !== "add") {
@@ -164,7 +165,7 @@ export default function Article() {
               });
               navigate(`/articles/${docRef.id}?title=${title}`);
             } else {
-              alert("Title and content cannot be left blank!");
+              alert("Title and content cannot be blank!");
             }
           }}
         >
