@@ -19,7 +19,7 @@ const ArticleTitle = styled.div`
 
 const Time = styled.div`
   color: gray;
-  font-size: 10px;
+  font-size: 14px;
 `;
 
 const Title = styled.div`

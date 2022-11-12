@@ -22,7 +22,7 @@ interface Props {
 }
 
 const Wrapper = styled.div`
-  font-size: 12px;
+  font-size: 16px;
   padding: 20px;
   border: 1px gray solid;
   width: 50vw;
@@ -97,7 +97,6 @@ const PartOfSpeech = styled.div`
   margin-top: 30px;
   margin-bottom: 20px;
   border-bottom: 1px gray solid;
-  font-size: 14px;
 `;
 
 const SubTitle = styled.div`

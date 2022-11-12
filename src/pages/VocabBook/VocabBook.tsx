@@ -25,7 +25,7 @@ const Wrapper = styled.div`
 
 const Img = styled.img`
   position: absolute;
-  left: 0px;
+  right: 0px;
   bottom: 0px;
   width: 500px;
 `;

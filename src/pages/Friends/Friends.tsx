@@ -25,7 +25,7 @@ const Img = styled.img`
   position: absolute;
   width: 50vw;
   min-width: 400px;
-  max-width: 800px;
+  max-width: 500px;
   right: 0px;
   bottom: 0px;
 `;

@@ -23,7 +23,7 @@ const Wrapper = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 80px 20px 20px 20px;
-  width: 100vw;
+  width: calc(100vw - 40px);
 `;
 
 const ModeBtns = styled.div`

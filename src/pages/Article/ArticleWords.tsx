@@ -14,18 +14,15 @@ const commonWordsArray = commonWords
   .replace(/[^a-zA-Z]/g, " ")
   .split(" ");
 
-const Wrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin-right: 50px;
-  width: 50%;
-  height: calc(100vh - 30px);
-  overflow-y: scroll;
+const Wrapper = styled.div``;
+
+const WordsWrapper = styled.div`
+  background-color: rgb(255, 255, 255, 0.7);
 `;
 
 const Buttons = styled.div`
   display: flex;
-  position: absolute;
+  gap: 10px;
 `;
 
 const Btn = styled.button`
@@ -39,6 +36,9 @@ const Input = styled.input`
 const Words = styled.div`
   display: flex;
   flex-direction: column;
+  padding: 20px;
+  height: calc(100vh - 160px);
+  overflow-y: scroll;
 `;
 
 export const ArticleWords = () => {
@@ -90,42 +90,43 @@ export const ArticleWords = () => {
 
   return (
     <Wrapper>
-      <Buttons>
-        <Btn onClick={() => navigate("/articles")}>Back</Btn>
-        <Btn onClick={() => setSortByCount(false)}>Default</Btn>
-        <Btn onClick={() => setSortByCount(true)}>Sort</Btn>
-        <Input placeholder="low" onChange={(e) => setLow(e.target.value)} />
-        <Input placeholder="high" onChange={(e) => setHigh(e.target.value)} />
-        <Btn
-          onClick={() => {
-            if (low && high) {
-              setArticleWords(
-                articleWordsArray?.current?.filter(
-                  (x) => x[1] > Number(low) && x[1] < Number(high)
-                )
-              );
-            } else if (low) {
-              setArticleWords(
-                articleWordsArray?.current?.filter((x) => x[1] > Number(low))
-              );
-            } else {
-              setArticleWords(
-                articleWordsArray?.current?.filter((x) => x[1] < Number(high))
-              );
-            }
-          }}
-        >
-          filter({articleWords?.length})
-        </Btn>
-      </Buttons>
-      <p>ArticleWords</p>
-      <Words>
-        {articleWords?.map((word) => (
-          <div onClick={() => setKeyword(word[0])}>
-            {word[0]}: {word[1]}
-          </div>
-        ))}
-      </Words>
+      <WordsWrapper>
+        <Buttons>
+          <Btn onClick={() => navigate("/articles")}>Back</Btn>
+          <Btn onClick={() => setSortByCount(false)}>Default</Btn>
+          <Btn onClick={() => setSortByCount(true)}>Sort</Btn>
+          <Input placeholder="low" onChange={(e) => setLow(e.target.value)} />
+          <Input placeholder="high" onChange={(e) => setHigh(e.target.value)} />
+          <Btn
+            onClick={() => {
+              if (low && high) {
+                setArticleWords(
+                  articleWordsArray?.current?.filter(
+                    (x) => x[1] > Number(low) && x[1] < Number(high)
+                  )
+                );
+              } else if (low) {
+                setArticleWords(
+                  articleWordsArray?.current?.filter((x) => x[1] > Number(low))
+                );
+              } else {
+                setArticleWords(
+                  articleWordsArray?.current?.filter((x) => x[1] < Number(high))
+                );
+              }
+            }}
+          >
+            filter({articleWords?.length})
+          </Btn>
+        </Buttons>
+        <Words>
+          {articleWords?.map((word) => (
+            <div onClick={() => setKeyword(word[0])}>
+              {word[0]}: {word[1]}
+            </div>
+          ))}
+        </Words>
+      </WordsWrapper>
     </Wrapper>
   );
 };
