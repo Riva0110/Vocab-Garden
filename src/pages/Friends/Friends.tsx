@@ -13,17 +13,43 @@ import {
 } from "firebase/firestore";
 import styled from "styled-components";
 import { db } from "../../firebase/firebase";
+import plant from "./plant.png";
+import plant2 from "./plant2.png";
 
 const Wrapper = styled.div`
   display: flex;
   padding-top: 60px;
 `;
 
+const Img = styled.img`
+  position: absolute;
+  width: 50vw;
+  min-width: 400px;
+  max-width: 800px;
+  right: 0px;
+  bottom: 0px;
+`;
+
+const Img2 = styled.img`
+  position: absolute;
+  width: 400px;
+  left: 40px;
+  top: 0px;
+`;
+
 const FriendsWrapper = styled.div`
   display: flex;
   flex-direction: column;
   margin: 50px auto;
-  width: 30vw;
+  padding: 10px;
+  width: 500px;
+  height: 80vh;
+  z-index: 1;
+  background-color: rgba(255, 255, 255, 0.7);
+  @media screen and (max-width: 600px) {
+    width: 100%;
+    margin: 50px 10px;
+  }
 `;
 
 const Input = styled.input`
@@ -184,6 +210,8 @@ export default function Friends() {
 
   return (
     <Wrapper>
+      <Img src={plant} alt="plant" />
+      <Img2 src={plant2} alt="plant" />
       <FriendsWrapper>
         <FriendRequest>
           <Input

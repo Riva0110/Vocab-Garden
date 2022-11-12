@@ -4,17 +4,24 @@ import { Outlet } from "react-router-dom";
 
 const Wrapper = styled.div`
   display: flex;
-  gap: 50px;
-  padding: 20px;
-  margin-top: 60px;
-  /* height: calc(100vh - 60px); */
+  padding: 80px 20px 20px 20px;
+  gap: 20px;
+  @media screen and (min-width: 1440px) {
+    margin: 0 auto;
+    max-width: 1440px;
+  }
+`;
+
+const OutletWrapper = styled.div`
+  width: 50vw;
 `;
 
 export default function ArticlesLayout() {
-  console.log("ArticlesLayout");
   return (
     <Wrapper>
-      <Outlet />
+      <OutletWrapper>
+        <Outlet />
+      </OutletWrapper>
       <VocabDetails />
     </Wrapper>
   );

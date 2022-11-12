@@ -14,19 +14,16 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import QuillEditor from "./Editor/QuillEditor";
-import "./Editor/style.css";
 
 const Wrapper = styled.div`
   display: flex;
-  width: 50vw;
 `;
 
 const ArticleWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  width: 80%;
+  width: 100%;
   height: calc(100vh - 30px);
-  overflow-y: scroll;
 `;
 
 const TitleBtnWrapper = styled.div`
@@ -41,10 +38,6 @@ const ContentLabel = styled(TitleLabel)`
   white-space: pre-line;
 `;
 
-const ContentTextArea = styled.textarea`
-  height: 50%;
-`;
-
 const Title = styled.div`
   line-height: 100%;
   font-size: 16px;
@@ -55,6 +48,8 @@ const Title = styled.div`
 
 const Content = styled.div`
   font-size: 14px;
+  overflow-y: scroll;
+  height: calc(100vh - 160px);
 `;
 
 const Btns = styled.div`

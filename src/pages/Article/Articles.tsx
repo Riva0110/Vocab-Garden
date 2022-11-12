@@ -9,22 +9,31 @@ import { authContext } from "../../context/authContext";
 const ArticlesWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  width: 50vw;
+  width: 100%;
 `;
+
 const ArticleTitle = styled.div`
   margin-bottom: 20px;
   cursor: pointer;
 `;
+
 const Time = styled.div`
   color: gray;
   font-size: 10px;
 `;
+
 const Title = styled.div`
   border-bottom: 1px solid gray;
 `;
+
+const Btns = styled.div`
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+`;
+
 const Btn = styled.button`
-  width: 50px;
-  margin-left: auto;
+  width: 100px;
 `;
 
 interface ArticleListInterface {
@@ -59,25 +68,25 @@ export default function Articles() {
     getArticles(userId);
   }, [userId]);
 
-  console.log("Articles");
-
   return (
     <div className="App">
       <ArticlesWrapper>
-        <Btn
-          onClick={() => {
-            navigate("/articles/words");
-          }}
-        >
-          Words
-        </Btn>
-        <Btn
-          onClick={() => {
-            navigate("/articles/add");
-          }}
-        >
-          +
-        </Btn>
+        <Btns>
+          <Btn
+            onClick={() => {
+              navigate("/articles/words");
+            }}
+          >
+            Article Words
+          </Btn>
+          <Btn
+            onClick={() => {
+              navigate("/articles/add");
+            }}
+          >
+            Add Article
+          </Btn>
+        </Btns>
         {articleList?.map(({ time, title, id }, index) => {
           const newDate = new Date(time.seconds * 1000);
           return (

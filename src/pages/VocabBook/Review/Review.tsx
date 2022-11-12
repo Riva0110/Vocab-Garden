@@ -20,6 +20,7 @@ interface Props {
 
 const Wrapper = styled.div`
   width: 100%;
+  padding: 20px;
 `;
 
 const Header = styled.div`
@@ -121,15 +122,14 @@ export default function Review() {
   const [round, setRound] = useState<number>(0);
 
   const [answerCount, setAnswerCount] = useState({ correct: 0, wrong: 0 });
-  const [reviewingQuestions, setReviewingQuestions] = useState<
-    ReviewingQuestions[]
-  >([]);
   const { viewingBook } = useViewingBook();
   const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
   const questionsNumber = 5;
   const questions = vocabBooks?.[viewingBook]
     ?.sort(() => Math.random() - 0.5)
     .slice(0, questionsNumber);
+  const [reviewingQuestions, setReviewingQuestions] =
+    useState<ReviewingQuestions[]>(questions);
   const { isLogin, userId } = useContext(authContext);
   const [score, setScore] = useState<number>();
   const [isChallenging, setIsChallenging] = useState<boolean>();
@@ -144,9 +144,9 @@ export default function Review() {
   ]);
 
   useEffect(() => {
-    console.log("singleMode", "viewingBook", viewingBook);
-    setReviewingQuestions(questions);
+    console.log("singleMode");
     getVocabBooks(userId);
+
     const getUserInfo = async (userId: string) => {
       const docRef = doc(db, "users", userId);
       const docSnap: any = await getDoc(docRef);
@@ -154,7 +154,7 @@ export default function Review() {
       setIsChallenging(docSnap.data().isChallenging);
     };
     getUserInfo(userId);
-  }, []);
+  }, [getVocabBooks, userId]);
 
   useEffect(() => {
     const getRandomIndex = () => {
