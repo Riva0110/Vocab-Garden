@@ -18,6 +18,7 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 const Wrapper = styled.div`
+  display: flex;
   background-color: white;
   width: 100vw;
   min-height: 100vh;

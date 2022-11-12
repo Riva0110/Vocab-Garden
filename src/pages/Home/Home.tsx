@@ -1,13 +1,9 @@
-import { useState } from "react";
 import styled from "styled-components";
-import VocabDetails from "../../components/VocabDetails";
-import Test from "./test";
 import banner from "./banner.jpg";
 import banner2 from "./banner2.jpg";
 
 const Wrapper = styled.div`
   display: flex;
-  /* padding: 0 20px; */
 `;
 
 const Border = styled.div`

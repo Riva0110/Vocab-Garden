@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, useRef } from "react";
+import { useEffect, useState, useContext, useRef, useCallback } from "react";
 import styled from "styled-components";
 import { keywordContext } from "../context/keywordContext";
 import { authContext } from "../context/authContext";
@@ -22,60 +22,81 @@ interface Props {
 }
 
 const Wrapper = styled.div`
-  font-size: 12px;
-  padding-right: 20px;
-  height: calc(100vh - 30px);
-  overflow-y: scroll;
+  font-size: 16px;
+  padding: 20px;
+  border: 1px gray solid;
+  width: 50vw;
+  height: calc(100vh - 160px);
+  background-color: rgba(255, 255, 255, 0.7);
+  z-index: 1;
 `;
+
 const SpinnerImg = styled.img`
   width: 40px;
 `;
-const VocabWrapper = styled.div``;
+const VocabWrapper = styled.div`
+  height: 100%;
+`;
+
 const TitleContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
   color: black;
 `;
+
 const Vocab = styled.div`
   font-size: 20px;
   font-weight: 800;
 `;
+
 const Phonetic = styled.div``;
+
 const AudioImg = styled.img`
   width: 20px;
   height: 20px;
+  cursor: pointer;
 `;
+
 const SaveVocabImg = styled.img`
   width: 20px;
   height: 20px;
+  cursor: pointer;
 `;
+
 const SavePopup = styled.div`
   position: absolute;
   border: 1px solid gray;
   border-radius: 10px;
-  top: 170px;
+  top: 110px;
   background-color: white;
   display: ${(props: Props) => (props.isPopuping ? "block" : "none")};
   padding: 10px;
 `;
+
 const Select = styled.select`
   width: 80%;
   margin-left: 10px;
 `;
+
 const Buttons = styled.div`
   display: flex;
   margin-top: 20px;
   gap: 10px;
 `;
+
 const Button = styled.button``;
-const Meanings = styled.div``;
+
+const Meanings = styled.div`
+  overflow-y: scroll;
+  height: calc(100% - 20px);
+`;
+
 const PartOfSpeech = styled.div`
-  color: green;
+  color: darkgreen;
   margin-top: 30px;
   margin-bottom: 20px;
   border-bottom: 1px gray solid;
-  font-size: 14px;
 `;
 
 const SubTitle = styled.div`
@@ -92,11 +113,6 @@ const Definition = styled.li``;
 const Synonyms = styled.div``;
 
 const Example = styled.div``;
-
-const LastVocabBtn = styled.button`
-  width: 50px;
-  height: 20px;
-`;
 
 interface VocabDetailsInterface {
   word?: string;
@@ -136,7 +152,7 @@ export default function VocabDetails() {
   const [isPopuping, setIsPopuping] = useState(false);
   const popup = useRef<HTMLDivElement>(null);
   const resourceUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${keyword}`;
-
+  console.log("vocab details", { keyword });
   const handlePlayAudio = () => {
     const audio = new Audio(vocabDetails?.phonetics?.[0].audio);
     audio.play();
@@ -221,21 +237,28 @@ export default function VocabDetails() {
     fetchVocabDetails(resourceUrl);
   }, [resourceUrl]);
 
+  // const handleClickElement = useCallback(
+  //   (e: any) => {
+  //     if (isPopuping && popup.current && !popup.current.contains(e.target)) {
+  //       console.log(2);
+  //       setIsPopuping(false);
+  //       console.log({ isPopuping });
+  //     }
+
+  //     console.log(popup?.current?.contains(e.target));
+  //   },
+  //   [isPopuping]
+  // );
+
   // useEffect(() => {
   //   getVocabBooks(userId);
-  //   document.addEventListener("click", handleClickElement, false);
+  //   if (isPopuping) {
+  //     document.addEventListener("click", handleClickElement, false);
+  //   }
   //   return () => {
   //     document.removeEventListener("click", handleClickElement, false);
   //   };
-  // }, []);
-
-  // const handleClickElement = (e: any) => {
-  //   if (popup.current) console.log(1, popup.current.contains(e.target));
-  //   if (isPopuping && popup.current && !popup.current.contains(e.target)) {
-  //     console.log(2);
-  //     setIsPopuping(false);
-  //   }
-  // };
+  // }, [getVocabBooks, handleClickElement, isPopuping, userId]);
 
   useEffect(() => {
     setIsSaved(false);

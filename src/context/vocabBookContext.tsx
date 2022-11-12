@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useCallback, useState } from "react";
 import { getDoc, doc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 
@@ -36,14 +36,14 @@ export function VocabBookContextProvider({ children }: ContextProviderProps) {
   const [vocabBooks, setVocabBooks] = useState({});
   const [isSaved, setIsSaved] = useState(false);
 
-  const getVocabBooks = async (userId: string) => {
+  const getVocabBooks = useCallback(async (userId: string) => {
     const vocabBooksRef = doc(db, "vocabBooks", userId);
     const docSnap = await getDoc(vocabBooksRef);
     if (docSnap) {
       const vocabBooksData = docSnap.data() as BooksInterface;
       setVocabBooks(vocabBooksData);
     }
-  };
+  }, []);
 
   return (
     <vocabBookContext.Provider

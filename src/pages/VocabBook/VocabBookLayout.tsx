@@ -3,9 +3,10 @@ import { Outlet, useOutletContext } from "react-router-dom";
 import { useState } from "react";
 
 const Wrapper = styled.div`
-  display: flex;
-  padding: 20px;
-  margin-top: 60px;
+  @media screen and (min-width: 1440px) {
+    margin: 0 auto;
+    max-width: 1440px;
+  }
 `;
 
 type ContextType = {

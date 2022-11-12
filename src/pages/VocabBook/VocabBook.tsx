@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import audio from "../../components/audio.png";
 import { keywordContext } from "../../context/keywordContext";
 import { authContext } from "../../context/authContext";
 import { vocabBookContext } from "../../context/vocabBookContext";
@@ -13,42 +12,62 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
+import audio from "../../components/audio.png";
 import saved from "../../components/saved.png";
 import VocabDetails from "../../components/VocabDetails";
 import { useViewingBook } from "./VocabBookLayout";
+import plant from "./plant.png";
 
-const Wrapper = styled.div``;
+const Wrapper = styled.div`
+  display: flex;
+  padding: 80px 20px 20px 20px;
+`;
+
+const Img = styled.img`
+  position: absolute;
+  right: 0px;
+  bottom: 0px;
+  width: 500px;
+`;
+
 const Nav = styled.nav`
   margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
 `;
+
 const NavLink = styled(Link)`
   margin-right: 20px;
+  text-decoration: none;
+  color: darkgreen;
+  font-weight: 600;
 `;
 
-const Main = styled.div`
-  display: flex;
-`;
-
-const VocabBookAndCard = styled.div`
+const VocabBookWrapper = styled.div`
   width: 50vw;
+  margin-right: 20px;
+  z-index: 1;
 `;
+
+const VocabBookAndCard = styled.div``;
 
 const BookWrapper = styled.div`
   display: flex;
-  flex-wrap: wrap;
+  flex: 1;
   gap: 20px;
-  height: 200px;
-  overflow-y: scroll;
+  width: 100%;
+  height: 150px;
   margin-bottom: 20px;
-  margin-right: 30px;
   align-items: center;
+  overflow-x: scroll;
 `;
 
 const Book = styled.div`
   text-align: center;
-  width: 150px;
+  min-width: 150px;
   height: 80px;
-  border: gray solid ${(props: Props) => (props.selected ? "2px" : "1px")};
+  border: solid
+    ${(props: Props) => (props.selected ? "2px  darkgreen" : "1px gray")};
   color: ${(props: Props) => (props.selected ? "black" : "gray")};
   background-color: lightgray;
   padding: 10px;
@@ -61,6 +80,8 @@ const CardWrapper = styled.div`
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
+  overflow-y: scroll;
+  height: calc(100vh - 350px);
 `;
 
 const Card = styled.div`
@@ -68,11 +89,15 @@ const Card = styled.div`
   flex-direction: column;
   align-items: flex-start;
   text-align: center;
-  width: 200px;
+  width: calc((100% - 90px) / 2);
   height: 100px;
   border: 1px gray solid;
   overflow-y: scroll;
   padding: 10px;
+  background-color: rgba(255, 255, 255, 0.7);
+  @media screen and (max-width: 960px) {
+    width: 100%;
+  }
 `;
 
 const CardText = styled.div`
@@ -128,7 +153,6 @@ export default function VocabBook() {
         [newBook]: arrayUnion(),
       });
       getVocabBooks(userId);
-      setTimeout(alert, 200, `Add a "${newBook}" vocabbook successfully!`);
     }
   };
 
@@ -141,7 +165,6 @@ export default function VocabBook() {
         [book]: deleteField(),
       });
       getVocabBooks(userId);
-      setTimeout(alert, 200, `Delete book "${book}" sucessfully!`);
     }
   };
 
@@ -176,29 +199,36 @@ export default function VocabBook() {
   }
 
   useEffect(() => {
-    getVocabBooks(userId);
-  });
+    if (Object.keys(vocabBooks).length === 0) {
+      getVocabBooks(userId);
+    }
+  }, [getVocabBooks, userId, vocabBooks, vocabBooks.length]);
 
   return (
     <Wrapper>
-      <Nav>
-        <NavLink to="wordle">Wordle</NavLink>
-        {vocabBooks[viewingBook]?.length >= 5 ? (
-          <NavLink to="review">Review</NavLink>
-        ) : (
-          <span
-            onClick={() =>
-              alert("Please save at least 5 vocab cards in this book!")
-            }
-          >
-            Review
-          </span>
-        )}
-
-        <input onChange={(e) => setNewBook(e.target.value)} />
-        <Button onClick={handleAddBook}>Add a Book</Button>
-      </Nav>
-      <Main>
+      <Img src={plant} alt="plant" />
+      <VocabBookWrapper>
+        <Nav>
+          <div>
+            <input onChange={(e) => setNewBook(e.target.value)} />
+            <Button onClick={handleAddBook}>Add a Book</Button>
+          </div>
+          <div>
+            <NavLink to="wordle">Wordle</NavLink>
+            {vocabBooks[viewingBook]?.length >= 5 ? (
+              <NavLink to="review">Review</NavLink>
+            ) : (
+              <NavLink
+                to=""
+                onClick={() =>
+                  alert("Please save at least 5 vocab cards in this book!")
+                }
+              >
+                Review
+              </NavLink>
+            )}
+          </div>
+        </Nav>
         <VocabBookAndCard>
           <BookWrapper>
             {Object.keys(vocabBooks)
@@ -253,8 +283,8 @@ export default function VocabBook() {
             )}
           </CardWrapper>
         </VocabBookAndCard>
-        <VocabDetails />
-      </Main>
+      </VocabBookWrapper>
+      <VocabDetails />
     </Wrapper>
   );
 }

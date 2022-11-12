@@ -7,6 +7,7 @@ import audio from "../../../components/audio.png";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
+import plant from "./reviewPlant.png";
 
 interface Props {
   correct?: boolean;
@@ -20,6 +21,16 @@ interface Props {
 
 const Wrapper = styled.div`
   width: 100%;
+  @media screen and (min-width: 1440px) {
+    max-width: 1440px;
+  }
+`;
+
+const Img = styled.img`
+  width: 350px;
+  position: absolute;
+  right: 0px;
+  bottom: 0;
 `;
 
 const Header = styled.div`
@@ -28,7 +39,6 @@ const Header = styled.div`
 `;
 
 const Main = styled.div`
-  width: 100%;
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -59,7 +69,10 @@ const Options = styled.div`
 `;
 
 const Option = styled.div`
+  background-color: rgb(255, 255, 255, 0.7);
+  z-index: 1;
   width: 800px;
+  max-width: 90vw;
   padding: 10px;
   border: 1px solid
     ${(props: Props) => {
@@ -121,15 +134,14 @@ export default function Review() {
   const [round, setRound] = useState<number>(0);
 
   const [answerCount, setAnswerCount] = useState({ correct: 0, wrong: 0 });
-  const [reviewingQuestions, setReviewingQuestions] = useState<
-    ReviewingQuestions[]
-  >([]);
   const { viewingBook } = useViewingBook();
   const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
   const questionsNumber = 5;
   const questions = vocabBooks?.[viewingBook]
     ?.sort(() => Math.random() - 0.5)
     .slice(0, questionsNumber);
+  const [reviewingQuestions, setReviewingQuestions] =
+    useState<ReviewingQuestions[]>(questions);
   const { isLogin, userId } = useContext(authContext);
   const [score, setScore] = useState<number>();
   const [isChallenging, setIsChallenging] = useState<boolean>();
@@ -144,9 +156,9 @@ export default function Review() {
   ]);
 
   useEffect(() => {
-    console.log("singleMode", "viewingBook", viewingBook);
-    setReviewingQuestions(questions);
+    console.log("singleMode");
     getVocabBooks(userId);
+
     const getUserInfo = async (userId: string) => {
       const docRef = doc(db, "users", userId);
       const docSnap: any = await getDoc(docRef);
@@ -154,7 +166,7 @@ export default function Review() {
       setIsChallenging(docSnap.data().isChallenging);
     };
     getUserInfo(userId);
-  }, []);
+  }, [getVocabBooks, userId]);
 
   useEffect(() => {
     const getRandomIndex = () => {
@@ -374,6 +386,7 @@ export default function Review() {
 
   return isLogin ? (
     <Wrapper>
+      <Img src={plant} alt="plant" />
       <Header>
         <div>Review Round: {gameOver ? questionsNumber : round + 1}</div>
         <div>

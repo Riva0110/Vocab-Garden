@@ -14,19 +14,15 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import QuillEditor from "./Editor/QuillEditor";
-import "./Editor/style.css";
 
 const Wrapper = styled.div`
   display: flex;
-  width: 50vw;
 `;
 
 const ArticleWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  width: 80%;
-  height: calc(100vh - 30px);
-  overflow-y: scroll;
+  width: 100%;
 `;
 
 const TitleBtnWrapper = styled.div`
@@ -35,14 +31,16 @@ const TitleBtnWrapper = styled.div`
   align-items: center;
 `;
 
-const TitleLabel = styled.label``;
-const TitleInput = styled.input``;
-const ContentLabel = styled(TitleLabel)`
-  white-space: pre-line;
+const TitleLabel = styled.label`
+  margin-bottom: 5px;
 `;
 
-const ContentTextArea = styled.textarea`
-  height: 50%;
+const TitleInput = styled.input`
+  margin-bottom: 20px;
+`;
+
+const ContentLabel = styled(TitleLabel)`
+  white-space: pre-line;
 `;
 
 const Title = styled.div`
@@ -54,7 +52,10 @@ const Title = styled.div`
 `;
 
 const Content = styled.div`
-  font-size: 14px;
+  font-size: 16px;
+  overflow-y: scroll;
+  height: calc(100vh - 160px);
+  background-color: rgb(255, 255, 255, 0.7);
 `;
 
 const Btns = styled.div`
@@ -69,6 +70,7 @@ const DoneBtn = styled.button`
 const BackBtn = styled.button`
   width: 50px;
 `;
+
 const EditBtn = styled(BackBtn)``;
 
 export default function Article() {
@@ -134,10 +136,6 @@ export default function Article() {
           onChange={(e) => setTitle(e.target.value)}
         />
         <ContentLabel>Content</ContentLabel>
-        {/* <ContentTextArea
-          defaultValue={articlePathName === "add" ? "" : content}
-          onChange={(e) => setContent(e.target.value)}
-        /> */}
         <QuillEditor content={content} setContent={setContent} />
         <DoneBtn
           onClick={async () => {
