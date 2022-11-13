@@ -67,7 +67,7 @@ const Book = styled.div`
   min-width: 150px;
   height: 80px;
   border: solid
-    ${(props: Props) => (props.selected ? "2px  darkgreen" : "1px gray")};
+    ${(props: Props) => (props.selected ? "2px darkgreen" : "1px gray")};
   color: ${(props: Props) => (props.selected ? "black" : "gray")};
   background-color: lightgray;
   padding: 10px;
@@ -105,6 +105,12 @@ const CardText = styled.div`
   font-weight: ${(props: Props) => (props.weight ? "600" : "")};
 `;
 
+const VocabHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+`;
+
 const VocabTitle = styled.div`
   display: flex;
   align-items: center;
@@ -140,6 +146,34 @@ export default function VocabBook() {
   const { vocabBooks, getVocabBooks, isSaved, setIsSaved } =
     useContext(vocabBookContext);
   const [newBook, setNewBook] = useState<string>();
+
+  const correctRateOfBooksArr = getCorrectRateOfBooks().map((logOfBook) => {
+    const correctCount = logOfBook.reduce((acc, item) => {
+      if (item.isCorrect) {
+        acc += 1;
+      }
+      console.log(logOfBook.length);
+      return acc;
+    }, 0);
+    return correctCount / logOfBook.length;
+  });
+
+  function getCorrectRateOfBooks() {
+    console.log(Object.keys(vocabBooks));
+    let log: any[][] = [];
+    Object.keys(vocabBooks).forEach((key, index) => {
+      let insideLog: any[] = [];
+      vocabBooks[key].map((vocab) => {
+        if (vocab.log) {
+          insideLog = [...insideLog, ...vocab.log];
+        }
+
+        return insideLog;
+      });
+      log = [...log, insideLog];
+    });
+    return log;
+  }
 
   const handlePlayAudio = (audioLink: string) => {
     const audio = new Audio(audioLink);
@@ -231,46 +265,51 @@ export default function VocabBook() {
         </Nav>
         <VocabBookAndCard>
           <BookWrapper>
-            {Object.keys(vocabBooks)
-              ?.sort()
-              .map((book: string) => (
-                <Book
-                  selected={viewingBook === `${book}` ? true : false}
-                  onClick={() => {
-                    setViewingBook(book);
-                  }}
-                >
-                  {book.toLocaleLowerCase()}({vocabBooks?.[book]?.length})
-                  <br />
-                  <br />
-                  <button onClick={() => handleDeleteBook(book)}>Delete</button>
-                </Book>
-              ))}
+            {Object.keys(vocabBooks).map((book: string, index) => (
+              <Book
+                selected={viewingBook === `${book}` ? true : false}
+                onClick={() => {
+                  setViewingBook(book);
+                }}
+              >
+                {book.toLocaleLowerCase()}({vocabBooks?.[book]?.length})
+                <br />
+                {Math.round(correctRateOfBooksArr[index] * 100)}%
+                <br />
+                <button onClick={() => handleDeleteBook(book)}>Delete</button>
+              </Book>
+            ))}
           </BookWrapper>
           <CardWrapper>
             {vocabBooks[viewingBook]?.map(
-              ({ vocab, audioLink, partOfSpeech, definition }, index) => (
+              (
+                { vocab, audioLink, partOfSpeech, definition, correctRate },
+                index
+              ) => (
                 <>
                   <Card>
-                    <VocabTitle>
-                      <Vocab key={index} onClick={() => setKeyword(vocab)}>
-                        {vocab}
-                      </Vocab>
-                      {audioLink ? (
-                        <AudioImg
-                          src={audio}
-                          alt="audio"
-                          onClick={() => handlePlayAudio(audioLink)}
+                    <VocabHeader>
+                      <VocabTitle>
+                        <Vocab key={index} onClick={() => setKeyword(vocab)}>
+                          {vocab}
+                        </Vocab>
+                        {audioLink ? (
+                          <AudioImg
+                            src={audio}
+                            alt="audio"
+                            onClick={() => handlePlayAudio(audioLink)}
+                          />
+                        ) : (
+                          ""
+                        )}
+                        <SaveVocabImg
+                          src={saved}
+                          alt="save"
+                          onClick={() => handleDeleteVocabFromBook(vocab)}
                         />
-                      ) : (
-                        ""
-                      )}
-                      <SaveVocabImg
-                        src={saved}
-                        alt="save"
-                        onClick={() => handleDeleteVocabFromBook(vocab)}
-                      />
-                    </VocabTitle>
+                      </VocabTitle>
+                      <div>{Math.round(correctRate * 100)}%</div>
+                    </VocabHeader>
                     <CardText weight={true} onClick={() => getSelectedText()}>
                       ({partOfSpeech})
                     </CardText>
