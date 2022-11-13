@@ -96,6 +96,7 @@ const Btn = styled.button`
   line-height: 24px;
   text-align: center;
   margin-top: 20px;
+  z-index: 1;
 `;
 
 const Message = styled.div``;
@@ -105,9 +106,15 @@ const OutcomeWrapper = styled.div`
   margin: 50px auto;
 `;
 
-const ReviewVocabs = styled.div``;
+const ReviewVocabs = styled.div`
+  background-color: rgb(255, 255, 255, 0.7);
+  z-index: 1;
+`;
+
 const WrongVocabs = styled.div``;
+
 const CorrectVocabs = styled.div``;
+
 const LabelDiv = styled.div`
   border-bottom: 1px gray solid;
   margin-top: 20px;
@@ -119,12 +126,19 @@ const VocabList = styled.div`
   margin-bottom: 10px;
 `;
 
+interface Log {
+  isCorrect?: boolean;
+  time?: {};
+}
+
 interface ReviewingQuestions {
   vocab: string;
   audioLink: string;
   partOfSpeech: string;
   definition: string;
-  isCorrect: boolean;
+  isCorrect?: boolean;
+  log?: Log[];
+  correctRate?: number;
 }
 
 export default function Review() {
@@ -136,12 +150,22 @@ export default function Review() {
   const [answerCount, setAnswerCount] = useState({ correct: 0, wrong: 0 });
   const { viewingBook } = useViewingBook();
   const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
+  const [updateLogInVeiwingBook, setUpdateLogInVeiwingBook] = useState<
+    ReviewingQuestions[]
+  >(vocabBooks?.[viewingBook]);
+
   const questionsNumber = 5;
   const questions = vocabBooks?.[viewingBook]
     ?.sort(() => Math.random() - 0.5)
     .slice(0, questionsNumber);
   const [reviewingQuestions, setReviewingQuestions] =
     useState<ReviewingQuestions[]>(questions);
+  const [newReviewingQuestions, setNewReviewingQuestions] = useState(
+    [...reviewingQuestions].map((question) => ({
+      ...question,
+    }))
+  );
+
   const { isLogin, userId } = useContext(authContext);
   const [score, setScore] = useState<number>();
   const [isChallenging, setIsChallenging] = useState<boolean>();
@@ -201,6 +225,7 @@ export default function Review() {
   };
 
   const handleGameOver = () => {
+    setReviewingQuestions(newReviewingQuestions);
     setShowBtn(true);
     setGameOver(true);
     setRound(0);
@@ -216,6 +241,14 @@ export default function Review() {
       }
     };
     if ((answerCount.correct / questionsNumber) * 100 >= 80) updateScore();
+
+    const updateLog = async () => {
+      const userRef = doc(db, "vocabBooks", userId);
+      await updateDoc(userRef, {
+        [viewingBook]: updateLogInVeiwingBook,
+      });
+    };
+    updateLog();
   };
 
   function renderTest() {
@@ -256,16 +289,126 @@ export default function Review() {
                   );
                   setShowAnswerArr(answerStatus);
 
+                  let newUpdateLogInVeiwingBook;
+
                   if (clickedVocab === correctVocab?.vocab) {
                     answerCount.correct += 1;
-                    reviewingQuestions[round].isCorrect = true;
-                    setReviewingQuestions(reviewingQuestions);
+                    newReviewingQuestions[round].isCorrect = true;
+
+                    newUpdateLogInVeiwingBook = [...updateLogInVeiwingBook].map(
+                      ({
+                        vocab,
+                        audioLink,
+                        partOfSpeech,
+                        definition,
+                        log,
+                        correctRate,
+                      }) => {
+                        if (vocab === correctVocab?.vocab) {
+                          if (log && log?.length > 0) {
+                            const correctCount = log?.reduce(
+                              (acc: any, item) => {
+                                if (item.isCorrect) {
+                                  acc += 1;
+                                }
+                                return acc;
+                              },
+                              0
+                            );
+                            return {
+                              vocab,
+                              audioLink,
+                              partOfSpeech,
+                              definition,
+                              log: [
+                                ...log,
+                                { isCorrect: true, time: new Date() },
+                              ],
+                              correctRate: correctCount / log.length,
+                            };
+                          } else {
+                            return {
+                              vocab,
+                              audioLink,
+                              partOfSpeech,
+                              definition,
+                              log: [{ isCorrect: true, time: new Date() }],
+                              correctRate: 1,
+                            };
+                          }
+                        } else {
+                          return {
+                            vocab,
+                            audioLink,
+                            partOfSpeech,
+                            definition,
+                            log,
+                            correctRate,
+                          };
+                        }
+                      }
+                    );
                   } else {
                     answerCount.wrong += 1;
-                    reviewingQuestions[round].isCorrect = false;
-                    setReviewingQuestions(reviewingQuestions);
+                    newReviewingQuestions[round].isCorrect = false;
+                    newUpdateLogInVeiwingBook = [...updateLogInVeiwingBook].map(
+                      ({
+                        vocab,
+                        audioLink,
+                        partOfSpeech,
+                        definition,
+                        log,
+                        correctRate,
+                      }) => {
+                        if (vocab === correctVocab?.vocab) {
+                          if (log && log?.length > 0) {
+                            const correctCount = log?.reduce(
+                              (acc: any, item) => {
+                                if (item.isCorrect) {
+                                  acc += 1;
+                                }
+                                return acc;
+                              },
+                              0
+                            );
+                            return {
+                              vocab,
+                              audioLink,
+                              partOfSpeech,
+                              definition,
+                              log: [
+                                ...log,
+                                { isCorrect: false, time: new Date() },
+                              ],
+                              correctRate: correctCount / log.length,
+                            };
+                          } else {
+                            return {
+                              vocab,
+                              audioLink,
+                              partOfSpeech,
+                              definition,
+                              log: [{ isCorrect: false, time: new Date() }],
+                              correctRate: 0,
+                            };
+                          }
+                        } else {
+                          return {
+                            vocab,
+                            audioLink,
+                            partOfSpeech,
+                            definition,
+                            log,
+                            correctRate,
+                          };
+                        }
+                      }
+                    );
                   }
                   setAnswerCount(answerCount);
+                  setNewReviewingQuestions(newReviewingQuestions);
+                  setUpdateLogInVeiwingBook(newUpdateLogInVeiwingBook);
+                  console.log({ newUpdateLogInVeiwingBook });
                 }
               }}
             >
@@ -299,6 +442,8 @@ export default function Review() {
   }
 
   function renderOutcome() {
+    console.log({ updateLogInVeiwingBook });
+
     return (
       <Main>
         <OutcomeWrapper>

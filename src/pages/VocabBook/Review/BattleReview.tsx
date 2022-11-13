@@ -81,8 +81,9 @@ const WaitingRoomWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 50px;
+  margin: 50px auto;
   background-color: rgb(255, 255, 255, 0.7);
+  width: 500px;
 `;
 
 const StartGame = styled.button`
