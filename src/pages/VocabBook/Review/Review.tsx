@@ -154,6 +154,9 @@ export default function Review() {
     ReviewingQuestions[]
   >(vocabBooks?.[viewingBook]);
 
+  console.log(vocabBooks?.[viewingBook]);
+  console.log("top", { updateLogInVeiwingBook });
+
   const questionsNumber = 5;
   const questions = vocabBooks?.[viewingBook]
     ?.sort(() => Math.random() - 0.5)
@@ -225,6 +228,7 @@ export default function Review() {
   };
 
   const handleGameOver = () => {
+    console.log("click done", { newReviewingQuestions });
     setReviewingQuestions(newReviewingQuestions);
     setShowBtn(true);
     setGameOver(true);
@@ -315,6 +319,7 @@ export default function Review() {
                               },
                               0
                             );
+                            console.log("correct correctRate: ...log");
                             return {
                               vocab,
                               audioLink,
@@ -324,9 +329,11 @@ export default function Review() {
                                 ...log,
                                 { isCorrect: true, time: new Date() },
                               ],
-                              correctRate: correctCount / log.length,
+                              correctRate:
+                                (correctCount + 1) / (log.length + 1),
                             };
                           } else {
+                            console.log("correct correctRate: 1");
                             return {
                               vocab,
                               audioLink,
@@ -371,6 +378,7 @@ export default function Review() {
                               },
                               0
                             );
+                            console.log("wrong correctRate: ...log");
                             return {
                               vocab,
                               audioLink,
@@ -380,9 +388,10 @@ export default function Review() {
                                 ...log,
                                 { isCorrect: false, time: new Date() },
                               ],
-                              correctRate: correctCount / log.length,
+                              correctRate: correctCount / (log.length + 1),
                             };
                           } else {
+                            console.log("wrong correctRate: 0");
                             return {
                               vocab,
                               audioLink,
@@ -408,7 +417,8 @@ export default function Review() {
                   setAnswerCount(answerCount);
                   setNewReviewingQuestions(newReviewingQuestions);
                   setUpdateLogInVeiwingBook(newUpdateLogInVeiwingBook);
-                  console.log({ newUpdateLogInVeiwingBook });
+                  console.log("clickOptions", { newUpdateLogInVeiwingBook });
+                  console.log("clickOptions", { newReviewingQuestions });
                 }
               }}
             >
@@ -442,8 +452,6 @@ export default function Review() {
   }
 
   function renderOutcome() {
-    console.log({ updateLogInVeiwingBook });
-
     return (
       <Main>
         <OutcomeWrapper>
@@ -456,10 +464,16 @@ export default function Review() {
             <Btn
               showBtn={showBtn}
               onClick={() => {
+                // window.location.reload();
                 setGameOver(false);
                 setAnswerCount({ correct: 0, wrong: 0 });
                 setReviewingQuestions(questions);
-
+                setNewReviewingQuestions(
+                  [...reviewingQuestions].map((question) => ({
+                    ...question,
+                  }))
+                );
+                console.log("click again", { reviewingQuestions });
                 setShowBtn(false);
                 setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
               }}
@@ -492,7 +506,7 @@ export default function Review() {
                       </VocabList>
                     );
                   } else {
-                    <></>;
+                    return <></>;
                   }
                 }
               )}
@@ -518,7 +532,7 @@ export default function Review() {
                       </VocabList>
                     );
                   } else {
-                    <></>;
+                    return <></>;
                   }
                 }
               )}
