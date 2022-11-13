@@ -148,6 +148,7 @@ export default function Review() {
   const [round, setRound] = useState<number>(0);
 
   const [answerCount, setAnswerCount] = useState({ correct: 0, wrong: 0 });
+
   const { viewingBook } = useViewingBook();
   const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
   const [updateLogInVeiwingBook, setUpdateLogInVeiwingBook] = useState<

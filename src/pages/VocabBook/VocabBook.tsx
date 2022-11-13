@@ -280,7 +280,8 @@ export default function VocabBook() {
           </div>
           <div>
             <NavLink to="wordle">Wordle</NavLink>
-            {vocabBooks[viewingBook]?.length >= 5 ? (
+            {vocabBooks[viewingBook]?.length >= 5 ||
+            topWrongWords?.length >= 5 ? (
               <NavLink to="review">Review</NavLink>
             ) : (
               <NavLink
