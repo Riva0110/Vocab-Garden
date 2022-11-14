@@ -4,7 +4,7 @@ import { useViewingBook } from "../VocabBookLayout";
 import { vocabBookContext } from "../../../context/vocabBookContext";
 import { authContext } from "../../../context/authContext";
 import audio from "../../../components/audio.png";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
 import plant from "./reviewPlant.png";
@@ -27,7 +27,7 @@ const Wrapper = styled.div`
 `;
 
 const Img = styled.img`
-  width: 350px;
+  width: 300px;
   position: absolute;
   right: 0px;
   bottom: 0;
@@ -108,7 +108,7 @@ const OutcomeWrapper = styled.div`
 
 const ReviewVocabs = styled.div`
   background-color: rgb(255, 255, 255, 0.7);
-  z-index: 1;
+  z-index: 100;
 `;
 
 const WrongVocabs = styled.div``;
@@ -170,7 +170,7 @@ export default function Review() {
     }))
   );
 
-  const { isLogin, userId } = useContext(authContext);
+  const { userId } = useContext(authContext);
   const [score, setScore] = useState<number>();
   const [isChallenging, setIsChallenging] = useState<boolean>();
   const [currentOptions, setCurrentOptions] = useState<[string, string][]>([]);
@@ -544,7 +544,7 @@ export default function Review() {
     );
   }
 
-  return isLogin ? (
+  return (
     <Wrapper>
       <Img src={plant} alt="plant" />
       <Header>
@@ -556,10 +556,6 @@ export default function Review() {
         </div>
       </Header>
       {gameOver ? renderOutcome() : renderTest()}
-    </Wrapper>
-  ) : (
-    <Wrapper>
-      <p>Please log in to review!</p>
     </Wrapper>
   );
 }

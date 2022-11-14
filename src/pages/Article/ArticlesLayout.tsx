@@ -1,8 +1,10 @@
 import styled from "styled-components";
 import VocabDetails from "../../components/VocabDetails";
-import { Outlet } from "react-router-dom";
+import { Outlet, Navigate } from "react-router-dom";
 import plant from "./plant.png";
 import plant2 from "./plant2.png";
+import { useContext } from "react";
+import { authContext } from "../../context/authContext";
 
 const Wrapper = styled.div`
   display: flex;
@@ -33,7 +35,8 @@ const OutletWrapper = styled.div`
 `;
 
 export default function ArticlesLayout() {
-  return (
+  const { isLogin } = useContext(authContext);
+  return isLogin ? (
     <Wrapper>
       <Img src={plant} alt="plant" />
       <Img2 src={plant2} alt="plant" />
@@ -42,5 +45,7 @@ export default function ArticlesLayout() {
       </OutletWrapper>
       <VocabDetails />
     </Wrapper>
+  ) : (
+    <Navigate replace to="/profile" />
   );
 }

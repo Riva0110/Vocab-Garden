@@ -152,7 +152,10 @@ const OutcomeWrapper = styled.div`
   margin: 50px auto;
 `;
 
-const ReviewVocabs = styled.div``;
+const ReviewVocabs = styled.div`
+  background-color: rgb(255, 255, 255, 0.7);
+  z-index: 100;
+`;
 
 const WrongVocabs = styled.div``;
 
