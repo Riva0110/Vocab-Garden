@@ -16,6 +16,7 @@ import { db } from "../../firebase/firebase";
 import plant from "./plant.png";
 import plant2 from "./plant2.png";
 import plant3 from "./plant3.png";
+import { Navigate } from "react-router-dom";
 
 const Wrapper = styled.div`
   display: flex;
@@ -218,7 +219,7 @@ export default function Friends() {
     });
   };
 
-  return (
+  return isLogin ? (
     <Wrapper>
       <Img src={plant} alt="plant" />
       <Img2 src={plant2} alt="plant" />
@@ -271,5 +272,7 @@ export default function Friends() {
         ))}
       </FriendsWrapper>
     </Wrapper>
+  ) : (
+    <Navigate replace to="/profile" />
   );
 }

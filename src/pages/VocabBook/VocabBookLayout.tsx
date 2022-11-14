@@ -1,6 +1,7 @@
 import styled from "styled-components";
-import { Outlet, useOutletContext } from "react-router-dom";
-import { useState } from "react";
+import { Navigate, Outlet, useOutletContext } from "react-router-dom";
+import { useContext, useState } from "react";
+import { authContext } from "../../context/authContext";
 
 const Wrapper = styled.div`
   @media screen and (min-width: 1440px) {
@@ -15,11 +16,14 @@ type ContextType = {
 };
 
 export default function VocabBookLayout() {
+  const { isLogin } = useContext(authContext);
   const [viewingBook, setViewingBook] = useState<string>("unsorted");
-  return (
+  return isLogin ? (
     <Wrapper>
       <Outlet context={{ viewingBook, setViewingBook }} />
     </Wrapper>
+  ) : (
+    <Navigate replace to="/profile" />
   );
 }
 

@@ -6,6 +6,11 @@ type ContextProviderProps = {
   children: React.ReactNode;
 };
 
+interface Log {
+  isCorrect: boolean;
+  testTime: {};
+}
+
 interface BooksInterface {
   vocabBooks: {
     [key: string]: [
@@ -14,7 +19,9 @@ interface BooksInterface {
         audioLink: string;
         partOfSpeech: string;
         definition: string;
-        isCorrect: boolean;
+        isCorrect?: boolean;
+        log?: Log[];
+        correctRate: number;
       }
     ];
   };

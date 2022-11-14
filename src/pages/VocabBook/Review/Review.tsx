@@ -4,7 +4,7 @@ import { useViewingBook } from "../VocabBookLayout";
 import { vocabBookContext } from "../../../context/vocabBookContext";
 import { authContext } from "../../../context/authContext";
 import audio from "../../../components/audio.png";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
 import plant from "./reviewPlant.png";
@@ -27,7 +27,7 @@ const Wrapper = styled.div`
 `;
 
 const Img = styled.img`
-  width: 350px;
+  width: 300px;
   position: absolute;
   right: 0px;
   bottom: 0;
@@ -96,6 +96,7 @@ const Btn = styled.button`
   line-height: 24px;
   text-align: center;
   margin-top: 20px;
+  z-index: 1;
 `;
 
 const Message = styled.div``;
@@ -105,9 +106,15 @@ const OutcomeWrapper = styled.div`
   margin: 50px auto;
 `;
 
-const ReviewVocabs = styled.div``;
+const ReviewVocabs = styled.div`
+  background-color: rgb(255, 255, 255, 0.7);
+  z-index: 100;
+`;
+
 const WrongVocabs = styled.div``;
+
 const CorrectVocabs = styled.div``;
+
 const LabelDiv = styled.div`
   border-bottom: 1px gray solid;
   margin-top: 20px;
@@ -119,12 +126,19 @@ const VocabList = styled.div`
   margin-bottom: 10px;
 `;
 
+interface Log {
+  isCorrect?: boolean;
+  time?: {};
+}
+
 interface ReviewingQuestions {
   vocab: string;
   audioLink: string;
   partOfSpeech: string;
   definition: string;
-  isCorrect: boolean;
+  isCorrect?: boolean;
+  log?: Log[];
+  correctRate?: number;
 }
 
 export default function Review() {
@@ -134,15 +148,29 @@ export default function Review() {
   const [round, setRound] = useState<number>(0);
 
   const [answerCount, setAnswerCount] = useState({ correct: 0, wrong: 0 });
+
   const { viewingBook } = useViewingBook();
   const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
+  const [updateLogInVeiwingBook, setUpdateLogInVeiwingBook] = useState<
+    ReviewingQuestions[]
+  >(vocabBooks?.[viewingBook]);
+
+  console.log(vocabBooks?.[viewingBook]);
+  console.log("top", { updateLogInVeiwingBook });
+
   const questionsNumber = 5;
   const questions = vocabBooks?.[viewingBook]
     ?.sort(() => Math.random() - 0.5)
     .slice(0, questionsNumber);
   const [reviewingQuestions, setReviewingQuestions] =
     useState<ReviewingQuestions[]>(questions);
-  const { isLogin, userId } = useContext(authContext);
+  const [newReviewingQuestions, setNewReviewingQuestions] = useState(
+    [...reviewingQuestions].map((question) => ({
+      ...question,
+    }))
+  );
+
+  const { userId } = useContext(authContext);
   const [score, setScore] = useState<number>();
   const [isChallenging, setIsChallenging] = useState<boolean>();
   const [currentOptions, setCurrentOptions] = useState<[string, string][]>([]);
@@ -201,6 +229,8 @@ export default function Review() {
   };
 
   const handleGameOver = () => {
+    console.log("click done", { newReviewingQuestions });
+    setReviewingQuestions(newReviewingQuestions);
     setShowBtn(true);
     setGameOver(true);
     setRound(0);
@@ -216,6 +246,14 @@ export default function Review() {
       }
     };
     if ((answerCount.correct / questionsNumber) * 100 >= 80) updateScore();
+
+    const updateLog = async () => {
+      const userRef = doc(db, "vocabBooks", userId);
+      await updateDoc(userRef, {
+        [viewingBook]: updateLogInVeiwingBook,
+      });
+    };
+    updateLog();
   };
 
   function renderTest() {
@@ -256,16 +294,132 @@ export default function Review() {
                   );
                   setShowAnswerArr(answerStatus);
 
+                  let newUpdateLogInVeiwingBook;
+
                   if (clickedVocab === correctVocab?.vocab) {
                     answerCount.correct += 1;
-                    reviewingQuestions[round].isCorrect = true;
-                    setReviewingQuestions(reviewingQuestions);
+                    newReviewingQuestions[round].isCorrect = true;
+
+                    newUpdateLogInVeiwingBook = [...updateLogInVeiwingBook].map(
+                      ({
+                        vocab,
+                        audioLink,
+                        partOfSpeech,
+                        definition,
+                        log,
+                        correctRate,
+                      }) => {
+                        if (vocab === correctVocab?.vocab) {
+                          if (log && log?.length > 0) {
+                            const correctCount = log?.reduce(
+                              (acc: any, item) => {
+                                if (item.isCorrect) {
+                                  acc += 1;
+                                }
+                                return acc;
+                              },
+                              0
+                            );
+                            console.log("correct correctRate: ...log");
+                            return {
+                              vocab,
+                              audioLink,
+                              partOfSpeech,
+                              definition,
+                              log: [
+                                ...log,
+                                { isCorrect: true, time: new Date() },
+                              ],
+                              correctRate:
+                                (correctCount + 1) / (log.length + 1),
+                            };
+                          } else {
+                            console.log("correct correctRate: 1");
+                            return {
+                              vocab,
+                              audioLink,
+                              partOfSpeech,
+                              definition,
+                              log: [{ isCorrect: true, time: new Date() }],
+                              correctRate: 1,
+                            };
+                          }
+                        } else {
+                          return {
+                            vocab,
+                            audioLink,
+                            partOfSpeech,
+                            definition,
+                            log,
+                            correctRate,
+                          };
+                        }
+                      }
+                    );
                   } else {
                     answerCount.wrong += 1;
-                    reviewingQuestions[round].isCorrect = false;
-                    setReviewingQuestions(reviewingQuestions);
+                    newReviewingQuestions[round].isCorrect = false;
+                    newUpdateLogInVeiwingBook = [...updateLogInVeiwingBook].map(
+                      ({
+                        vocab,
+                        audioLink,
+                        partOfSpeech,
+                        definition,
+                        log,
+                        correctRate,
+                      }) => {
+                        if (vocab === correctVocab?.vocab) {
+                          if (log && log?.length > 0) {
+                            const correctCount = log?.reduce(
+                              (acc: any, item) => {
+                                if (item.isCorrect) {
+                                  acc += 1;
+                                }
+                                return acc;
+                              },
+                              0
+                            );
+                            console.log("wrong correctRate: ...log");
+                            return {
+                              vocab,
+                              audioLink,
+                              partOfSpeech,
+                              definition,
+                              log: [
+                                ...log,
+                                { isCorrect: false, time: new Date() },
+                              ],
+                              correctRate: correctCount / (log.length + 1),
+                            };
+                          } else {
+                            console.log("wrong correctRate: 0");
+                            return {
+                              vocab,
+                              audioLink,
+                              partOfSpeech,
+                              definition,
+                              log: [{ isCorrect: false, time: new Date() }],
+                              correctRate: 0,
+                            };
+                          }
+                        } else {
+                          return {
+                            vocab,
+                            audioLink,
+                            partOfSpeech,
+                            definition,
+                            log,
+                            correctRate,
+                          };
+                        }
+                      }
+                    );
                   }
                   setAnswerCount(answerCount);
+                  setNewReviewingQuestions(newReviewingQuestions);
+                  setUpdateLogInVeiwingBook(newUpdateLogInVeiwingBook);
+                  console.log("clickOptions", { newUpdateLogInVeiwingBook });
+                  console.log("clickOptions", { newReviewingQuestions });
                 }
               }}
             >
@@ -311,10 +465,16 @@ export default function Review() {
             <Btn
               showBtn={showBtn}
               onClick={() => {
+                // window.location.reload();
                 setGameOver(false);
                 setAnswerCount({ correct: 0, wrong: 0 });
                 setReviewingQuestions(questions);
-
+                setNewReviewingQuestions(
+                  [...reviewingQuestions].map((question) => ({
+                    ...question,
+                  }))
+                );
+                console.log("click again", { reviewingQuestions });
                 setShowBtn(false);
                 setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
               }}
@@ -347,7 +507,7 @@ export default function Review() {
                       </VocabList>
                     );
                   } else {
-                    <></>;
+                    return <></>;
                   }
                 }
               )}
@@ -373,7 +533,7 @@ export default function Review() {
                       </VocabList>
                     );
                   } else {
-                    <></>;
+                    return <></>;
                   }
                 }
               )}
@@ -384,7 +544,7 @@ export default function Review() {
     );
   }
 
-  return isLogin ? (
+  return (
     <Wrapper>
       <Img src={plant} alt="plant" />
       <Header>
@@ -396,10 +556,6 @@ export default function Review() {
         </div>
       </Header>
       {gameOver ? renderOutcome() : renderTest()}
-    </Wrapper>
-  ) : (
-    <Wrapper>
-      <p>Please log in to review!</p>
     </Wrapper>
   );
 }

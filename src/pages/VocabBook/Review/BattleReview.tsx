@@ -81,8 +81,9 @@ const WaitingRoomWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 50px;
+  margin: 50px auto;
   background-color: rgb(255, 255, 255, 0.7);
+  width: 500px;
 `;
 
 const StartGame = styled.button`
@@ -151,7 +152,10 @@ const OutcomeWrapper = styled.div`
   margin: 50px auto;
 `;
 
-const ReviewVocabs = styled.div``;
+const ReviewVocabs = styled.div`
+  background-color: rgb(255, 255, 255, 0.7);
+  z-index: 100;
+`;
 
 const WrongVocabs = styled.div``;
 
@@ -367,11 +371,24 @@ export default function BattleReview() {
           data?.answerCount.competitor.correct +
           data?.answerCount.competitor.wrong;
 
-        if (isCompetitorIn && !isOwner && userId !== data.competitorId)
+        if (data.competitorId !== "") setIsCompetitorIn(true);
+        if (
+          isCompetitorIn &&
+          !isOwner &&
+          userId !== data.competitorId &&
+          data.competitorId !== ""
+        ) {
           setIsVisitor(true);
-        console.log(isOwner, userId, data.competitorId);
+        }
+        // console.log(
+        //   isCompetitorIn,
+        //   data.competitorId !== "",
+        //   data.competitorId,
+        //   isOwner,
+        //   userId,
+        //   data.competitorId
+        // );
         if (data.ownerId !== userId) setIsOwner(false);
-        if (data.competitorId) setIsCompetitorIn(true);
         if (data.competitorName !== "") setCompetitorName(data.competitorName);
         if (isWaiting && data?.status === "playing") setIsWaiting(false);
         if (data.answerCount) setAnswerCount(data.answerCount);
@@ -759,70 +776,59 @@ export default function BattleReview() {
     );
   }
 
-  return isLogin ? (
-    !isVisitor ? (
-      <>
-        <Img src={plant} alt="plant" />
+  return !isVisitor ? (
+    <>
+      <Img src={plant} alt="plant" />
 
-        <Wrapper>
-          <div>Review Round: {round + 1}</div>
-          <Header>
-            <OwnerCount>
-              <div>
-                <p>Owner: {ownerName}</p>
-                O: {answerCount.owner.correct} X: {answerCount.owner.wrong} /
-                Total: {questionsNumber} (
+      <Wrapper>
+        <div>Review Round: {round + 1}</div>
+        <Header>
+          <OwnerCount>
+            <div>
+              <p>Owner: {ownerName}</p>
+              O: {answerCount.owner.correct} X: {answerCount.owner.wrong} /
+              Total: {questionsNumber} (
+              {Math.ceil((answerCount.owner.correct / questionsNumber) * 100)}
+              %)
+            </div>
+            <ScoreBar insideColor={true} score={answerCount.owner.correct}>
+              <ScoreBar>
                 {Math.ceil((answerCount.owner.correct / questionsNumber) * 100)}
-                %)
-              </div>
-              <ScoreBar insideColor={true} score={answerCount.owner.correct}>
-                <ScoreBar>
-                  {Math.ceil(
-                    (answerCount.owner.correct / questionsNumber) * 100
-                  )}
-                  %
-                </ScoreBar>
+                %
               </ScoreBar>
-            </OwnerCount>
-            {isWaiting ? <></> : <p>{countDown} seconds left</p>}
-            <CompetitorCount>
-              <div>
-                <p>Competitor: {competitorName}</p>
-                O: {answerCount.competitor.correct} X:{" "}
-                {answerCount.competitor.wrong} / Total: {questionsNumber} (
+            </ScoreBar>
+          </OwnerCount>
+          {isWaiting ? <></> : <p>{countDown} seconds left</p>}
+          <CompetitorCount>
+            <div>
+              <p>Competitor: {competitorName}</p>
+              O: {answerCount.competitor.correct} X:{" "}
+              {answerCount.competitor.wrong} / Total: {questionsNumber} (
+              {Math.ceil(
+                (answerCount.competitor.correct / questionsNumber) * 100
+              )}
+              %)
+            </div>
+            <ScoreBar insideColor={true} score={answerCount.competitor.correct}>
+              <ScoreBar>
                 {Math.ceil(
                   (answerCount.competitor.correct / questionsNumber) * 100
                 )}
-                %)
-              </div>
-              <ScoreBar
-                insideColor={true}
-                score={answerCount.competitor.correct}
-              >
-                <ScoreBar>
-                  {Math.ceil(
-                    (answerCount.competitor.correct / questionsNumber) * 100
-                  )}
-                  %
-                </ScoreBar>
+                %
               </ScoreBar>
-            </CompetitorCount>
-          </Header>
-          {isWaiting
-            ? renderWaiting()
-            : gameOver
-            ? renderOutcome()
-            : renderTest()}
-        </Wrapper>
-      </>
-    ) : (
-      <Wrapper>
-        <p>The game has started.</p>
+            </ScoreBar>
+          </CompetitorCount>
+        </Header>
+        {isWaiting
+          ? renderWaiting()
+          : gameOver
+          ? renderOutcome()
+          : renderTest()}
       </Wrapper>
-    )
+    </>
   ) : (
     <Wrapper>
-      <p>Please log in to battle!</p>
+      <p>The game has started.</p>
     </Wrapper>
   );
 }
