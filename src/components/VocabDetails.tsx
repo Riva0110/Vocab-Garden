@@ -164,7 +164,7 @@ export default function VocabDetails() {
       await updateDoc(vocabRef, {
         [newBook]: arrayUnion(),
       });
-      await getVocabBooks(userId);
+      getVocabBooks(userId);
     }
   };
 
@@ -192,7 +192,7 @@ export default function VocabDetails() {
       correctRate: 0,
       log: [],
     });
-    await getVocabBooks(userId);
+    getVocabBooks(userId);
   };
 
   const handleDeleteVocabFromBook = async () => {

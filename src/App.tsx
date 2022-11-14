@@ -144,7 +144,11 @@ function App() {
               setInputVocab(e.target.value);
             }}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && inputVocab) setKeyword(inputVocab);
+              if (e.key === "Enter" && inputVocab) {
+                setKeyword(inputVocab);
+                const target = e.target as HTMLInputElement;
+                target.value = "";
+              }
             }}
           />
           {isLogin ? (
