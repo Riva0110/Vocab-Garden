@@ -278,7 +278,7 @@ export default function Profile() {
           ) : score !== 5 ? (
             <>
               <Select
-                defaultValue={currentPlant}
+                // defaultValue={currentPlant}
                 onChange={async (e: any) => {
                   setCurrentPlant(e.target.value);
                   setIsDying(false);
@@ -291,7 +291,9 @@ export default function Profile() {
                 }}
               >
                 {Object.keys(plantImgsObj)?.map((plant, index) => (
-                  <option key={plant}>{plant}</option>
+                  <option key={plant} selected={plant === currentPlant}>
+                    {plant}
+                  </option>
                 ))}
               </Select>
 

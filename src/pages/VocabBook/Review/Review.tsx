@@ -157,9 +157,6 @@ export default function Review() {
     Answer[]
   >(vocabBooks?.[viewingBook]);
 
-  console.log(vocabBooks?.[viewingBook]);
-  console.log("top", { updateLogInVeiwingBook });
-
   const questionsNumber = 5;
   const questions = vocabBooks?.[viewingBook]
     ?.sort(() => Math.random() - 0.5)
