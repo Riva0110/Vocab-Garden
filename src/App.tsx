@@ -24,6 +24,10 @@ const Wrapper = styled.div`
   min-height: 100vh;
 `;
 
+const Loading = styled.div`
+  padding: 50vh 50vw;
+`;
+
 const Header = styled.div`
   display: flex;
   justify-content: space-between;
@@ -97,7 +101,7 @@ interface BattleInvitation {
 
 function App() {
   const { setKeyword } = useContext(keywordContext);
-  const { isLogin, userId } = useContext(authContext);
+  const { isLogin, userId, isLoadingUserAuth } = useContext(authContext);
   const [inputVocab, setInputVocab] = useState<string>();
   const [battleInvitation, setBattleInvitation] =
     useState<BattleInvitation[]>();
@@ -185,7 +189,7 @@ function App() {
             <div>There's no invitation.</div>
           )}
         </Notification>
-        <Outlet />
+        {isLoadingUserAuth ? <Loading>Loading......</Loading> : <Outlet />}
       </Main>
     </Wrapper>
   );
