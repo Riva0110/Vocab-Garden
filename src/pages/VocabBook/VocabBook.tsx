@@ -304,7 +304,7 @@ export default function VocabBook() {
                   setViewingBook(book);
                 }}
               >
-                {book.toLocaleLowerCase()}({vocabBooks?.[book]?.length})
+                {book.toLocaleLowerCase()} ({vocabBooks?.[book]?.length})
                 <br />
                 {Math.round(correctRateOfBooksArr[index] * 100)}%
                 <br />

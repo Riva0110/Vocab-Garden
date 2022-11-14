@@ -136,9 +136,11 @@ interface ReviewingQuestions {
   audioLink: string;
   partOfSpeech: string;
   definition: string;
-  isCorrect?: boolean;
-  log?: Log[];
-  correctRate?: number;
+}
+
+interface Answer extends ReviewingQuestions {
+  log: Log[];
+  correctRate: number;
 }
 
 export default function Review() {
@@ -152,7 +154,7 @@ export default function Review() {
   const { viewingBook } = useViewingBook();
   const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
   const [updateLogInVeiwingBook, setUpdateLogInVeiwingBook] = useState<
-    ReviewingQuestions[]
+    Answer[]
   >(vocabBooks?.[viewingBook]);
 
   console.log(vocabBooks?.[viewingBook]);
@@ -164,11 +166,6 @@ export default function Review() {
     .slice(0, questionsNumber);
   const [reviewingQuestions, setReviewingQuestions] =
     useState<ReviewingQuestions[]>(questions);
-  const [newReviewingQuestions, setNewReviewingQuestions] = useState(
-    [...reviewingQuestions].map((question) => ({
-      ...question,
-    }))
-  );
 
   const { userId } = useContext(authContext);
   const [score, setScore] = useState<number>();
@@ -229,8 +226,6 @@ export default function Review() {
   };
 
   const handleGameOver = () => {
-    console.log("click done", { newReviewingQuestions });
-    setReviewingQuestions(newReviewingQuestions);
     setShowBtn(true);
     setGameOver(true);
     setRound(0);
@@ -297,8 +292,10 @@ export default function Review() {
                   let newUpdateLogInVeiwingBook;
 
                   if (clickedVocab === correctVocab?.vocab) {
-                    answerCount.correct += 1;
-                    newReviewingQuestions[round].isCorrect = true;
+                    setAnswerCount((prev) => ({
+                      ...prev,
+                      correct: prev.correct + 1,
+                    }));
 
                     newUpdateLogInVeiwingBook = [...updateLogInVeiwingBook].map(
                       ({
@@ -357,8 +354,10 @@ export default function Review() {
                       }
                     );
                   } else {
-                    answerCount.wrong += 1;
-                    newReviewingQuestions[round].isCorrect = false;
+                    setAnswerCount((prev) => ({
+                      ...prev,
+                      wrong: prev.wrong + 1,
+                    }));
                     newUpdateLogInVeiwingBook = [...updateLogInVeiwingBook].map(
                       ({
                         vocab,
@@ -415,11 +414,8 @@ export default function Review() {
                       }
                     );
                   }
-                  setAnswerCount(answerCount);
-                  setNewReviewingQuestions(newReviewingQuestions);
                   setUpdateLogInVeiwingBook(newUpdateLogInVeiwingBook);
                   console.log("clickOptions", { newUpdateLogInVeiwingBook });
-                  console.log("clickOptions", { newReviewingQuestions });
                 }
               }}
             >
@@ -469,11 +465,6 @@ export default function Review() {
                 setGameOver(false);
                 setAnswerCount({ correct: 0, wrong: 0 });
                 setReviewingQuestions(questions);
-                setNewReviewingQuestions(
-                  [...reviewingQuestions].map((question) => ({
-                    ...question,
-                  }))
-                );
                 console.log("click again", { reviewingQuestions });
                 setShowBtn(false);
                 setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
@@ -489,8 +480,12 @@ export default function Review() {
             <WrongVocabs>
               <LabelDiv>Wrong vocab:</LabelDiv>{" "}
               {reviewingQuestions.map(
-                ({ vocab, audioLink, partOfSpeech, definition, isCorrect }) => {
-                  if (!isCorrect) {
+                ({ vocab, audioLink, partOfSpeech, definition }) => {
+                  const answer = updateLogInVeiwingBook.find((answer) => {
+                    return answer.vocab === vocab;
+                  });
+                  const lastAnswerLog = answer?.log.at(-1);
+                  if (!lastAnswerLog?.isCorrect) {
                     return (
                       <VocabList key={vocab + partOfSpeech}>
                         {vocab}{" "}
@@ -515,8 +510,12 @@ export default function Review() {
             <CorrectVocabs>
               <LabelDiv>Correct vocab:</LabelDiv>{" "}
               {reviewingQuestions.map(
-                ({ vocab, audioLink, partOfSpeech, definition, isCorrect }) => {
-                  if (isCorrect) {
+                ({ vocab, audioLink, partOfSpeech, definition }) => {
+                  const answer = updateLogInVeiwingBook.find((answer) => {
+                    return answer.vocab === vocab;
+                  });
+                  const lastAnswerLog = answer?.log.at(-1);
+                  if (lastAnswerLog?.isCorrect) {
                     return (
                       <VocabList key={vocab + partOfSpeech}>
                         {vocab}{" "}
