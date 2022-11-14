@@ -68,7 +68,7 @@ const SavePopup = styled.div`
   position: absolute;
   border: 1px solid gray;
   border-radius: 10px;
-  top: 110px;
+  top: 130px;
   background-color: white;
   display: ${(props: Props) => (props.isPopuping ? "block" : "none")};
   padding: 10px;
