@@ -5,6 +5,7 @@ import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { useEffect } from "react";
 import { authContext } from "../../context/authContext";
+import MainBtn from "../../components/MainButton";
 
 const ArticlesWrapper = styled.div`
   display: flex;
@@ -30,10 +31,6 @@ const Btns = styled.div`
   display: flex;
   gap: 10px;
   justify-content: flex-end;
-`;
-
-const Btn = styled.button`
-  width: 100px;
 `;
 
 interface ArticleListInterface {
@@ -72,20 +69,20 @@ export default function Articles() {
     <div className="App">
       <ArticlesWrapper>
         <Btns>
-          <Btn
+          <MainBtn
             onClick={() => {
               navigate("/articles/words");
             }}
           >
             Article Words
-          </Btn>
-          <Btn
+          </MainBtn>
+          <MainBtn
             onClick={() => {
               navigate("/articles/add");
             }}
           >
             Add Article
-          </Btn>
+          </MainBtn>
         </Btns>
         {articleList?.map(({ time, title, id }, index) => {
           const newDate = new Date(time.seconds * 1000);
