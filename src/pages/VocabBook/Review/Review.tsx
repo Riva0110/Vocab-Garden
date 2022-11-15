@@ -4,10 +4,11 @@ import { useViewingBook } from "../VocabBookLayout";
 import { vocabBookContext } from "../../../context/vocabBookContext";
 import { authContext } from "../../../context/authContext";
 import audio from "../../../components/audio.png";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
 import plant from "./reviewPlant.png";
+import Button from "../../../components/Button";
 
 interface Props {
   correct?: boolean;
@@ -29,8 +30,8 @@ const Wrapper = styled.div`
 const Img = styled.img`
   width: 300px;
   position: absolute;
-  right: 0px;
-  bottom: 0;
+  left: 0px;
+  bottom: 50px;
 `;
 
 const Header = styled.div`
@@ -74,12 +75,11 @@ const Option = styled.div`
   width: 800px;
   max-width: 90vw;
   padding: 10px;
-  border: 1px solid
-    ${(props: Props) => {
-      if (props.showAnswer === "notAnswer") return "gray";
-      if (props.showAnswer === "wrongAnswer") return "red";
-      if (props.showAnswer === "correctAnswer") return "blue";
-    }};
+  border: solid 1px gray;
+  background-color: ${(props: Props) => {
+    if (props.showAnswer === "wrongAnswer") return "#f1d8dc";
+    if (props.showAnswer === "correctAnswer") return "#d2e1ed";
+  }};
   margin-top: 20px;
   cursor: pointer;
 `;
@@ -89,14 +89,16 @@ const Btns = styled.div`
   gap: 10px;
 `;
 
-const Btn = styled.button`
+const BtnDiv = styled.div`
   display: ${(props: Props) => (props.showBtn ? "flex" : "none")};
-  width: 100%;
+  margin-top: 20px;
+  justify-content: flex-end;
+  /* width: 100%;
   height: 24px;
   line-height: 24px;
   text-align: center;
-  margin-top: 20px;
-  z-index: 1;
+  
+  z-index: 1; */
 `;
 
 const Message = styled.div``;
@@ -420,16 +422,16 @@ export default function Review() {
             </Option>
           ))}
           {round === questionsNumber - 1 ? (
-            <Btn
+            <BtnDiv
               showBtn={showBtn}
               onClick={() => {
                 handleGameOver();
               }}
             >
               Done
-            </Btn>
+            </BtnDiv>
           ) : (
-            <Btn
+            <BtnDiv
               showBtn={showBtn}
               onClick={() => {
                 setShowBtn(false);
@@ -437,8 +439,8 @@ export default function Review() {
                 setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
               }}
             >
-              Next
-            </Btn>
+              <Button btnType={"secondary"}>Next &gt;&gt;&gt;</Button>
+            </BtnDiv>
           )}
         </Options>
       </Main>
@@ -455,7 +457,7 @@ export default function Review() {
               : "加油，好嗎？我對你太失望了"}
           </Message>
           <Btns>
-            <Btn
+            <BtnDiv
               showBtn={showBtn}
               onClick={() => {
                 // window.location.reload();
@@ -468,10 +470,10 @@ export default function Review() {
               }}
             >
               Review again
-            </Btn>
-            <Btn showBtn={showBtn} onClick={() => navigate("/vocabbook")}>
+            </BtnDiv>
+            <BtnDiv showBtn={showBtn} onClick={() => navigate("/vocabbook")}>
               Back to VocabBooks
-            </Btn>
+            </BtnDiv>
           </Btns>
           <ReviewVocabs>
             <WrongVocabs>

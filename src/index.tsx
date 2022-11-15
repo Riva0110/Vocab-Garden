@@ -13,7 +13,6 @@ import ReviewLayout from "./pages/VocabBook/Review/ReviewLayout";
 import Review from "./pages/VocabBook/Review/Review";
 import BattleReview from "./pages/VocabBook/Review/BattleReview";
 import VocabBook from "./pages/VocabBook/VocabBook";
-import Wordle from "./pages/VocabBook/Wordle/Wordle";
 import { KeywordContextProvider } from "./context/keywordContext";
 import { AuthContextProvider } from "./context/authContext";
 import { VocabBookContextProvider } from "./context/vocabBookContext";

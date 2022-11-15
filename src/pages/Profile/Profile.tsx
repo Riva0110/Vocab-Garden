@@ -4,6 +4,7 @@ import { useContext, useState, useEffect } from "react";
 import { arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { plantImgsObj } from "./plantImgs";
+import Button from "../../components/Button";
 
 interface Props {
   insideColor?: boolean;
@@ -22,7 +23,12 @@ const Wrapper = styled.div`
   display: flex;
 `;
 
-const Select = styled.select``;
+const Select = styled.select`
+  border: none;
+  &:focus {
+    outline: none;
+  }
+`;
 
 const ScoreBarWrapper = styled.div`
   width: 200px;
@@ -68,14 +74,13 @@ const GrowingPlantImg = styled.img`
   }
 `;
 
-const Btn = styled.button``;
-
 const Plants = styled.div`
   display: flex;
   flex-wrap: wrap;
   margin-top: 30px;
   width: 65vw;
   gap: 20px;
+  align-content: flex-start;
 `;
 
 const PlantBorder = styled.div`
@@ -278,7 +283,6 @@ export default function Profile() {
           ) : score !== 5 ? (
             <>
               <Select
-                // defaultValue={currentPlant}
                 onChange={async (e: any) => {
                   setCurrentPlant(e.target.value);
                   setIsDying(false);
@@ -297,16 +301,20 @@ export default function Profile() {
                 ))}
               </Select>
 
-              <Btn onClick={() => handleStartChallenge()}>
-                Start a challenge
-              </Btn>
+              <div onClick={() => handleStartChallenge()}>
+                <Button btnType={"primary"}>Start a challenge</Button>
+              </div>
             </>
           ) : (
-            <Btn onClick={() => handleSavePlant()}>
-              Save the plant in your garden!
-            </Btn>
+            <div onClick={() => handleSavePlant()}>
+              <Button btnType={"primary"}>
+                Save the plant in your garden!
+              </Button>
+            </div>
           )}
-          <button onClick={() => logout()}>Log out</button>
+          <div onClick={() => logout()}>
+            <Button btnType={"secondary"}>Log out</Button>
+          </div>
         </UserInfoWrapper>
         <Plants>
           {plantsList?.map(({ plantName, time }, index) => {

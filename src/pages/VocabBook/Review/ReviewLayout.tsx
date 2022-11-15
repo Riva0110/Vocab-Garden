@@ -7,6 +7,7 @@ import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
+import Button from "../../../components/Button";
 
 interface Props {
   correct?: boolean;
@@ -23,28 +24,11 @@ const Wrapper = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 80px 20px 20px 20px;
-  width: calc(100vw - 40px);
 `;
 
 const ModeBtns = styled.div`
   display: flex;
   gap: 20px;
-`;
-const ReviewModeBtn = styled.button`
-  cursor: pointer;
-  ${(props: Props) =>
-    props.isBattle &&
-    css`
-      border: 1px solid gray;
-      color: gray;
-    `}
-
-  ${(props: Props) =>
-    !props.isBattle &&
-    css`
-      border: none;
-      font-weight: 600;
-    `}
 `;
 
 type ContextType = {
@@ -104,25 +88,27 @@ export default function ReviewLayout() {
   return (
     <Wrapper>
       <ModeBtns>
-        <ReviewModeBtn
-          isBattle={isBattle}
+        <div
           onClick={() => {
             setIsBattle(false);
             navigate("/vocabbook/review");
           }}
         >
-          Single Mode
-        </ReviewModeBtn>
-        <ReviewModeBtn
-          isBattle={!isBattle}
+          <Button btnType={isBattle ? "secondary" : "primary"}>
+            Single Mode
+          </Button>
+        </div>
+        <div
           onClick={() => {
             handleSetBattleRoom();
             setIsBattle(true);
             navigate(`/vocabbook/review/${userId + roomId}`);
           }}
         >
-          Battle Mode
-        </ReviewModeBtn>
+          <Button btnType={isBattle ? "primary" : "secondary"}>
+            Battle Mode
+          </Button>
+        </div>
       </ModeBtns>
       <Outlet
         context={{ viewingBook, questionsNumber, isBattle, setIsBattle }}

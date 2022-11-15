@@ -781,7 +781,7 @@ export default function BattleReview() {
       <Img src={plant} alt="plant" />
 
       <Wrapper>
-        <div>Review Round: {round + 1}</div>
+        <div>Battle Round: {round + 1}</div>
         <Header>
           <OwnerCount>
             <div>

@@ -6,14 +6,15 @@ const BUTTON_TYPE = {
 };
 
 const Wrapper = styled.button`
-  width: 100px;
+  min-width: 100px;
   height: 25px;
+  padding-left: 10px;
+  padding-right: 10px;
   background-color: ${(props: Props) =>
     props.btnType === BUTTON_TYPE.primary ? "#607973" : "white"};
   color: ${(props: Props) =>
     props.btnType === BUTTON_TYPE.primary ? "white" : "#607973"};
-  border: ${(props: Props) =>
-    props.btnType === BUTTON_TYPE.primary ? "none" : "1px solid #607973"};
+  border: 1px solid #607973;
   cursor: pointer;
 `;
 

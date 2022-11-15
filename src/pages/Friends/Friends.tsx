@@ -54,7 +54,7 @@ const FriendsWrapper = styled.div`
 `;
 
 const Input = styled.input`
-  width: 100%;
+  width: 70%;
   height: 25px;
   border: none;
   &:focus {
@@ -240,7 +240,7 @@ export default function Friends() {
   return isLogin ? (
     <Wrapper>
       <Img src={plant} alt="plant" />
-      <Img2 src={plant2} alt="plant" />
+      {/* <Img2 src={plant2} alt="plant" /> */}
       <FriendsWrapper>
         <FriendRequest>
           <Input
@@ -259,7 +259,7 @@ export default function Friends() {
               handleSendRequest();
             }}
           >
-            <Button btnType="primary">Send Request</Button>
+            <Button btnType="primary">Send request</Button>
           </div>
         </FriendRequest>
         <Title>Friend List</Title>

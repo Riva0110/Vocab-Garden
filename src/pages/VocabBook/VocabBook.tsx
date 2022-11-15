@@ -20,22 +20,11 @@ import { useViewingBook } from "./VocabBookLayout";
 import plant from "./plant.png";
 import deleteBtn from "./delete.png";
 import Button from "../../components/Button";
-import banner from "./banner.jpg";
 
 const Wrapper = styled.div`
   display: flex;
   padding: 80px 20px 20px 20px;
   gap: 30px;
-`;
-
-const BackgroundImg = styled.div`
-  width: 100vw;
-  height: 100vh;
-  position: absolute;
-  left: 0;
-  top: 0;
-  background-image: url(${banner});
-  background-size: cover;
 `;
 
 const Img = styled.img`
@@ -88,8 +77,13 @@ const Book = styled.div`
 
 const BookInfoWrapper = styled.div`
   display: flex;
-  gap: 20px;
   margin-bottom: 20px;
+  justify-content: space-between;
+`;
+
+const BookButtons = styled.div`
+  display: flex;
+  gap: 20px;
 `;
 
 const CardWrapper = styled.div`
@@ -134,7 +128,7 @@ const VocabTitle = styled.div`
   gap: 20px;
   font-size: 20px;
   font-weight: 600;
-  color: darkgreen;
+  color: black;
   margin-bottom: 10px;
 `;
 
@@ -304,25 +298,8 @@ export default function VocabBook() {
 
   return (
     <Wrapper>
-      {/* <BackgroundImg /> */}
-      {/* <Img src={plant} alt="plant" /> */}
+      <Img src={plant} alt="plant" />
       <VocabBookWrapper>
-        <Nav>
-          <div>
-            <Input onChange={(e) => setNewBook(e.target.value)} />
-            <AddButton onClick={handleAddBook}>+</AddButton>
-          </div>
-          <div
-            onClick={() =>
-              vocabBooks[viewingBook]?.length >= 5 ||
-              (viewingBook === "wrong words" && topWrongWords?.length >= 5)
-                ? navigate("/vocabbook/review")
-                : alert("Please save at least 5 vocab cards in this book!")
-            }
-          >
-            <Button btnType={"primary"}>Review</Button>
-          </div>
-        </Nav>
         <VocabBookAndCard>
           <BookWrapper>
             {Object.keys(vocabBooks).map((book: string, index) => (
@@ -351,17 +328,37 @@ export default function VocabBook() {
             </Book>
           </BookWrapper>
           <BookInfoWrapper>
-            <div>
-              Correct rate:{" "}
-              {viewingBook === "wrong words" ? "<50%" : `${bookCorrectRate}%`}
-            </div>
-            {viewingBook === "wrong words" ? null : (
-              <SaveVocabImg
-                src={deleteBtn}
-                alt="delete"
-                onClick={() => handleDeleteBook(viewingBook)}
-              />
-            )}
+            <BookButtons>
+              <div>
+                Correct rate:{" "}
+                {viewingBook === "wrong words" ? "<50%" : `${bookCorrectRate}%`}
+              </div>
+              <div>
+                <Input onChange={(e) => setNewBook(e.target.value)} />
+                <AddButton onClick={handleAddBook}>+</AddButton>
+              </div>
+              <div>
+                {viewingBook === "wrong words" ? null : (
+                  <SaveVocabImg
+                    src={deleteBtn}
+                    alt="delete"
+                    onClick={() => handleDeleteBook(viewingBook)}
+                  />
+                )}
+              </div>
+            </BookButtons>
+            <Nav>
+              <div
+                onClick={() =>
+                  vocabBooks[viewingBook]?.length >= 5 ||
+                  (viewingBook === "wrong words" && topWrongWords?.length >= 5)
+                    ? navigate("/vocabbook/review")
+                    : alert("Please save at least 5 vocab cards in this book!")
+                }
+              >
+                <Button btnType={"primary"}>Review</Button>
+              </div>
+            </Nav>
           </BookInfoWrapper>
           <CardWrapper>
             {viewingBook === "wrong words" ? (
