@@ -5,7 +5,7 @@ import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { useEffect } from "react";
 import { authContext } from "../../context/authContext";
-import MainBtn from "../../components/MainButton";
+import Button from "../../components/Button";
 
 const ArticlesWrapper = styled.div`
   display: flex;
@@ -69,20 +69,20 @@ export default function Articles() {
     <div className="App">
       <ArticlesWrapper>
         <Btns>
-          <MainBtn
+          <div
             onClick={() => {
               navigate("/articles/words");
             }}
           >
-            Article Words
-          </MainBtn>
-          <MainBtn
+            <Button btnType="primary">Article Words</Button>
+          </div>
+          <div
             onClick={() => {
               navigate("/articles/add");
             }}
           >
-            Add Article
-          </MainBtn>
+            <Button btnType="secondary">Add Article</Button>
+          </div>
         </Btns>
         {articleList?.map(({ time, title, id }, index) => {
           const newDate = new Date(time.seconds * 1000);

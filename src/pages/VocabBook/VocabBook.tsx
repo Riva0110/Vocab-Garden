@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { keywordContext } from "../../context/keywordContext";
 import { authContext } from "../../context/authContext";
@@ -18,11 +18,13 @@ import saved from "../../components/saved.png";
 import VocabDetails from "../../components/VocabDetails";
 import { useViewingBook } from "./VocabBookLayout";
 import plant from "./plant.png";
-import MainBtn from "../../components/MainButton";
+import deleteBtn from "./delete.png";
+import Button from "../../components/Button";
 
 const Wrapper = styled.div`
   display: flex;
   padding: 80px 20px 20px 20px;
+  gap: 30px;
 `;
 
 const Img = styled.img`
@@ -38,16 +40,8 @@ const Nav = styled.nav`
   justify-content: space-between;
 `;
 
-const NavLink = styled(Link)`
-  margin-right: 20px;
-  text-decoration: none;
-  color: darkgreen;
-  font-weight: 600;
-`;
-
 const VocabBookWrapper = styled.div`
-  width: 50vw;
-  margin-right: 20px;
+  width: calc((100% - 30px) / 2);
   z-index: 1;
 `;
 
@@ -66,8 +60,8 @@ const BookWrapper = styled.div`
 const Book = styled.div`
   text-align: center;
   min-width: 150px;
-  height: 15px;
-  line-height: 15px;
+  height: 30px;
+  line-height: 30px;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   border: ${(props: Props) => (props.selected ? "1px solid gray" : "none")};
@@ -75,10 +69,16 @@ const Book = styled.div`
     props.selected ? "none" : "1px solid gray"};
   color: ${(props: Props) => (props.selected ? "black" : "gray")};
   background-color: ${(props: Props) => (props.selected ? "white" : "none")};
-  padding: 10px;
+  padding: auto;
   font-size: 18px;
   font-weight: 600;
   cursor: pointer;
+`;
+
+const BookInfoWrapper = styled.div`
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
 `;
 
 const CardWrapper = styled.div`
@@ -169,6 +169,7 @@ export default function VocabBook() {
   const { vocabBooks, getVocabBooks, isSaved, setIsSaved } =
     useContext(vocabBookContext);
   const [newBook, setNewBook] = useState<string>();
+  const [bookCorrectRate, setBookCorrectRate] = useState<number>();
 
   const topWrongWords = getAllWords()?.slice(0, 10);
 
@@ -206,7 +207,6 @@ export default function VocabBook() {
       if (item.isCorrect) {
         acc += 1;
       }
-      console.log(logOfBook.length);
       return acc;
     }, 0);
     return correctCount / logOfBook.length || 0;
@@ -293,63 +293,64 @@ export default function VocabBook() {
 
   return (
     <Wrapper>
-      <Img src={plant} alt="plant" />
+      {/* <Img src={plant} alt="plant" /> */}
       <VocabBookWrapper>
         <Nav>
           <div>
             <Input onChange={(e) => setNewBook(e.target.value)} />
             <AddButton onClick={handleAddBook}>+</AddButton>
           </div>
-          <div>
-            {vocabBooks[viewingBook]?.length >= 5 ||
-            topWrongWords?.length >= 5 ? (
-              <MainBtn onClick={() => navigate("/vocabbook/review")}>
-                Review
-              </MainBtn>
-            ) : (
-              <MainBtn
-                onClick={() =>
-                  alert("Please save at least 5 vocab cards in this book!")
-                }
-              >
-                Review
-              </MainBtn>
-            )}
+          <div
+            onClick={() =>
+              vocabBooks[viewingBook]?.length >= 5 ||
+              (viewingBook === "wrong words" && topWrongWords?.length >= 5)
+                ? navigate("/vocabbook/review")
+                : alert("Please save at least 5 vocab cards in this book!")
+            }
+          >
+            <Button btnType={"primary"}>Review</Button>
           </div>
         </Nav>
         <VocabBookAndCard>
           <BookWrapper>
             {Object.keys(vocabBooks).map((book: string, index) => (
-              <Book
-                selected={viewingBook === `${book}` ? true : false}
-                onClick={() => {
-                  setViewingBook(book);
-                }}
-              >
-                {book.toLocaleLowerCase()} ({vocabBooks?.[book]?.length})
-                <br />
-                {/* {Math.round(correctRateOfBooksArr[index] * 100)}%
-                <br /> */}
-                {/* <SaveVocabImg
-                  src={saved}
-                  alt="save"
-                  onClick={() => handleDeleteBook(book)}
-                /> */}
-                {/* <button onClick={() => handleDeleteBook(book)}>Delete</button> */}
-              </Book>
+              <>
+                <Book
+                  selected={viewingBook === `${book}`}
+                  onClick={() => {
+                    setViewingBook(book);
+                    setBookCorrectRate(
+                      Math.round(correctRateOfBooksArr[index] * 100)
+                    );
+                  }}
+                >
+                  {book.toLocaleLowerCase()} ({vocabBooks?.[book]?.length})
+                </Book>
+              </>
             ))}
             <Book
-              selected={viewingBook === "wrong words" ? true : false}
+              selected={viewingBook === "wrong words"}
               onClick={() => {
                 setViewingBook("wrong words");
               }}
             >
               wrong words ({topWrongWords?.length})
               <br />
-              {/* <div> &lt; 50%</div>
-              <br /> */}
             </Book>
           </BookWrapper>
+          <BookInfoWrapper>
+            <div>
+              Correct rate:{" "}
+              {viewingBook === "wrong words" ? "<50%" : `${bookCorrectRate}%`}
+            </div>
+            {viewingBook === "wrong words" ? null : (
+              <SaveVocabImg
+                src={deleteBtn}
+                alt="delete"
+                onClick={() => handleDeleteBook(viewingBook)}
+              />
+            )}
+          </BookInfoWrapper>
           <CardWrapper>
             {viewingBook === "wrong words" ? (
               <>

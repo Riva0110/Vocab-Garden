@@ -41,7 +41,6 @@ root.render(
               </Route>
               <Route path="vocabbook" element={<VocabBookLayout />}>
                 <Route index element={<VocabBook />} />
-                <Route path="wordle" element={<Wordle />} />
                 <Route path="review" element={<ReviewLayout />}>
                   <Route index element={<Review />} />
                   <Route path=":pin" element={<BattleReview />} />

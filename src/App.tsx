@@ -10,6 +10,9 @@ import bell from "./notification.png";
 import yellowBell from "./notification-yellow.png";
 
 const GlobalStyle = createGlobalStyle`
+  * {
+    box-sizing: border-box;
+  }
   body {
     margin: 0;
     padding: 0;

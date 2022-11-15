@@ -23,11 +23,10 @@ interface Props {
 
 const Wrapper = styled.div`
   font-size: 16px;
+  width: calc((100% - 30px) / 2);
   padding: 20px;
-  border: 1px gray solid;
-  width: 50vw;
   height: calc(100vh - 160px);
-  background-color: rgba(255, 255, 255, 0.7);
+  background-color: rgba(194, 207, 203, 0.9);
   z-index: 1;
 `;
 
@@ -152,7 +151,6 @@ export default function VocabDetails() {
   const [isPopuping, setIsPopuping] = useState(false);
   const popup = useRef<HTMLDivElement>(null);
   const resourceUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${keyword}`;
-  console.log("vocab details", { keyword });
   const handlePlayAudio = () => {
     const audio = new Audio(vocabDetails?.phonetics?.[0].audio);
     audio.play();
