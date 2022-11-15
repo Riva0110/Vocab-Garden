@@ -7,7 +7,7 @@ const BUTTON_TYPE = {
 
 const Wrapper = styled.button`
   min-width: 100px;
-  height: 25px;
+  min-height: 25px;
   padding-left: 10px;
   padding-right: 10px;
   background-color: ${(props: Props) =>

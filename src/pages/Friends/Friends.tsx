@@ -13,8 +13,8 @@ import {
 } from "firebase/firestore";
 import styled from "styled-components";
 import { db } from "../../firebase/firebase";
-import plant from "./plant.png";
-import plant2 from "./plant2.png";
+import plantRight from "./plant-right.png";
+import plantLeft from "./plant-left.png";
 import { Navigate } from "react-router-dom";
 import Button from "../../components/Button";
 
@@ -33,9 +33,9 @@ const Img = styled.img`
 
 const Img2 = styled.img`
   position: absolute;
-  width: 400px;
-  left: 40px;
-  top: 0px;
+  width: 550px;
+  left: 0px;
+  bottom: 0px;
 `;
 
 const FriendsWrapper = styled.div`
@@ -239,8 +239,8 @@ export default function Friends() {
 
   return isLogin ? (
     <Wrapper>
-      <Img src={plant} alt="plant" />
-      {/* <Img2 src={plant2} alt="plant" /> */}
+      <Img src={plantRight} alt="plant" />
+      <Img2 src={plantLeft} alt="plant" />
       <FriendsWrapper>
         <FriendRequest>
           <Input

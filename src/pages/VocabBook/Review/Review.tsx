@@ -18,6 +18,8 @@ interface Props {
   showBtn?: boolean;
   showAnswer?: string;
   isBattle?: boolean;
+  insideColor?: boolean;
+  score?: number;
 }
 
 const Wrapper = styled.div`
@@ -30,13 +32,38 @@ const Wrapper = styled.div`
 const Img = styled.img`
   width: 300px;
   position: absolute;
-  left: 0px;
+  right: 0px;
   bottom: 50px;
 `;
 
 const Header = styled.div`
   display: flex;
   justify-content: space-between;
+  margin-top: 20px;
+`;
+
+const Div = styled.div`
+  width: 200px;
+  text-align: center;
+`;
+
+const ScoreBar = styled.div`
+  width: 200px;
+  height: 30px;
+  line-height: 30px;
+  border: 1px solid gray;
+  border-radius: 20px;
+  margin-top: 10px;
+  ${(props: Props) =>
+    props.insideColor &&
+    css`
+      border: 0px;
+      background-color: #95caca;
+      width: ${(props: Props) =>
+        props.score ? `${props.score * 40}px` : "0px"};
+      z-index: -1;
+      margin-bottom: 20px;
+    `}
 `;
 
 const Main = styled.div`
@@ -87,42 +114,56 @@ const Option = styled.div`
 const Btns = styled.div`
   display: flex;
   gap: 10px;
+  justify-content: center;
 `;
 
 const BtnDiv = styled.div`
   display: ${(props: Props) => (props.showBtn ? "flex" : "none")};
   margin-top: 20px;
   justify-content: flex-end;
-  /* width: 100%;
-  height: 24px;
-  line-height: 24px;
-  text-align: center;
-  
-  z-index: 1; */
 `;
 
-const Message = styled.div``;
+const Message = styled.div`
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+`;
 
 const OutcomeWrapper = styled.div`
   width: 50vw;
-  margin: 50px auto;
+  margin: 20px auto;
 `;
 
 const ReviewVocabs = styled.div`
+  position: relative;
   background-color: rgb(255, 255, 255, 0.7);
-  z-index: 100;
+  z-index: 1;
+  border: 1px solid gray;
+  padding: 20px;
+  margin-top: 20px;
 `;
 
-const WrongVocabs = styled.div``;
+const WrongVocabs = styled.div`
+  margin-bottom: 40px;
+`;
 
 const CorrectVocabs = styled.div``;
 
+const VocabDiv = styled.div`
+  font-weight: 600;
+  margin-bottom: 10px;
+`;
+
 const LabelDiv = styled.div`
   border-bottom: 1px gray solid;
+  padding-bottom: 10px;
   margin-top: 20px;
   margin-bottom: 20px;
   width: 100%;
   font-weight: 600;
+  color: darkgreen;
+  text-align: center;
 `;
 const VocabList = styled.div`
   margin-bottom: 10px;
@@ -428,7 +469,7 @@ export default function Review() {
                 handleGameOver();
               }}
             >
-              Done
+              <Button btnType={"primary"}>Done</Button>
             </BtnDiv>
           ) : (
             <BtnDiv
@@ -453,31 +494,29 @@ export default function Review() {
         <OutcomeWrapper>
           <Message>
             {(answerCount.correct / questionsNumber) * 100 >= 80
-              ? " 你太棒了！！！我服了你 "
-              : "加油，好嗎？我對你太失望了"}
+              ? "You're amazing! Keep up the good work."
+              : "Keep fighting, Keep pushing!"}
           </Message>
           <Btns>
             <BtnDiv
               showBtn={showBtn}
               onClick={() => {
-                // window.location.reload();
                 setGameOver(false);
                 setAnswerCount({ correct: 0, wrong: 0 });
                 setReviewingQuestions(questions);
-                console.log("click again", { reviewingQuestions });
                 setShowBtn(false);
                 setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
               }}
             >
-              Review again
+              <Button btnType="secondary">Review again</Button>
             </BtnDiv>
             <BtnDiv showBtn={showBtn} onClick={() => navigate("/vocabbook")}>
-              Back to VocabBooks
+              <Button btnType="secondary">Back to VocabBooks</Button>
             </BtnDiv>
           </Btns>
           <ReviewVocabs>
             <WrongVocabs>
-              <LabelDiv>Wrong vocab:</LabelDiv>{" "}
+              <LabelDiv>Wrong vocab</LabelDiv>{" "}
               {reviewingQuestions.map(
                 ({ vocab, audioLink, partOfSpeech, definition }) => {
                   const answer = updateLogInVeiwingBook.find((answer) => {
@@ -487,17 +526,20 @@ export default function Review() {
                   if (!lastAnswerLog?.isCorrect) {
                     return (
                       <VocabList key={vocab + partOfSpeech}>
-                        {vocab}{" "}
-                        {audioLink ? (
-                          <AudioImg
-                            src={audio}
-                            alt="audio"
-                            onClick={() => handlePlayAudio(audioLink)}
-                          />
-                        ) : (
-                          ""
-                        )}
-                        : ({partOfSpeech}) {definition}
+                        <VocabDiv>
+                          {vocab}{" "}
+                          {audioLink ? (
+                            <AudioImg
+                              src={audio}
+                              alt="audio"
+                              onClick={() => handlePlayAudio(audioLink)}
+                            />
+                          ) : (
+                            ""
+                          )}
+                          : ({partOfSpeech})
+                        </VocabDiv>
+                        {definition}
                       </VocabList>
                     );
                   } else {
@@ -507,7 +549,7 @@ export default function Review() {
               )}
             </WrongVocabs>
             <CorrectVocabs>
-              <LabelDiv>Correct vocab:</LabelDiv>{" "}
+              <LabelDiv>Correct vocab</LabelDiv>{" "}
               {reviewingQuestions.map(
                 ({ vocab, audioLink, partOfSpeech, definition }) => {
                   const answer = updateLogInVeiwingBook.find((answer) => {
@@ -517,17 +559,20 @@ export default function Review() {
                   if (lastAnswerLog?.isCorrect) {
                     return (
                       <VocabList key={vocab + partOfSpeech}>
-                        {vocab}{" "}
-                        {audioLink ? (
-                          <AudioImg
-                            src={audio}
-                            alt="audio"
-                            onClick={() => handlePlayAudio(audioLink)}
-                          />
-                        ) : (
-                          ""
-                        )}
-                        : ({partOfSpeech}) {definition}
+                        <VocabDiv>
+                          {vocab}{" "}
+                          {audioLink ? (
+                            <AudioImg
+                              src={audio}
+                              alt="audio"
+                              onClick={() => handlePlayAudio(audioLink)}
+                            />
+                          ) : (
+                            ""
+                          )}
+                          : ({partOfSpeech})
+                        </VocabDiv>
+                        {definition}
                       </VocabList>
                     );
                   } else {
@@ -546,12 +591,19 @@ export default function Review() {
     <Wrapper>
       <Img src={plant} alt="plant" />
       <Header>
-        <div>Review Round: {gameOver ? questionsNumber : round + 1}</div>
-        <div>
-          O: {answerCount.correct} X: {answerCount.wrong} / Total:{" "}
-          {questionsNumber} (
-          {Math.ceil((answerCount.correct / questionsNumber) * 100)}%)
-        </div>
+        <Div>
+          <div>
+            O: {answerCount.correct} X: {answerCount.wrong} / Total:{" "}
+            {questionsNumber}
+          </div>
+          <ScoreBar insideColor={true} score={answerCount.correct}>
+            <ScoreBar>
+              {Math.ceil((answerCount.correct / questionsNumber) * 100)}%
+            </ScoreBar>
+          </ScoreBar>
+        </Div>
+        <Div>Review Round: {gameOver ? questionsNumber : round + 1}</Div>
+        <Div />
       </Header>
       {gameOver ? renderOutcome() : renderTest()}
     </Wrapper>

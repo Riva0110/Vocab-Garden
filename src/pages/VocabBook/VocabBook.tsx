@@ -35,9 +35,10 @@ const Img = styled.img`
 `;
 
 const Nav = styled.nav`
-  margin-bottom: 20px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  gap: 20px;
 `;
 
 const VocabBookWrapper = styled.div`
@@ -67,7 +68,7 @@ const Book = styled.div`
   border: ${(props: Props) => (props.selected ? "1px solid gray" : "none")};
   border-bottom: ${(props: Props) =>
     props.selected ? "none" : "1px solid gray"};
-  color: ${(props: Props) => (props.selected ? "black" : "gray")};
+  color: ${(props: Props) => (props.selected ? "black" : "lightgray")};
   background-color: ${(props: Props) => (props.selected ? "white" : "none")};
   padding: auto;
   font-size: 18px;
@@ -79,11 +80,13 @@ const BookInfoWrapper = styled.div`
   display: flex;
   margin-bottom: 20px;
   justify-content: space-between;
+  align-items: center;
 `;
 
 const BookButtons = styled.div`
   display: flex;
   gap: 20px;
+  align-items: center;
 `;
 
 const CardWrapper = styled.div`
@@ -100,13 +103,13 @@ const Card = styled.div`
   flex-direction: column;
   align-items: flex-start;
   text-align: center;
-  width: calc((100% - 90px) / 2);
-  height: 100px;
-  border: 1px gray solid;
+  width: calc((100% - 20px) / 2);
+  height: 120px;
+  border-top: 1px gray solid;
   overflow-y: scroll;
   padding: 10px;
   background-color: rgba(255, 255, 255, 0.7);
-  @media screen and (max-width: 960px) {
+  @media screen and (max-width: 1100px) {
     width: 100%;
   }
 `;
@@ -330,11 +333,10 @@ export default function VocabBook() {
           <BookInfoWrapper>
             <BookButtons>
               <div>
-                Correct rate:{" "}
-                {viewingBook === "wrong words" ? "<50%" : `${bookCorrectRate}%`}
-              </div>
-              <div>
-                <Input onChange={(e) => setNewBook(e.target.value)} />
+                <Input
+                  onChange={(e) => setNewBook(e.target.value)}
+                  placeholder="Add a book"
+                />
                 <AddButton onClick={handleAddBook}>+</AddButton>
               </div>
               <div>
@@ -348,6 +350,10 @@ export default function VocabBook() {
               </div>
             </BookButtons>
             <Nav>
+              <div>
+                Correct rate:{" "}
+                {viewingBook === "wrong words" ? "<50%" : `${bookCorrectRate}%`}
+              </div>
               <div
                 onClick={() =>
                   vocabBooks[viewingBook]?.length >= 5 ||
