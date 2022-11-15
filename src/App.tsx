@@ -79,7 +79,7 @@ const NavLink = styled(Link)`
 `;
 
 const Input = styled.input`
-  width: 200px;
+  width: 180px;
   height: 20px;
   border: none;
   border-radius: 5px;
@@ -87,6 +87,7 @@ const Input = styled.input`
   &:focus {
     outline: none;
   }
+  margin-right: 20px;
 `;
 
 const Notification = styled.div`
@@ -107,6 +108,7 @@ const Invitation = styled.div``;
 interface Props {
   showInvitation?: boolean;
   length?: number;
+  isScrolling?: boolean;
 }
 
 interface BattleInvitation {

@@ -26,7 +26,9 @@ const Wrapper = styled.div`
   width: calc((100% - 30px) / 2);
   padding: 20px;
   height: calc(100vh - 160px);
-  background-color: rgba(194, 207, 203, 0.9);
+  /* background-color: rgba(194, 207, 203, 0.9); */
+  background-color: rgba(255, 255, 255, 0.7);
+  border: 1px solid gray;
   z-index: 1;
 `;
 

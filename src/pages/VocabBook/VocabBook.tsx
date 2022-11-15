@@ -20,11 +20,22 @@ import { useViewingBook } from "./VocabBookLayout";
 import plant from "./plant.png";
 import deleteBtn from "./delete.png";
 import Button from "../../components/Button";
+import banner from "./banner.jpg";
 
 const Wrapper = styled.div`
   display: flex;
   padding: 80px 20px 20px 20px;
   gap: 30px;
+`;
+
+const BackgroundImg = styled.div`
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-image: url(${banner});
+  background-size: cover;
 `;
 
 const Img = styled.img`
@@ -293,6 +304,7 @@ export default function VocabBook() {
 
   return (
     <Wrapper>
+      {/* <BackgroundImg /> */}
       {/* <Img src={plant} alt="plant" /> */}
       <VocabBookWrapper>
         <Nav>
