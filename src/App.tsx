@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import styled, { createGlobalStyle } from "styled-components";
+import styled, { createGlobalStyle, css } from "styled-components";
 import { Link, Outlet } from "react-router-dom";
 import { keywordContext } from "./context/keywordContext";
 import { authContext } from "./context/authContext";
@@ -45,6 +45,7 @@ const LogoImg = styled.img`
 `;
 
 const HeaderNav = styled.div`
+  display: flex;
   margin-right: 20px;
 `;
 
@@ -52,8 +53,15 @@ const Main = styled.main`
   width: 100vw;
 `;
 
+const NavDiv = styled.div`
+  width: ${(props: Props) => (props.length ? `${props.length * 10}px` : ``)};
+  display: flex;
+  justify-content: center;
+`;
+
 const BellImg = styled.img`
   width: 16px;
+  height: 16px;
   cursor: pointer;
 `;
 
@@ -61,6 +69,10 @@ const NavLink = styled(Link)`
   margin-left: 20px;
   color: #4f4f4f;
   text-decoration: none;
+  &:hover {
+    color: #607973;
+    font-weight: 800;
+  }
 `;
 
 const Input = styled.input`
@@ -76,7 +88,6 @@ const Input = styled.input`
 
 const Notification = styled.div`
   display: ${(props: Props) => (props.showInvitation ? "flex" : "none")};
-  /* width: 200px; */
   min-height: 20px;
   border: 1px solid gray;
   border-radius: 10px;
@@ -92,6 +103,7 @@ const Invitation = styled.div``;
 
 interface Props {
   showInvitation?: boolean;
+  length?: number;
 }
 
 interface BattleInvitation {
@@ -163,10 +175,20 @@ function App() {
           ) : (
             <></>
           )}
-          <NavLink to={isLogin ? "/articles" : "/profile"}>Article</NavLink>
-          <NavLink to={isLogin ? "/vocabbook" : "/profile"}>VocabBook</NavLink>
-          <NavLink to={isLogin ? "/friends" : "/profile"}>Friend</NavLink>
-          <NavLink to={isLogin ? "/profile" : "/profile"}>Profile</NavLink>
+          <NavDiv length={"Article".length}>
+            <NavLink to={isLogin ? "/articles" : "/profile"}>Article</NavLink>
+          </NavDiv>
+          <NavDiv length={"VocabBook".length}>
+            <NavLink to={isLogin ? "/vocabbook" : "/profile"}>
+              VocabBook
+            </NavLink>
+          </NavDiv>
+          <NavDiv length={"Friend".length}>
+            <NavLink to={isLogin ? "/friends" : "/profile"}>Friend</NavLink>
+          </NavDiv>
+          <NavDiv length={"Profile".length}>
+            <NavLink to={isLogin ? "/profile" : "/profile"}>Profile</NavLink>
+          </NavDiv>
         </HeaderNav>
       </Header>
       <Main>
