@@ -41,7 +41,11 @@ const Header = styled.div`
   height: 60px;
   width: 100vw;
   z-index: 100;
-  /* background-color: rgba(255, 255, 255, 0.45); */
+  background-image: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.5),
+    transparent 95%
+  );
 `;
 
 const LogoImg = styled.img`
@@ -78,9 +82,6 @@ const HomeLink = styled(Link)`
   margin-left: 20px;
   color: #4f4f4f;
   text-decoration: none;
-  &:hover {
-    color: white;
-  }
 `;
 
 const NavLink = styled(Link)`
@@ -88,11 +89,10 @@ const NavLink = styled(Link)`
   align-items: center;
   gap: 10px;
   margin-left: 20px;
-  color: black;
+  color: #4f4f4f;
   text-decoration: none;
   &:hover {
-    color: white;
-    background-color: #607973;
+    background-color: white;
     padding: 0 10px;
   }
 `;

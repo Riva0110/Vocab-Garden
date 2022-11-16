@@ -26,12 +26,6 @@ const ArticleWrapper = styled.div`
   width: 100%;
 `;
 
-const TitleBtnWrapper = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
 const TitleLabel = styled.label`
   margin-bottom: 5px;
 `;

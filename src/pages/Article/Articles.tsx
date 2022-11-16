@@ -13,6 +13,14 @@ const ArticlesWrapper = styled.div`
   width: 100%;
 `;
 
+const NoArticle = styled.div`
+  display: flex;
+  width: 100%;
+  height: 500px;
+  justify-content: center;
+  align-items: center;
+`;
+
 const ArticleTitle = styled.div`
   margin-bottom: 20px;
   cursor: pointer;
@@ -87,20 +95,24 @@ export default function Articles() {
             <Button btnType="primary">Add Article</Button>
           </div>
         </Btns>
-        {articleList?.map(({ time, title, id }, index) => {
-          const newDate = new Date(time.seconds * 1000);
-          return (
-            <ArticleTitle
-              key={index}
-              onClick={() => {
-                navigate(`/articles/${id}?title=${title}`);
-              }}
-            >
-              <Time>{newDate.toLocaleString()}</Time>
-              <Title>{title}</Title>
-            </ArticleTitle>
-          );
-        })}
+        {articleList.length > 0 ? (
+          articleList?.map(({ time, title, id }, index) => {
+            const newDate = new Date(time.seconds * 1000);
+            return (
+              <ArticleTitle
+                key={index}
+                onClick={() => {
+                  navigate(`/articles/${id}?title=${title}`);
+                }}
+              >
+                <Time>{newDate.toLocaleString()}</Time>
+                <Title>{title}</Title>
+              </ArticleTitle>
+            );
+          })
+        ) : (
+          <NoArticle>Add articles, and start reading TODAY!</NoArticle>
+        )}
       </ArticlesWrapper>
     </div>
   );

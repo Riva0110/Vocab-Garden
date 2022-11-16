@@ -28,7 +28,7 @@ const Wrapper = styled.div`
 `;
 
 const Img = styled.img`
-  position: absolute;
+  position: fixed;
   right: 0px;
   bottom: 0px;
   width: 500px;
@@ -184,6 +184,12 @@ export default function VocabBook() {
   const topWrongWords = getAllWords()?.slice(0, 10);
 
   useEffect(() => {
+    if (Object.keys(vocabBooks).length === 0) {
+      getVocabBooks(userId);
+    }
+  }, [getVocabBooks, userId, vocabBooks, vocabBooks.length]);
+
+  useEffect(() => {
     if (topWrongWords?.length >= 5) {
       async function setWrongWordsDoc() {
         await setDoc(doc(db, "wrongWordsBook", userId), {
@@ -203,7 +209,7 @@ export default function VocabBook() {
       isCorrect?: boolean | undefined;
       correctRate: number;
     }[] = [];
-    const wordsByBook = Object.keys(vocabBooks).map((key) => {
+    const wordsByBook = Object.keys(vocabBooks)?.map((key) => {
       allWords = allWords.concat(vocabBooks[key]);
       return allWords;
     });
@@ -294,12 +300,6 @@ export default function VocabBook() {
       if (typeof txt !== "undefined") setKeyword(txt);
     }
   }
-
-  useEffect(() => {
-    if (Object.keys(vocabBooks).length === 0) {
-      getVocabBooks(userId);
-    }
-  }, [getVocabBooks, userId, vocabBooks, vocabBooks.length]);
 
   return (
     <Wrapper>

@@ -20,7 +20,7 @@ const BannerWrapper = styled.div`
 const BackgroundImg = styled.div`
   width: 100vw;
   height: 100vh;
-  position: absolute;
+  position: fixed;
   left: 0;
   top: 0;
   background-image: url(${banner});
@@ -29,24 +29,19 @@ const BackgroundImg = styled.div`
 `;
 
 const Banner = styled.img`
-  position: absolute;
+  position: fixed;
   left: 20px;
   bottom: 100px;
   height: 35%;
 `;
 
 const Title = styled.div`
-  position: absolute;
+  position: fixed;
   left: 10%;
   top: 30%;
-  font-size: 34px;
+  font-size: 30px;
   font-weight: 600;
   color: black;
-`;
-
-const Emphasize = styled.span`
-  /* color: darkgreen;
-  text-decoration: underline; */
 `;
 
 const Author = styled.span`
@@ -61,7 +56,7 @@ export default function Home() {
       <Banner src={banner2} alt="banner-plant"></Banner>
       <Title>
         The best way to predict the future
-        <br /> is to <Emphasize>create</Emphasize> it. <br />
+        <br /> is to create it. <br />
         <Author>– Abraham Lincoln</Author>
       </Title>
       <BannerWrapper />

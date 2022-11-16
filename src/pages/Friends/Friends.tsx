@@ -25,14 +25,14 @@ const Wrapper = styled.div`
 `;
 
 const Img = styled.img`
-  position: absolute;
+  position: fixed;
   width: 400px;
   right: 0px;
   bottom: 0px;
 `;
 
 const Img2 = styled.img`
-  position: absolute;
+  position: fixed;
   width: 550px;
   left: 0px;
   bottom: 0px;
@@ -44,7 +44,7 @@ const FriendsWrapper = styled.div`
   margin: 50px auto;
   padding: 10px;
   width: 500px;
-  height: 80vh;
+  height: 100%;
   z-index: 1;
   background-color: rgba(255, 255, 255, 0.7);
   @media screen and (max-width: 600px) {
@@ -93,6 +93,7 @@ const FriendRequest = styled.div`
   border: 1px solid gray;
   border-radius: 10px;
   padding: 20px;
+  background-color: white;
 `;
 
 const ReplyBtns = styled.div`

@@ -40,7 +40,7 @@ const Wrapper = styled.div`
 
 const Img = styled.img`
   width: 300px;
-  position: absolute;
+  position: fixed;
   left: 100px;
   bottom: 0;
 `;

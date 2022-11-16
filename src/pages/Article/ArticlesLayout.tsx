@@ -17,13 +17,13 @@ const Wrapper = styled.div`
 `;
 
 const Img = styled.img`
-  position: absolute;
+  position: fixed;
   right: 0;
   width: 400px;
 `;
 
 const Img2 = styled.img`
-  position: absolute;
+  position: fixed;
   left: 0;
   bottom: 0;
   width: 400px;

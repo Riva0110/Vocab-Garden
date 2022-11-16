@@ -21,11 +21,13 @@ const LoginWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 100px auto;
+  justify-content: center;
+  margin: auto;
   width: 500px;
   padding: 20px;
   position: relative;
   z-index: 1;
+  height: calc(100vh - 60px);
 `;
 
 const BackgroundImg = styled.div`
