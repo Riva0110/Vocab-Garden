@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, useRef, useCallback } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
 import styled from "styled-components";
 import { keywordContext } from "../context/keywordContext";
 import { authContext } from "../context/authContext";
@@ -17,6 +17,7 @@ import save from "./save.png";
 import saved from "./saved.png";
 import spinner from "./spinner.gif";
 import Alert from "./Alert/Alert";
+import Button from "./Button";
 
 interface Props {
   isPopuping: boolean;
@@ -68,17 +69,26 @@ const SaveVocabImg = styled.img`
 
 const SavePopup = styled.div`
   position: absolute;
-  border: 1px solid gray;
+  border: 1px solid lightgray;
   border-radius: 10px;
   top: 130px;
   background-color: white;
   display: ${(props: Props) => (props.isPopuping ? "block" : "none")};
   padding: 10px;
+  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
 `;
 
 const Select = styled.select`
-  width: 80%;
-  margin-left: 10px;
+  width: 100%;
+  height: 25px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border: 1px solid lightgray;
+  background-color: white;
+  padding-left: 10px;
+  &:focus {
+    outline: none;
+  }
 `;
 
 const Buttons = styled.div`
@@ -87,7 +97,23 @@ const Buttons = styled.div`
   gap: 10px;
 `;
 
-const Button = styled.button``;
+const Input = styled.input`
+  outline: none;
+  border: 1px solid lightgray;
+  height: 25px;
+  padding-left: 10px;
+`;
+
+const AddButton = styled.button`
+  width: 20px;
+  height: 20px;
+  margin-left: 10px;
+  background-color: #607973;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+`;
 
 const Meanings = styled.div`
   overflow-y: scroll;
@@ -157,6 +183,7 @@ export default function VocabDetails() {
   const popup = useRef<HTMLDivElement>(null);
   const resourceUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${keyword}`;
   const ref = useRef<null | AddFunction>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handlePlayAudio = () => {
     const audio = new Audio(vocabDetails?.phonetics?.[0].audio);
@@ -302,7 +329,7 @@ export default function VocabDetails() {
             }
           />
           <SavePopup isPopuping={isPopuping} ref={popup}>
-            <label>Book</label>
+            <label>Save to Book:</label>
             <Select
               value={selectedvocabBook}
               onChange={(e: any) => {
@@ -310,27 +337,43 @@ export default function VocabDetails() {
               }}
             >
               {Object.keys(vocabBooks)?.map((vocabBook, index) => (
-                <option key={vocabBook + index}>{vocabBook}</option>
+                <option key={vocabBook + index}>
+                  {vocabBook.toLocaleLowerCase()}
+                </option>
               ))}
             </Select>
+            <div>
+              <Input
+                ref={inputRef}
+                onChange={(e) => setNewBook(e.target.value)}
+                placeholder="Add a book"
+              />
+              <AddButton
+                onClick={async () => {
+                  await handleAddBook();
+                  if (newBook) setSelectedvocabBook(newBook);
+                  if (inputRef.current) inputRef.current.value = "";
+                }}
+              >
+                +
+              </AddButton>
+            </div>
             <Buttons>
-              <input onChange={(e) => setNewBook(e.target.value)} />
-              <Button onClick={() => handleAddBook()}>Add a book</Button>
-              <Button onClick={() => setIsPopuping(false)}>Cancel</Button>
-              <Button
+              <div onClick={() => setIsPopuping(false)}>
+                <Button btnType="secondary">Cancel</Button>
+              </div>
+              <div
                 onClick={() => {
                   if (selectedvocabBook) {
                     handleSaveVocab(selectedvocabBook);
                     getVocabBooks(userId);
                     setIsPopuping(false);
-                    alert(
-                      `"${keyword}" saved in the "${selectedvocabBook}" vocabbook successfully!`
-                    );
+                    ref.current?.(`"${keyword}" saved successfully!`);
                   }
                 }}
               >
-                Done
-              </Button>
+                <Button btnType="primary">Done</Button>
+              </div>
             </Buttons>
           </SavePopup>
         </TitleContainer>

@@ -16,7 +16,7 @@ export const Container = styled.div`
   position: fixed;
   z-index: 1000;
   width: 0 auto;
-  bottom: 30px;
+  bottom: 60px;
   margin: 0 auto;
   left: 30px;
   right: 30px;
@@ -43,15 +43,13 @@ export const Content = styled.div`
   color: white;
   background: #607973;
   opacity: 0.9;
-  padding: 12px 22px;
+  padding: auto;
   font-size: 1em;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-gap: 10px;
+  display: flex;
+  justify-content: center;
   overflow: hidden;
-  height: auto;
+  height: 50px;
   border-radius: 3px;
-  margin-top: 10px;
 `;
 
 export const Button = styled.button`
@@ -77,6 +75,6 @@ export const Life = styled(animated.div)`
   bottom: 0;
   left: 0px;
   width: auto;
-  background-image: linear-gradient(130deg, #00b4e6, #00f0e0);
+  background-image: linear-gradient(130deg, lightgray, gray);
   height: 5px;
 `;

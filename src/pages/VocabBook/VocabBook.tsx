@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { keywordContext } from "../../context/keywordContext";
 import { authContext } from "../../context/authContext";
 import { vocabBookContext } from "../../context/vocabBookContext";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import {
   doc,
   arrayUnion,
@@ -20,6 +20,7 @@ import { useViewingBook } from "./VocabBookLayout";
 import plant from "./plant.png";
 import deleteBtn from "./delete.png";
 import Button from "../../components/Button";
+import Alert from "../../components/Alert/Alert";
 
 const Wrapper = styled.div`
   display: flex;
@@ -146,13 +147,16 @@ const AudioImg = styled.img`
   height: 20px;
 `;
 
-const SaveVocabImg = styled.img`
+const ButtonImg = styled.img`
   width: 20px;
+  cursor: pointer;
 `;
 
 const Input = styled.input`
   outline: none;
   border: 1px solid lightgray;
+  height: 25px;
+  padding-left: 10px;
 `;
 
 const AddButton = styled.button`
@@ -171,6 +175,8 @@ interface Props {
   weight?: boolean;
 }
 
+type AddFunction = (msg: string) => void;
+
 export default function VocabBook() {
   const navigate = useNavigate();
   const { viewingBook, setViewingBook } = useViewingBook();
@@ -180,7 +186,7 @@ export default function VocabBook() {
     useContext(vocabBookContext);
   const [newBook, setNewBook] = useState<string>();
   const [bookCorrectRate, setBookCorrectRate] = useState<number>();
-
+  const ref = useRef<null | AddFunction>(null);
   const topWrongWords = getAllWords()?.slice(0, 10);
 
   useEffect(() => {
@@ -286,11 +292,6 @@ export default function VocabBook() {
       await deleteDoc(doc(db, "savedVocabs", `${userId}+${vocab}`));
       getVocabBooks(userId);
       if (isSaved) setIsSaved(false);
-      setTimeout(
-        alert,
-        200,
-        `Remove vocab "${vocab}" from "${viewingBook}" sucessfully!`
-      );
     }
   };
 
@@ -303,6 +304,11 @@ export default function VocabBook() {
 
   return (
     <Wrapper>
+      <Alert
+        children={(add: AddFunction) => {
+          ref.current = add;
+        }}
+      />
       <Img src={plant} alt="plant" />
       <VocabBookWrapper>
         <VocabBookAndCard>
@@ -343,7 +349,7 @@ export default function VocabBook() {
               </div>
               <div>
                 {viewingBook === "wrong words" ? null : (
-                  <SaveVocabImg
+                  <ButtonImg
                     src={deleteBtn}
                     alt="delete"
                     onClick={() => handleDeleteBook(viewingBook)}
@@ -361,7 +367,9 @@ export default function VocabBook() {
                   vocabBooks[viewingBook]?.length >= 5 ||
                   (viewingBook === "wrong words" && topWrongWords?.length >= 5)
                     ? navigate("/vocabbook/review")
-                    : alert("Please save at least 5 vocab cards in this book!")
+                    : ref.current?.(
+                        "Please save at least 5 vocab cards in this book!"
+                      )
                 }
               >
                 <Button btnType={"primary"}>Review</Button>
@@ -438,7 +446,7 @@ export default function VocabBook() {
                             ) : (
                               ""
                             )}
-                            <SaveVocabImg
+                            <ButtonImg
                               src={saved}
                               alt="save"
                               onClick={() => handleDeleteVocabFromBook(vocab)}

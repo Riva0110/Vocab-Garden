@@ -1,5 +1,5 @@
 import styled, { css } from "styled-components";
-import { useContext, useState, useEffect, useCallback } from "react";
+import { useContext, useState, useEffect, useCallback, useRef } from "react";
 import { authContext } from "../../../context/authContext";
 import audio from "../../../components/audio.png";
 import { useReviewLayout } from "./ReviewLayout";
@@ -19,6 +19,7 @@ import { db } from "../../../firebase/firebase";
 import { useParams } from "react-router-dom";
 import plant from "./battlePlant.png";
 import Button from "../../../components/Button";
+import Alert from "../../../components/Alert/Alert";
 
 interface Props {
   correct?: boolean;
@@ -165,15 +166,6 @@ const BtnDiv = styled.div`
   justify-content: flex-end;
 `;
 
-const Btn = styled.button`
-  display: ${(props: Props) => (props.showBtn ? "flex" : "none")};
-  width: 100%;
-  height: 24px;
-  line-height: 24px;
-  text-align: center;
-  margin-top: 20px;
-`;
-
 const Message = styled.div`
   text-align: center;
   font-size: 20px;
@@ -283,6 +275,8 @@ interface RoomInfo {
   questions: Questions[];
 }
 
+type AddFunction = (msg: string) => void;
+
 export default function BattleReview() {
   const navigate = useNavigate();
   const { pin } = useParams();
@@ -319,6 +313,7 @@ export default function BattleReview() {
   const [friendList, setFriendList] = useState<string[]>();
   const [hasInvited, setHasInvited] = useState<boolean[]>([]);
   const [friendState, setFriendState] = useState<string[]>(["offline"]);
+  const ref = useRef<null | AddFunction>(null);
 
   const handleSyncScore = useCallback(
     async (answerCountAfterClick: AnswerCount) => {
@@ -449,14 +444,6 @@ export default function BattleReview() {
         ) {
           setIsVisitor(true);
         }
-        // console.log(
-        //   isCompetitorIn,
-        //   data.competitorId !== "",
-        //   data.competitorId,
-        //   isOwner,
-        //   userId,
-        //   data.competitorId
-        // );
         if (data.ownerId !== userId) setIsOwner(false);
         if (data.competitorName !== "") setCompetitorName(data.competitorName);
         if (isWaiting && data?.status === "playing") setIsWaiting(false);
@@ -620,7 +607,7 @@ export default function BattleReview() {
     const friendRef = collection(db, "users");
     const q = query(friendRef, where("email", "==", friendEmail));
     const querySnapshot = await getDocs(q);
-    if (querySnapshot.empty) alert("The user doesn't exist!");
+    if (querySnapshot.empty) ref.current?.("The user doesn't exist!");
     querySnapshot.forEach((friendDoc) => {
       const updateFriendStatus = async () => {
         await updateDoc(doc(db, "users", friendDoc.id), {
@@ -852,7 +839,11 @@ export default function BattleReview() {
   return !isVisitor ? (
     <>
       <Img src={plant} alt="plant" />
-
+      <Alert
+        children={(add: AddFunction) => {
+          ref.current = add;
+        }}
+      />
       <Wrapper>
         <RoundCount>Round: {round + 1}</RoundCount>
         <Header>

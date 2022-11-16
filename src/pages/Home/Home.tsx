@@ -38,7 +38,7 @@ const Banner = styled.img`
 const Title = styled.div`
   position: fixed;
   left: 10%;
-  top: 30%;
+  top: 50%;
   font-size: 30px;
   font-weight: 600;
   color: black;
@@ -53,7 +53,7 @@ export default function Home() {
   return (
     <Wrapper>
       <BackgroundImg />
-      <Banner src={banner2} alt="banner-plant"></Banner>
+      {/* <Banner src={banner2} alt="banner-plant"></Banner> */}
       <Title>
         The best way to predict the future
         <br /> is to create it. <br />

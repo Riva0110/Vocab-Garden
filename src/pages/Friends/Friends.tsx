@@ -17,6 +17,7 @@ import plantRight from "./plant-right.png";
 import plantLeft from "./plant-left.png";
 import { Navigate } from "react-router-dom";
 import Button from "../../components/Button";
+import Alert from "../../components/Alert/Alert";
 
 const Wrapper = styled.div`
   display: flex;
@@ -113,6 +114,8 @@ interface Props {
   stateColor: string;
 }
 
+type AddFunction = (msg: string) => void;
+
 export default function Friends() {
   const { isLogin, userId } = useContext(authContext);
   const [myEmail, setMyEmail] = useState<string>();
@@ -122,6 +125,7 @@ export default function Friends() {
   const [friendState, setFriendState] = useState<string[]>([]);
   const [awaitingFriendReply, setAwaitingFriendReply] = useState<string[]>();
   const emailInput = useRef<HTMLInputElement>(null);
+  const ref = useRef<null | AddFunction>(null);
 
   useEffect(() => {
     let unsub;
@@ -181,17 +185,14 @@ export default function Friends() {
     const friendRef = collection(db, "users");
     const q = query(friendRef, where("email", "==", searchingEmail));
     const querySnapshot = await getDocs(q);
-    if (querySnapshot.empty) return alert("The user doesn't exist!");
+    if (querySnapshot.empty) return ref.current?.("The user doesn't exist!");
     if (awaitingFriendReply?.includes(searchingEmail))
-      return alert("You have already sent a request to the user!");
+      return ref.current?.("Already sent!");
     querySnapshot.forEach((friendDoc) => {
       const updateFriendStatus = async () => {
         await updateDoc(doc(db, "users", friendDoc.id), {
           friendRequest: arrayUnion(myEmail),
         });
-        alert(
-          `You have sent a friend request to ${searchingEmail} successfully!`
-        );
         await updateDoc(doc(db, "users", userId), {
           awaitingFriendReply: arrayUnion(searchingEmail),
         });
@@ -204,7 +205,7 @@ export default function Friends() {
     const friendRef = collection(db, "users");
     const q = query(friendRef, where("email", "==", friendEmail));
     const querySnapshot = await getDocs(q);
-    if (querySnapshot.empty) alert("The user doesn't exist!");
+    if (querySnapshot.empty) ref.current?.("The user doesn't exist!");
     querySnapshot.forEach((friendDoc) => {
       const updateFriendStatus = async () => {
         await updateDoc(doc(db, "users", friendDoc.id), {
@@ -224,7 +225,7 @@ export default function Friends() {
     const friendRef = collection(db, "users");
     const q = query(friendRef, where("email", "==", friendEmail));
     const querySnapshot = await getDocs(q);
-    if (querySnapshot.empty) alert("The user doesn't exist!");
+    if (querySnapshot.empty) ref.current?.("The user doesn't exist!");
     querySnapshot.forEach((friendDoc) => {
       const updateFriendStatus = async () => {
         await updateDoc(doc(db, "users", friendDoc.id), {
@@ -240,6 +241,11 @@ export default function Friends() {
 
   return isLogin ? (
     <Wrapper>
+      <Alert
+        children={(add: AddFunction) => {
+          ref.current = add;
+        }}
+      />
       <Img src={plantRight} alt="plant" />
       <Img2 src={plantLeft} alt="plant" />
       <FriendsWrapper>

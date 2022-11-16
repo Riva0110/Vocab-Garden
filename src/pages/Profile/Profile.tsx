@@ -13,7 +13,7 @@ interface Props {
 }
 
 const Wrapper = styled.div`
-  padding: 20px;
+  padding: 80px 20px 20px 20px;
   display: flex;
 `;
 

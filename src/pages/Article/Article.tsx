@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { authContext } from "../../context/authContext";
 import { keywordContext } from "../../context/keywordContext";
@@ -15,6 +15,7 @@ import {
 import { db } from "../../firebase/firebase";
 import QuillEditor from "./Editor/QuillEditor";
 import Button from "../../components/Button";
+import Alert from "../../components/Alert/Alert";
 
 const Wrapper = styled.div`
   display: flex;
@@ -67,17 +68,13 @@ const Btns = styled.div`
   justify-content: flex-end;
 `;
 
-const BackBtn = styled.button`
-  width: 50px;
-`;
-
-const EditBtn = styled(BackBtn)``;
-
 const ButtonDiv = styled.div`
   margin-top: 50px;
   display: flex;
   justify-content: flex-end;
 `;
+
+type AddFunction = (msg: string) => void;
 
 export default function Article() {
   const navigate = useNavigate();
@@ -87,6 +84,7 @@ export default function Article() {
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
   const articlePathName = window.location.pathname.slice(10);
+  const ref = useRef<null | AddFunction>(null);
 
   useEffect(() => {
     const getArticleContent = async (articlePathName: string) => {
@@ -169,7 +167,7 @@ export default function Article() {
               });
               navigate(`/articles/${docRef.id}?title=${title}`);
             } else {
-              alert("Title and content cannot be blank!");
+              ref.current?.("Title and content cannot be blank!");
             }
           }}
         >
@@ -181,6 +179,11 @@ export default function Article() {
 
   return (
     <Wrapper>
+      <Alert
+        children={(add: AddFunction) => {
+          ref.current = add;
+        }}
+      />
       <ArticleWrapper>
         {isEditing ? renderEditMode() : renderReadMode()}
       </ArticleWrapper>
