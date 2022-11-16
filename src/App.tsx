@@ -8,6 +8,8 @@ import { arrayRemove, doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { db } from "./firebase/firebase";
 import bell from "./notification.png";
 import yellowBell from "./notification-yellow.png";
+import menu from "./menu.png";
+import { X } from "react-feather";
 
 const GlobalStyle = createGlobalStyle`
   * {
@@ -48,8 +50,23 @@ const Header = styled.div`
   );
 `;
 
+const InputWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+`;
+
 const LogoImg = styled.img`
   height: 30px;
+`;
+
+const Menu = styled.img`
+  height: 30px;
+  display: none;
+  cursor: pointer;
+  @media screen and (max-width: 601px) {
+    display: flex;
+    margin-left: 10px;
+  }
 `;
 
 const BrandName = styled.div``;
@@ -57,6 +74,31 @@ const BrandName = styled.div``;
 const HeaderNav = styled.div`
   display: flex;
   margin-right: 20px;
+`;
+
+const Nav = styled.div`
+  display: flex;
+  @media screen and (max-width: 601px) {
+    display: ${(props: Props) => (props.showNav ? "flex" : "none")};
+    flex-direction: column;
+    width: 200px;
+    height: 100vh;
+    background-color: #607973;
+    position: fixed;
+    right: 0px;
+    top: 0;
+  }
+`;
+
+const XDiv = styled(X)`
+  display: none;
+  cursor: pointer;
+  @media screen and (max-width: 601px) {
+    display: flex;
+    color: white;
+    width: 100%;
+    margin-top: 20px;
+  } ;
 `;
 
 const Main = styled.main`
@@ -67,11 +109,16 @@ const NavDiv = styled.div`
   width: ${(props: Props) => (props.length ? `${props.length * 10}px` : ``)};
   display: flex;
   justify-content: center;
+  @media screen and (max-width: 601px) {
+    justify-content: flex-start;
+    margin-top: 20px;
+  }
 `;
 
 const BellImg = styled.img`
-  width: 16px;
-  height: 16px;
+  margin-top: 5px;
+  width: 20px;
+  height: 20px;
   cursor: pointer;
 `;
 
@@ -95,11 +142,19 @@ const NavLink = styled(Link)`
     background-color: white;
     padding: 0 10px;
   }
+  @media screen and (max-width: 601px) {
+    color: white;
+    &:hover {
+      background-color: white;
+      padding: 0 10px;
+      color: #4f4f4f;
+    }
+  }
 `;
 
 const Input = styled.input`
   width: 180px;
-  height: 20px;
+  height: 30px;
   border: 1px solid lightgray;
   border-radius: 5px;
   padding-left: 10px;
@@ -131,6 +186,7 @@ interface Props {
   showInvitation?: boolean;
   length?: number;
   isScrolling?: boolean;
+  showNav?: boolean;
 }
 
 interface BattleInvitation {
@@ -144,7 +200,8 @@ function App() {
   const [inputVocab, setInputVocab] = useState<string>();
   const [battleInvitation, setBattleInvitation] =
     useState<BattleInvitation[]>();
-  const [showInvitation, setShowInvitation] = useState<boolean>(true);
+  const [showInvitation, setShowInvitation] = useState<boolean>(false);
+  const [showNav, setShowNav] = useState<boolean>(false);
 
   useEffect(() => {
     let unsub;
@@ -172,6 +229,26 @@ function App() {
     });
   };
 
+  function renderNav() {
+    return (
+      <Nav showNav={showNav}>
+        <XDiv size={16} onClick={() => setShowNav(false)} />
+        <NavDiv length={"Article".length}>
+          <NavLink to={isLogin ? "/articles" : "/profile"}>Article</NavLink>
+        </NavDiv>
+        <NavDiv length={"VocabBook".length}>
+          <NavLink to={isLogin ? "/vocabbook" : "/profile"}>VocabBook</NavLink>
+        </NavDiv>
+        <NavDiv length={"Friend".length}>
+          <NavLink to={isLogin ? "/friends" : "/profile"}>Friend</NavLink>
+        </NavDiv>
+        <NavDiv length={"Profile".length}>
+          <NavLink to={isLogin ? "/profile" : "/profile"}>Profile</NavLink>
+        </NavDiv>
+      </Nav>
+    );
+  }
+
   return (
     <Wrapper>
       <GlobalStyle />
@@ -181,40 +258,30 @@ function App() {
           <BrandName>Vocab Garden</BrandName>
         </HomeLink>
         <HeaderNav>
-          <Input
-            placeholder="search a word..."
-            onChange={(e) => {
-              e.target.value = e.target.value.toLowerCase();
-              setInputVocab(e.target.value);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && inputVocab) {
-                setKeyword(inputVocab);
-                const target = e.target as HTMLInputElement;
-                target.value = "";
-              }
-            }}
-          />
-          {isLogin && (
-            <BellImg
-              src={battleInvitation?.length !== 0 ? yellowBell : bell}
-              onClick={() => setShowInvitation((prev) => !prev)}
+          <InputWrapper>
+            <Input
+              placeholder="search a word..."
+              onChange={(e) => {
+                e.target.value = e.target.value.toLowerCase();
+                setInputVocab(e.target.value);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && inputVocab) {
+                  setKeyword(inputVocab);
+                  const target = e.target as HTMLInputElement;
+                  target.value = "";
+                }
+              }}
             />
-          )}
-          <NavDiv length={"Article".length}>
-            <NavLink to={isLogin ? "/articles" : "/profile"}>Article</NavLink>
-          </NavDiv>
-          <NavDiv length={"VocabBook".length}>
-            <NavLink to={isLogin ? "/vocabbook" : "/profile"}>
-              VocabBook
-            </NavLink>
-          </NavDiv>
-          <NavDiv length={"Friend".length}>
-            <NavLink to={isLogin ? "/friends" : "/profile"}>Friend</NavLink>
-          </NavDiv>
-          <NavDiv length={"Profile".length}>
-            <NavLink to={isLogin ? "/profile" : "/profile"}>Profile</NavLink>
-          </NavDiv>
+            {isLogin && (
+              <BellImg
+                src={battleInvitation?.length !== 0 ? yellowBell : bell}
+                onClick={() => setShowInvitation((prev) => !prev)}
+              />
+            )}
+            <Menu src={menu} alt="menu" onClick={() => setShowNav(true)} />
+          </InputWrapper>
+          {renderNav()}
         </HeaderNav>
       </Header>
       <Main>

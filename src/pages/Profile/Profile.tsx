@@ -30,7 +30,7 @@ const LoginWrapper = styled.div`
   padding: 20px;
   position: relative;
   z-index: 1;
-  height: calc(100vh - 60px);
+  min-height: calc(100vh - 60px);
 `;
 
 const BackgroundImg = styled.div`
