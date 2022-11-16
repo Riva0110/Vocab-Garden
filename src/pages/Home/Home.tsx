@@ -17,22 +17,6 @@ const BannerWrapper = styled.div`
   width: calc((100% - 30px) / 2);
 `;
 
-const Border = styled.div`
-  position: absolute;
-  margin: 20px;
-  margin-top: 60px;
-  border: 1px gray solid;
-  width: calc(100% - 40px);
-  height: 50vh;
-`;
-
-const Banners = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 60vh;
-`;
-
 const BackgroundImg = styled.div`
   width: 100vw;
   height: 100vh;
@@ -69,11 +53,6 @@ const Author = styled.span`
   font-weight: 200;
 `;
 
-const VocabDiv = styled.div`
-  height: 200px;
-  padding: 20px;
-`;
-
 export default function Home() {
   return (
     <Wrapper>
@@ -84,17 +63,8 @@ export default function Home() {
         <br /> is to <Emphasize>create</Emphasize> it. <br />
         <Author>– Abraham Lincoln</Author>
       </Title>
-      <BannerWrapper>
-        {/* <Border />
-        <Banners>
-          <Banner src={banner} alt="banner-plant"></Banner>
-          <Banner2 src={banner2} alt="banner-plant"></Banner2>
-        </Banners>
-         */}
-      </BannerWrapper>
-      {/* <VocabDiv> */}
+      <BannerWrapper />
       <VocabDetails />
-      {/* </VocabDiv> */}
     </Wrapper>
   );
 }

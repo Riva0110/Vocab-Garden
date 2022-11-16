@@ -182,14 +182,14 @@ export default function Friends() {
     const querySnapshot = await getDocs(q);
     if (querySnapshot.empty) return alert("The user doesn't exist!");
     if (awaitingFriendReply?.includes(searchingEmail))
-      return alert("You have already sent request to the user!");
+      return alert("You have already sent a request to the user!");
     querySnapshot.forEach((friendDoc) => {
       const updateFriendStatus = async () => {
         await updateDoc(doc(db, "users", friendDoc.id), {
           friendRequest: arrayUnion(myEmail),
         });
         alert(
-          `You have sent friend request to ${searchingEmail} successfully!`
+          `You have sent a friend request to ${searchingEmail} successfully!`
         );
         await updateDoc(doc(db, "users", userId), {
           awaitingFriendReply: arrayUnion(searchingEmail),

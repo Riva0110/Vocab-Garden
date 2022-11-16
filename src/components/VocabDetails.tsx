@@ -16,6 +16,7 @@ import audio from "./audio.png";
 import save from "./save.png";
 import saved from "./saved.png";
 import spinner from "./spinner.gif";
+import Alert from "./Alert/Alert";
 
 interface Props {
   isPopuping: boolean;
@@ -26,9 +27,9 @@ const Wrapper = styled.div`
   width: calc((100% - 30px) / 2);
   padding: 20px;
   height: calc(100vh - 160px);
-  /* background-color: rgba(194, 207, 203, 0.9); */
+  background-color: rgba(211, 211, 211, 0.4);
   background-color: rgba(255, 255, 255, 0.7);
-  border: 1px solid gray;
+  border: 1px solid lightgray;
   z-index: 1;
 `;
 
@@ -97,7 +98,7 @@ const PartOfSpeech = styled.div`
   color: darkgreen;
   margin-top: 30px;
   margin-bottom: 20px;
-  border-bottom: 1px gray solid;
+  border-bottom: 1px lightgray solid;
 `;
 
 const SubTitle = styled.div`
@@ -140,6 +141,8 @@ interface VocabDetailsInterface {
   sourceUrls?: [];
 }
 
+type AddFunction = (msg: string) => void;
+
 export default function VocabDetails() {
   const { userId } = useContext(authContext);
   const { keyword, setKeyword } = useContext(keywordContext);
@@ -153,6 +156,8 @@ export default function VocabDetails() {
   const [isPopuping, setIsPopuping] = useState(false);
   const popup = useRef<HTMLDivElement>(null);
   const resourceUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${keyword}`;
+  const ref = useRef<null | AddFunction>(null);
+
   const handlePlayAudio = () => {
     const audio = new Audio(vocabDetails?.phonetics?.[0].audio);
     audio.play();
@@ -214,7 +219,6 @@ export default function VocabDetails() {
         [savedVocabBook]: updateVocabCard,
       });
       getVocabBooks(userId);
-      setTimeout(alert, 200, `Unsave vocab "${keyword}" sucessfully!`);
     }
   };
 
@@ -230,7 +234,7 @@ export default function VocabDetails() {
       const response = await fetch(resourceUrl);
       const data = await response.json();
       if (data.title === "No Definitions Found")
-        return alert("Sorry......No result.");
+        return ref.current?.("Sorry......No result.");
       setVocabDetails(data[0]);
       setIsLoading(false);
     }
@@ -278,6 +282,11 @@ export default function VocabDetails() {
     </p>
   ) : (
     <Wrapper>
+      <Alert
+        children={(add: AddFunction) => {
+          ref.current = add;
+        }}
+      />
       <VocabWrapper>
         <TitleContainer>
           <Vocab>{vocabDetails?.word}</Vocab>

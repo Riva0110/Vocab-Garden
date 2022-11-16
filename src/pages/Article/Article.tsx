@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import QuillEditor from "./Editor/QuillEditor";
+import Button from "../../components/Button";
 
 const Wrapper = styled.div`
   display: flex;
@@ -37,6 +38,13 @@ const TitleLabel = styled.label`
 
 const TitleInput = styled.input`
   margin-bottom: 20px;
+  border: 1px lightgray solid;
+  &:focus {
+    outline: none;
+  }
+  padding: 5px 15px;
+  color: #3f3c3c;
+  background-color: rgba(255, 255, 255, 0.7);
 `;
 
 const ContentLabel = styled(TitleLabel)`
@@ -45,26 +53,24 @@ const ContentLabel = styled(TitleLabel)`
 
 const Title = styled.div`
   line-height: 100%;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   color: black;
 `;
 
 const Content = styled.div`
   font-size: 16px;
   overflow-y: scroll;
-  height: calc(100vh - 160px);
+  height: calc(100vh - 240px);
   background-color: rgb(255, 255, 255, 0.7);
 `;
 
 const Btns = styled.div`
   display: flex;
   gap: 10px;
-`;
-
-const DoneBtn = styled.button`
-  margin-top: 50px;
+  margin-bottom: 20px;
+  justify-content: flex-end;
 `;
 
 const BackBtn = styled.button`
@@ -72,6 +78,12 @@ const BackBtn = styled.button`
 `;
 
 const EditBtn = styled(BackBtn)``;
+
+const ButtonDiv = styled.div`
+  margin-top: 50px;
+  display: flex;
+  justify-content: flex-end;
+`;
 
 export default function Article() {
   const navigate = useNavigate();
@@ -105,20 +117,20 @@ export default function Article() {
 
   const renderReadMode = () => (
     <>
-      <TitleBtnWrapper>
-        <Title onClick={() => getSelectedText()}>{title}</Title>
-        <Btns>
-          <BackBtn onClick={() => navigate("/articles")}>Back</BackBtn>
-          <EditBtn
-            onClick={() => {
-              setIsEditing(true);
-              navigate(`/articles/${articlePathName}?title=${title}&edit=true`);
-            }}
-          >
-            Edit
-          </EditBtn>
-        </Btns>
-      </TitleBtnWrapper>
+      <Btns>
+        <div onClick={() => navigate("/articles")}>
+          <Button btnType="secondary">Back</Button>
+        </div>
+        <div
+          onClick={() => {
+            setIsEditing(true);
+            navigate(`/articles/${articlePathName}?title=${title}&edit=true`);
+          }}
+        >
+          <Button btnType="primary">Edit</Button>
+        </div>
+      </Btns>
+      <Title onClick={() => getSelectedText()}>{title}</Title>
       <Content
         dangerouslySetInnerHTML={{ __html: content }}
         onClick={() => getSelectedText()}
@@ -137,7 +149,7 @@ export default function Article() {
         />
         <ContentLabel>Content</ContentLabel>
         <QuillEditor content={content} setContent={setContent} />
-        <DoneBtn
+        <ButtonDiv
           onClick={async () => {
             if (title && content && userId && articlePathName !== "add") {
               setIsEditing(false);
@@ -167,8 +179,8 @@ export default function Article() {
             }
           }}
         >
-          Done
-        </DoneBtn>
+          <Button btnType="primary">Done</Button>
+        </ButtonDiv>
       </>
     );
   };

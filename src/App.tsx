@@ -3,7 +3,7 @@ import styled, { createGlobalStyle, css } from "styled-components";
 import { Link, Outlet } from "react-router-dom";
 import { keywordContext } from "./context/keywordContext";
 import { authContext } from "./context/authContext";
-import logoName from "./logoName.png";
+import logo from "./logoName.png";
 import { arrayRemove, doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { db } from "./firebase/firebase";
 import bell from "./notification.png";
@@ -47,6 +47,8 @@ const LogoImg = styled.img`
   height: 30px;
 `;
 
+const BrandName = styled.div``;
+
 const HeaderNav = styled.div`
   display: flex;
   margin-right: 20px;
@@ -69,6 +71,9 @@ const BellImg = styled.img`
 `;
 
 const NavLink = styled(Link)`
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-left: 20px;
   color: #4f4f4f;
   text-decoration: none;
@@ -155,7 +160,8 @@ function App() {
       <GlobalStyle />
       <Header>
         <NavLink to="/">
-          <LogoImg src={logoName} alt="logo" />
+          <LogoImg src={logo} alt="logo" />
+          <BrandName>Vocab Garden</BrandName>
         </NavLink>
         <HeaderNav>
           <Input
@@ -172,13 +178,11 @@ function App() {
               }
             }}
           />
-          {isLogin ? (
+          {isLogin && (
             <BellImg
               src={battleInvitation?.length !== 0 ? yellowBell : bell}
               onClick={() => setShowInvitation((prev) => !prev)}
             />
-          ) : (
-            <></>
           )}
           <NavDiv length={"Article".length}>
             <NavLink to={isLogin ? "/articles" : "/profile"}>Article</NavLink>

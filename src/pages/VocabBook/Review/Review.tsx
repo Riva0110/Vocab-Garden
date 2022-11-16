@@ -165,6 +165,7 @@ const LabelDiv = styled.div`
   color: darkgreen;
   text-align: center;
 `;
+
 const VocabList = styled.div`
   margin-bottom: 10px;
 `;
@@ -537,7 +538,7 @@ export default function Review() {
                           ) : (
                             ""
                           )}
-                          : ({partOfSpeech})
+                          ({partOfSpeech})
                         </VocabDiv>
                         {definition}
                       </VocabList>
@@ -570,7 +571,7 @@ export default function Review() {
                           ) : (
                             ""
                           )}
-                          : ({partOfSpeech})
+                          ({partOfSpeech})
                         </VocabDiv>
                         {definition}
                       </VocabList>

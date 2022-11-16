@@ -24,7 +24,10 @@ const Time = styled.div`
 `;
 
 const Title = styled.div`
-  border-bottom: 1px solid gray;
+  border-bottom: 1px solid lightgray;
+  padding-bottom: 10px;
+  padding-top: 10px;
+  font-weight: 600;
 `;
 
 const Btns = styled.div`
@@ -69,19 +72,19 @@ export default function Articles() {
     <div className="App">
       <ArticlesWrapper>
         <Btns>
-          <div
+          {/* <div
             onClick={() => {
               navigate("/articles/words");
             }}
           >
-            <Button btnType="primary">Article Words</Button>
-          </div>
+            <Button btnType="secondary">Article Words</Button>
+          </div> */}
           <div
             onClick={() => {
               navigate("/articles/add");
             }}
           >
-            <Button btnType="secondary">Add Article</Button>
+            <Button btnType="primary">Add Article</Button>
           </div>
         </Btns>
         {articleList?.map(({ time, title, id }, index) => {

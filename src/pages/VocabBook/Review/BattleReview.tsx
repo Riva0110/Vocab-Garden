@@ -140,15 +140,15 @@ const Options = styled.div`
 
 const Option = styled.div`
   background-color: rgb(255, 255, 255, 0.7);
+  z-index: 1;
   width: 800px;
   max-width: 90vw;
   padding: 10px;
-  border: 1px solid
-    ${(props: Props) => {
-      if (props.showAnswer === "notAnswer") return "gray";
-      if (props.showAnswer === "wrongAnswer") return "red";
-      if (props.showAnswer === "correctAnswer") return "blue";
-    }};
+  border: solid 1px gray;
+  background-color: ${(props: Props) => {
+    if (props.showAnswer === "wrongAnswer") return "#f1d8dc";
+    if (props.showAnswer === "correctAnswer") return "#d2e1ed";
+  }};
   margin-top: 20px;
   cursor: pointer;
 `;
@@ -157,6 +157,12 @@ const Btns = styled.div`
   display: flex;
   gap: 10px;
   margin-top: 20px;
+`;
+
+const BtnDiv = styled.div`
+  display: ${(props: Props) => (props.showBtn ? "flex" : "none")};
+  margin-top: 20px;
+  justify-content: flex-end;
 `;
 
 const Btn = styled.button`
@@ -168,7 +174,12 @@ const Btn = styled.button`
   margin-top: 20px;
 `;
 
-const Message = styled.div``;
+const Message = styled.div`
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+`;
 
 const OutcomeWrapper = styled.div`
   width: 50vw;
@@ -176,6 +187,7 @@ const OutcomeWrapper = styled.div`
 `;
 
 const ReviewVocabs = styled.div`
+  position: relative;
   background-color: rgb(255, 255, 255, 0.7);
   z-index: 100;
 `;
@@ -186,14 +198,21 @@ const CorrectVocabs = styled.div``;
 
 const LabelDiv = styled.div`
   border-bottom: 1px gray solid;
+  padding-bottom: 10px;
   margin-top: 20px;
   margin-bottom: 20px;
   width: 100%;
   font-weight: 600;
-  color: green;
+  color: darkgreen;
+  text-align: center;
 `;
 
 const VocabList = styled.div`
+  margin-bottom: 10px;
+`;
+
+const VocabDiv = styled.div`
+  font-weight: 600;
   margin-bottom: 10px;
 `;
 
@@ -746,9 +765,6 @@ export default function BattleReview() {
     );
   }
 
-  if (outcomeVocabList)
-    console.log("outcomeVocabList [global]", outcomeVocabList);
-
   function renderOutcomeVocabList(
     vocab: string,
     partOfSpeech: string,
@@ -757,18 +773,35 @@ export default function BattleReview() {
   ) {
     return (
       <VocabList key={vocab + partOfSpeech}>
-        <strong>{vocab}</strong>{" "}
-        {audioLink ? (
-          <AudioImg
-            src={audio}
-            alt="audio"
-            onClick={() => handlePlayAudio(audioLink)}
-          />
-        ) : (
-          ""
-        )}
-        : ({partOfSpeech}) {definition}
+        <VocabDiv>
+          {vocab}{" "}
+          {audioLink ? (
+            <AudioImg
+              src={audio}
+              alt="audio"
+              onClick={() => handlePlayAudio(audioLink)}
+            />
+          ) : (
+            ""
+          )}
+          ({partOfSpeech})
+        </VocabDiv>
+        {definition}
       </VocabList>
+
+      // <VocabList key={vocab + partOfSpeech}>
+      //   <strong>{vocab}</strong>{" "}
+      //   {audioLink ? (
+      //     <AudioImg
+      //       src={audio}
+      //       alt="audio"
+      //       onClick={() => handlePlayAudio(audioLink)}
+      //     />
+      //   ) : (
+      //     ""
+      //   )}
+      //   : ({partOfSpeech}) {definition}
+      // </VocabList>
     );
   }
 
@@ -786,13 +819,13 @@ export default function BattleReview() {
               : "Keep fighting, Keep pushing!"}
           </Message>
           <Btns>
-            <Btn showBtn={showBtn} onClick={() => navigate("/vocabbook")}>
-              Back to VocabBooks
-            </Btn>
+            <BtnDiv showBtn={showBtn} onClick={() => navigate("/vocabbook")}>
+              <Button btnType="secondary">Back to VocabBooks</Button>
+            </BtnDiv>
           </Btns>
           <ReviewVocabs>
             <WrongVocabs>
-              <LabelDiv>Wrong vocab:</LabelDiv>{" "}
+              <LabelDiv>Wrong vocab</LabelDiv>{" "}
               {outcomeVocabList?.map(
                 ({ vocab, audioLink, partOfSpeech, definition, isCorrect }) => {
                   if (!isCorrect) {
@@ -809,7 +842,7 @@ export default function BattleReview() {
               )}
             </WrongVocabs>
             <CorrectVocabs>
-              <LabelDiv>Correct vocab:</LabelDiv>{" "}
+              <LabelDiv>Correct vocab</LabelDiv>{" "}
               {outcomeVocabList?.map(
                 ({ vocab, audioLink, partOfSpeech, definition, isCorrect }) => {
                   if (isCorrect) {

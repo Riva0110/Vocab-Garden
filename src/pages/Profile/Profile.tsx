@@ -62,7 +62,7 @@ const UserInfoWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 20px;
-  width: 35vw;
+  width: 30vw;
 `;
 
 const GrowingPlantImg = styled.img`

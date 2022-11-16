@@ -68,7 +68,7 @@ const Book = styled.div`
   border: ${(props: Props) => (props.selected ? "1px solid gray" : "none")};
   border-bottom: ${(props: Props) =>
     props.selected ? "none" : "1px solid gray"};
-  color: ${(props: Props) => (props.selected ? "black" : "lightgray")};
+  color: ${(props: Props) => (props.selected ? "black" : "gray")};
   background-color: ${(props: Props) => (props.selected ? "white" : "none")};
   padding: auto;
   font-size: 18px;
@@ -105,7 +105,8 @@ const Card = styled.div`
   text-align: center;
   width: calc((100% - 20px) / 2);
   height: 120px;
-  border-top: 1px gray solid;
+  border: 1px solid lightgray;
+  border-top: 2px #607973 solid;
   overflow-y: scroll;
   padding: 10px;
   background-color: rgba(255, 255, 255, 0.7);
@@ -117,6 +118,7 @@ const Card = styled.div`
 const CardText = styled.div`
   text-align: start;
   font-weight: ${(props: Props) => (props.weight ? "600" : "")};
+  /* color: #607973; */
 `;
 
 const VocabHeader = styled.div`
@@ -150,7 +152,7 @@ const SaveVocabImg = styled.img`
 
 const Input = styled.input`
   outline: none;
-  border: 1px solid gray;
+  border: 1px solid lightgray;
 `;
 
 const AddButton = styled.button`
