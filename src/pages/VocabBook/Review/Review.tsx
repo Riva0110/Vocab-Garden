@@ -151,6 +151,9 @@ const WrongVocabs = styled.div`
 const CorrectVocabs = styled.div``;
 
 const VocabDiv = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-weight: 600;
   margin-bottom: 10px;
 `;
@@ -489,6 +492,30 @@ export default function Review() {
     );
   }
 
+  function renderOutcomeVocabList(
+    vocab: string,
+    partOfSpeech: string,
+    definition: string,
+    audioLink?: string
+  ) {
+    return (
+      <VocabList key={vocab + partOfSpeech}>
+        <VocabDiv>
+          {vocab}{" "}
+          {audioLink && (
+            <AudioImg
+              src={audio}
+              alt="audio"
+              onClick={() => handlePlayAudio(audioLink)}
+            />
+          )}
+          ({partOfSpeech})
+        </VocabDiv>
+        {definition}
+      </VocabList>
+    );
+  }
+
   function renderOutcome() {
     return (
       <Main>
@@ -524,28 +551,15 @@ export default function Review() {
                     return answer.vocab === vocab;
                   });
                   const lastAnswerLog = answer?.log.at(-1);
-                  if (!lastAnswerLog?.isCorrect) {
-                    return (
-                      <VocabList key={vocab + partOfSpeech}>
-                        <VocabDiv>
-                          {vocab}{" "}
-                          {audioLink ? (
-                            <AudioImg
-                              src={audio}
-                              alt="audio"
-                              onClick={() => handlePlayAudio(audioLink)}
-                            />
-                          ) : (
-                            ""
-                          )}
-                          ({partOfSpeech})
-                        </VocabDiv>
-                        {definition}
-                      </VocabList>
-                    );
-                  } else {
-                    return <></>;
-                  }
+                  return (
+                    !lastAnswerLog?.isCorrect &&
+                    renderOutcomeVocabList(
+                      vocab,
+                      partOfSpeech,
+                      definition,
+                      audioLink
+                    )
+                  );
                 }
               )}
             </WrongVocabs>
@@ -557,28 +571,15 @@ export default function Review() {
                     return answer.vocab === vocab;
                   });
                   const lastAnswerLog = answer?.log.at(-1);
-                  if (lastAnswerLog?.isCorrect) {
-                    return (
-                      <VocabList key={vocab + partOfSpeech}>
-                        <VocabDiv>
-                          {vocab}{" "}
-                          {audioLink ? (
-                            <AudioImg
-                              src={audio}
-                              alt="audio"
-                              onClick={() => handlePlayAudio(audioLink)}
-                            />
-                          ) : (
-                            ""
-                          )}
-                          ({partOfSpeech})
-                        </VocabDiv>
-                        {definition}
-                      </VocabList>
-                    );
-                  } else {
-                    return <></>;
-                  }
+                  return (
+                    lastAnswerLog?.isCorrect &&
+                    renderOutcomeVocabList(
+                      vocab,
+                      partOfSpeech,
+                      definition,
+                      audioLink
+                    )
+                  );
                 }
               )}
             </CorrectVocabs>
@@ -603,7 +604,7 @@ export default function Review() {
             </ScoreBar>
           </ScoreBar>
         </Div>
-        <Div>Review Round: {gameOver ? questionsNumber : round + 1}</Div>
+        <Div>Round: {gameOver ? questionsNumber : round + 1}</Div>
         <Div />
       </Header>
       {gameOver ? renderOutcome() : renderTest()}

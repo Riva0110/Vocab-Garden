@@ -1,6 +1,7 @@
 import React, { useRef, useState, useMemo, useEffect, MouseEvent } from "react";
 import { useTransition } from "@react-spring/web";
 import { Main, Container, Message, Button, Content, Life } from "./styles";
+import { X } from "react-feather";
 
 let id = 0;
 
@@ -70,7 +71,7 @@ function Alert({
                   cancelMap.get(item)();
               }}
             >
-              {/* <X size={18} /> */}
+              <X size={16} />
             </Button>
           </Content>
         </Message>

@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import banner from "./banner.jpg";
+import banner from "./banner.png";
 import banner2 from "./banner2.jpg";
 import VocabDetails from "../../components/VocabDetails";
 
@@ -25,27 +25,28 @@ const BackgroundImg = styled.div`
   top: 0;
   background-image: url(${banner});
   background-size: cover;
+  opacity: 0.6;
 `;
 
 const Banner = styled.img`
   position: absolute;
-  left: 0;
-  top: 350px;
-  height: 40%;
+  left: 20px;
+  bottom: 100px;
+  height: 35%;
 `;
 
 const Title = styled.div`
   position: absolute;
   left: 10%;
-  top: 20%;
+  top: 30%;
   font-size: 34px;
   font-weight: 600;
   color: black;
 `;
 
 const Emphasize = styled.span`
-  color: darkgreen;
-  text-decoration: underline;
+  /* color: darkgreen;
+  text-decoration: underline; */
 `;
 
 const Author = styled.span`

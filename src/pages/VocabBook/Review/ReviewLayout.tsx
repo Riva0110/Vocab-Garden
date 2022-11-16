@@ -31,6 +31,21 @@ const ModeBtns = styled.div`
   gap: 20px;
 `;
 
+const ModeBtn = styled.button`
+  width: 100px;
+  height: 25px;
+  line-height: 25px;
+  padding-left: 10px;
+  padding-right: 10px;
+  text-align: center;
+  cursor: pointer;
+  background-color: ${(props: Props) => (props.isBattle ? "#9dc0b8" : "white")};
+  color: ${(props: Props) => (props.isBattle ? "#3e4e4a" : "#607973")};
+  font-size: 14px;
+  border-radius: 5px;
+  border: none;
+`;
+
 type ContextType = {
   questionsNumber: number;
   isBattle: boolean;
@@ -88,27 +103,29 @@ export default function ReviewLayout() {
   return (
     <Wrapper>
       <ModeBtns>
-        <div
+        <ModeBtn
+          isBattle={!isBattle}
           onClick={() => {
             setIsBattle(false);
             navigate("/vocabbook/review");
           }}
         >
-          <Button btnType={isBattle ? "secondary" : "primary"}>
-            Single Mode
-          </Button>
-        </div>
-        <div
+          {/* <Button btnType={isBattle ? "secondary" : "primary"}> */}
+          Single Mode
+          {/* </Button> */}
+        </ModeBtn>
+        <ModeBtn
+          isBattle={isBattle}
           onClick={() => {
             handleSetBattleRoom();
             setIsBattle(true);
             navigate(`/vocabbook/review/${userId + roomId}`);
           }}
         >
-          <Button btnType={isBattle ? "primary" : "secondary"}>
-            Battle Mode
-          </Button>
-        </div>
+          {/* <Button btnType={isBattle ? "primary" : "secondary"}> */}
+          Battle Mode
+          {/* </Button> */}
+        </ModeBtn>
       </ModeBtns>
       <Outlet
         context={{ viewingBook, questionsNumber, isBattle, setIsBattle }}

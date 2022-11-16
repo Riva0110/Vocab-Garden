@@ -40,7 +40,8 @@ const Header = styled.div`
   left: 0px;
   height: 60px;
   width: 100vw;
-  z-index: 1;
+  z-index: 100;
+  /* background-color: rgba(255, 255, 255, 0.45); */
 `;
 
 const LogoImg = styled.img`
@@ -70,7 +71,7 @@ const BellImg = styled.img`
   cursor: pointer;
 `;
 
-const NavLink = styled(Link)`
+const HomeLink = styled(Link)`
   display: flex;
   align-items: center;
   gap: 10px;
@@ -78,15 +79,28 @@ const NavLink = styled(Link)`
   color: #4f4f4f;
   text-decoration: none;
   &:hover {
-    color: #607973;
-    font-weight: 800;
+    color: white;
+  }
+`;
+
+const NavLink = styled(Link)`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 20px;
+  color: black;
+  text-decoration: none;
+  &:hover {
+    color: white;
+    background-color: #607973;
+    padding: 0 10px;
   }
 `;
 
 const Input = styled.input`
   width: 180px;
   height: 20px;
-  border: none;
+  border: 1px solid lightgray;
   border-radius: 5px;
   padding-left: 10px;
   &:focus {
@@ -97,15 +111,18 @@ const Input = styled.input`
 
 const Notification = styled.div`
   display: ${(props: Props) => (props.showInvitation ? "flex" : "none")};
-  min-height: 20px;
+  min-height: 50px;
+  line-height: 50px;
   border: 1px solid gray;
   border-radius: 10px;
-  z-index: 1;
+  z-index: 1000;
   position: fixed;
   top: 40px;
   right: 300px;
   background-color: white;
-  padding: 20px 20px 20px 0;
+  text-align: center;
+  padding: 0 10px 0 0;
+  padding: 0 10px;
 `;
 
 const Invitation = styled.div``;
@@ -159,10 +176,10 @@ function App() {
     <Wrapper>
       <GlobalStyle />
       <Header>
-        <NavLink to="/">
+        <HomeLink to="/">
           <LogoImg src={logo} alt="logo" />
           <BrandName>Vocab Garden</BrandName>
-        </NavLink>
+        </HomeLink>
         <HeaderNav>
           <Input
             placeholder="search a word..."
@@ -206,13 +223,14 @@ function App() {
             battleInvitation?.map(({ ownerName, pin }: BattleInvitation) => (
               <Invitation>
                 <NavLink
+                  style={{ marginLeft: 0 }}
                   to={`/vocabbook/review/${pin}`}
                   onClick={() => {
                     setShowInvitation(false);
                     handleClearInvitation({ ownerName, pin });
                   }}
                 >
-                  ▶ {ownerName} invites you to battle!
+                  {ownerName} invites you to battle! ▶
                 </NavLink>
               </Invitation>
             ))

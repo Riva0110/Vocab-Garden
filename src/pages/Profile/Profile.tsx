@@ -5,22 +5,61 @@ import { arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { plantImgsObj } from "./plantImgs";
 import Button from "../../components/Button";
+import plant from "./loginBackground.png";
 
 interface Props {
   insideColor?: boolean;
   score?: number;
 }
 
-const LoginWrapper = styled.div`
-  padding: 20px;
-  margin-top: 60px;
-  display: block;
-`;
-
 const Wrapper = styled.div`
   padding: 20px;
-  margin-top: 60px;
   display: flex;
+`;
+
+const LoginWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 100px auto;
+  width: 500px;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+`;
+
+const BackgroundImg = styled.div`
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  background-image: url(${plant});
+  background-size: cover;
+  opacity: 0.5;
+`;
+
+const WelcomeMsg = styled.div`
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+`;
+
+const Toggle = styled.div`
+  margin-top: 20px;
+  color: gray;
+  cursor: pointer;
+`;
+
+const Input = styled.input`
+  width: 70%;
+  margin-bottom: 10px;
+  height: 30px;
+  padding-left: 10px;
+  border: 1px solid lightgrey;
+  &:focus {
+    outline: none;
+  }
 `;
 
 const Select = styled.select`
@@ -337,33 +376,61 @@ export default function Profile() {
   }
 
   function renderLoginPage() {
-    return isMember ? (
-      <LoginWrapper>
-        <p>登入 / 註冊會員，享有完整功能！</p>
-        <div>Login</div>
-        <input placeholder="email" onChange={(e) => setEmail(e.target.value)} />
-        <input
-          type="password"
-          placeholder="password"
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button onClick={() => login(email, password)}>Log in</button>
-        <p onClick={() => setIsMember(false)}>還不是會員？</p>
-      </LoginWrapper>
-    ) : (
-      <LoginWrapper>
-        <p>登入 / 註冊會員，享有完整功能！</p>
-        <div>Signup</div>
-        <input placeholder="name" onChange={(e) => setName(e.target.value)} />
-        <input placeholder="email" onChange={(e) => setEmail(e.target.value)} />
-        <input
-          type="password"
-          placeholder="password"
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button onClick={() => signup(email, password, name)}>Signup</button>
-        <p onClick={() => setIsMember(true)}>已經是會員？</p>
-      </LoginWrapper>
+    return (
+      <Wrapper>
+        <BackgroundImg />
+        <LoginWrapper>
+          {isMember ? (
+            <>
+              <WelcomeMsg>
+                Log in or sign up to enjoy full functions!
+              </WelcomeMsg>
+              <Input
+                placeholder="email"
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <Input
+                type="password"
+                placeholder="password"
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <div>
+                <div onClick={() => login(email, password)}>
+                  <Button btnType="primary">Log in</Button>
+                </div>
+                <Toggle onClick={() => setIsMember(false)}>
+                  not a member？
+                </Toggle>
+              </div>
+            </>
+          ) : (
+            <>
+              <WelcomeMsg>
+                Log in or sign up to enjoy full functions!
+              </WelcomeMsg>
+              <Input
+                placeholder="name"
+                onChange={(e) => setName(e.target.value)}
+              />
+              <Input
+                placeholder="email"
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <Input
+                type="password"
+                placeholder="password"
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <div onClick={() => signup(email, password, name)}>
+                <Button btnType="primary">Signup</Button>
+              </div>
+              <Toggle onClick={() => setIsMember(true)}>
+                already a member?
+              </Toggle>
+            </>
+          )}
+        </LoginWrapper>
+      </Wrapper>
     );
   }
 

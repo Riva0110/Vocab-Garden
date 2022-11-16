@@ -212,6 +212,9 @@ const VocabList = styled.div`
 `;
 
 const VocabDiv = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-weight: 600;
   margin-bottom: 10px;
 `;
@@ -775,33 +778,17 @@ export default function BattleReview() {
       <VocabList key={vocab + partOfSpeech}>
         <VocabDiv>
           {vocab}{" "}
-          {audioLink ? (
+          {audioLink && (
             <AudioImg
               src={audio}
               alt="audio"
               onClick={() => handlePlayAudio(audioLink)}
             />
-          ) : (
-            ""
           )}
           ({partOfSpeech})
         </VocabDiv>
         {definition}
       </VocabList>
-
-      // <VocabList key={vocab + partOfSpeech}>
-      //   <strong>{vocab}</strong>{" "}
-      //   {audioLink ? (
-      //     <AudioImg
-      //       src={audio}
-      //       alt="audio"
-      //       onClick={() => handlePlayAudio(audioLink)}
-      //     />
-      //   ) : (
-      //     ""
-      //   )}
-      //   : ({partOfSpeech}) {definition}
-      // </VocabList>
     );
   }
 
@@ -828,16 +815,15 @@ export default function BattleReview() {
               <LabelDiv>Wrong vocab</LabelDiv>{" "}
               {outcomeVocabList?.map(
                 ({ vocab, audioLink, partOfSpeech, definition, isCorrect }) => {
-                  if (!isCorrect) {
-                    return renderOutcomeVocabList(
+                  return (
+                    !isCorrect &&
+                    renderOutcomeVocabList(
                       vocab,
                       partOfSpeech,
                       definition,
                       audioLink
-                    );
-                  } else {
-                    return <></>;
-                  }
+                    )
+                  );
                 }
               )}
             </WrongVocabs>
@@ -845,16 +831,15 @@ export default function BattleReview() {
               <LabelDiv>Correct vocab</LabelDiv>{" "}
               {outcomeVocabList?.map(
                 ({ vocab, audioLink, partOfSpeech, definition, isCorrect }) => {
-                  if (isCorrect) {
-                    return renderOutcomeVocabList(
+                  return (
+                    isCorrect &&
+                    renderOutcomeVocabList(
                       vocab,
                       partOfSpeech,
                       definition,
                       audioLink
-                    );
-                  } else {
-                    return <></>;
-                  }
+                    )
+                  );
                 }
               )}
             </CorrectVocabs>
@@ -869,7 +854,7 @@ export default function BattleReview() {
       <Img src={plant} alt="plant" />
 
       <Wrapper>
-        <RoundCount>Battle Round: {round + 1}</RoundCount>
+        <RoundCount>Round: {round + 1}</RoundCount>
         <Header>
           <OwnerCount>
             <div>
