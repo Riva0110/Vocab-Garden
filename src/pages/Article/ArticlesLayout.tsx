@@ -9,7 +9,7 @@ import { authContext } from "../../context/authContext";
 const Wrapper = styled.div`
   display: flex;
   padding: 80px 20px 20px 20px;
-  gap: 20px;
+  gap: 30px;
   @media screen and (min-width: 1440px) {
     margin: 0 auto;
     max-width: 1440px;
@@ -17,20 +17,20 @@ const Wrapper = styled.div`
 `;
 
 const Img = styled.img`
-  position: absolute;
+  position: fixed;
   right: 0;
   width: 400px;
 `;
 
 const Img2 = styled.img`
-  position: absolute;
+  position: fixed;
   left: 0;
   bottom: 0;
   width: 400px;
 `;
 
 const OutletWrapper = styled.div`
-  width: 50vw;
+  width: calc((100% - 30px) / 2);
   z-index: 1;
 `;
 

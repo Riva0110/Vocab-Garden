@@ -4,10 +4,11 @@ import { useViewingBook } from "../VocabBookLayout";
 import { vocabBookContext } from "../../../context/vocabBookContext";
 import { authContext } from "../../../context/authContext";
 import audio from "../../../components/audio.png";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
 import plant from "./reviewPlant.png";
+import Button from "../../../components/Button";
 
 interface Props {
   correct?: boolean;
@@ -17,6 +18,8 @@ interface Props {
   showBtn?: boolean;
   showAnswer?: string;
   isBattle?: boolean;
+  insideColor?: boolean;
+  score?: number;
 }
 
 const Wrapper = styled.div`
@@ -28,14 +31,39 @@ const Wrapper = styled.div`
 
 const Img = styled.img`
   width: 300px;
-  position: absolute;
+  position: fixed;
   right: 0px;
-  bottom: 0;
+  bottom: 50px;
 `;
 
 const Header = styled.div`
   display: flex;
   justify-content: space-between;
+  margin-top: 20px;
+`;
+
+const Div = styled.div`
+  width: 200px;
+  text-align: center;
+`;
+
+const ScoreBar = styled.div`
+  width: 200px;
+  height: 30px;
+  line-height: 30px;
+  border: 1px solid gray;
+  border-radius: 20px;
+  margin-top: 10px;
+  ${(props: Props) =>
+    props.insideColor &&
+    css`
+      border: 0px;
+      background-color: #95caca;
+      width: ${(props: Props) =>
+        props.score ? `${props.score * 40}px` : "0px"};
+      z-index: -1;
+      margin-bottom: 20px;
+    `}
 `;
 
 const Main = styled.div`
@@ -74,12 +102,11 @@ const Option = styled.div`
   width: 800px;
   max-width: 90vw;
   padding: 10px;
-  border: 1px solid
-    ${(props: Props) => {
-      if (props.showAnswer === "notAnswer") return "gray";
-      if (props.showAnswer === "wrongAnswer") return "red";
-      if (props.showAnswer === "correctAnswer") return "blue";
-    }};
+  border: solid 1px gray;
+  background-color: ${(props: Props) => {
+    if (props.showAnswer === "wrongAnswer") return "#f1d8dc";
+    if (props.showAnswer === "correctAnswer") return "#d2e1ed";
+  }};
   margin-top: 20px;
   cursor: pointer;
 `;
@@ -87,41 +114,61 @@ const Option = styled.div`
 const Btns = styled.div`
   display: flex;
   gap: 10px;
+  justify-content: center;
 `;
 
-const Btn = styled.button`
+const BtnDiv = styled.div`
   display: ${(props: Props) => (props.showBtn ? "flex" : "none")};
-  width: 100%;
-  height: 24px;
-  line-height: 24px;
-  text-align: center;
   margin-top: 20px;
-  z-index: 1;
+  justify-content: flex-end;
 `;
 
-const Message = styled.div``;
+const Message = styled.div`
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+`;
 
 const OutcomeWrapper = styled.div`
   width: 50vw;
-  margin: 50px auto;
+  margin: 20px auto;
 `;
 
 const ReviewVocabs = styled.div`
+  position: relative;
   background-color: rgb(255, 255, 255, 0.7);
-  z-index: 100;
+  z-index: 1;
+  border: 1px solid gray;
+  padding: 20px;
+  margin-top: 20px;
 `;
 
-const WrongVocabs = styled.div``;
+const WrongVocabs = styled.div`
+  margin-bottom: 40px;
+`;
 
 const CorrectVocabs = styled.div``;
 
+const VocabDiv = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  margin-bottom: 10px;
+`;
+
 const LabelDiv = styled.div`
   border-bottom: 1px gray solid;
+  padding-bottom: 10px;
   margin-top: 20px;
   margin-bottom: 20px;
   width: 100%;
   font-weight: 600;
+  color: darkgreen;
+  text-align: center;
 `;
+
 const VocabList = styled.div`
   margin-bottom: 10px;
 `;
@@ -136,9 +183,11 @@ interface ReviewingQuestions {
   audioLink: string;
   partOfSpeech: string;
   definition: string;
-  isCorrect?: boolean;
-  log?: Log[];
-  correctRate?: number;
+}
+
+interface Answer extends ReviewingQuestions {
+  log: Log[];
+  correctRate: number;
 }
 
 export default function Review() {
@@ -152,11 +201,8 @@ export default function Review() {
   const { viewingBook } = useViewingBook();
   const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
   const [updateLogInVeiwingBook, setUpdateLogInVeiwingBook] = useState<
-    ReviewingQuestions[]
+    Answer[]
   >(vocabBooks?.[viewingBook]);
-
-  console.log(vocabBooks?.[viewingBook]);
-  console.log("top", { updateLogInVeiwingBook });
 
   const questionsNumber = 5;
   const questions = vocabBooks?.[viewingBook]
@@ -164,11 +210,6 @@ export default function Review() {
     .slice(0, questionsNumber);
   const [reviewingQuestions, setReviewingQuestions] =
     useState<ReviewingQuestions[]>(questions);
-  const [newReviewingQuestions, setNewReviewingQuestions] = useState(
-    [...reviewingQuestions].map((question) => ({
-      ...question,
-    }))
-  );
 
   const { userId } = useContext(authContext);
   const [score, setScore] = useState<number>();
@@ -229,8 +270,6 @@ export default function Review() {
   };
 
   const handleGameOver = () => {
-    console.log("click done", { newReviewingQuestions });
-    setReviewingQuestions(newReviewingQuestions);
     setShowBtn(true);
     setGameOver(true);
     setRound(0);
@@ -297,8 +336,10 @@ export default function Review() {
                   let newUpdateLogInVeiwingBook;
 
                   if (clickedVocab === correctVocab?.vocab) {
-                    answerCount.correct += 1;
-                    newReviewingQuestions[round].isCorrect = true;
+                    setAnswerCount((prev) => ({
+                      ...prev,
+                      correct: prev.correct + 1,
+                    }));
 
                     newUpdateLogInVeiwingBook = [...updateLogInVeiwingBook].map(
                       ({
@@ -357,8 +398,10 @@ export default function Review() {
                       }
                     );
                   } else {
-                    answerCount.wrong += 1;
-                    newReviewingQuestions[round].isCorrect = false;
+                    setAnswerCount((prev) => ({
+                      ...prev,
+                      wrong: prev.wrong + 1,
+                    }));
                     newUpdateLogInVeiwingBook = [...updateLogInVeiwingBook].map(
                       ({
                         vocab,
@@ -415,11 +458,8 @@ export default function Review() {
                       }
                     );
                   }
-                  setAnswerCount(answerCount);
-                  setNewReviewingQuestions(newReviewingQuestions);
                   setUpdateLogInVeiwingBook(newUpdateLogInVeiwingBook);
                   console.log("clickOptions", { newUpdateLogInVeiwingBook });
-                  console.log("clickOptions", { newReviewingQuestions });
                 }
               }}
             >
@@ -427,16 +467,16 @@ export default function Review() {
             </Option>
           ))}
           {round === questionsNumber - 1 ? (
-            <Btn
+            <BtnDiv
               showBtn={showBtn}
               onClick={() => {
                 handleGameOver();
               }}
             >
-              Done
-            </Btn>
+              <Button btnType={"primary"}>Done</Button>
+            </BtnDiv>
           ) : (
-            <Btn
+            <BtnDiv
               showBtn={showBtn}
               onClick={() => {
                 setShowBtn(false);
@@ -444,11 +484,35 @@ export default function Review() {
                 setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
               }}
             >
-              Next
-            </Btn>
+              <Button btnType={"secondary"}>Next &gt;&gt;&gt;</Button>
+            </BtnDiv>
           )}
         </Options>
       </Main>
+    );
+  }
+
+  function renderOutcomeVocabList(
+    vocab: string,
+    partOfSpeech: string,
+    definition: string,
+    audioLink?: string
+  ) {
+    return (
+      <VocabList key={vocab + partOfSpeech}>
+        <VocabDiv>
+          {vocab}{" "}
+          {audioLink && (
+            <AudioImg
+              src={audio}
+              alt="audio"
+              onClick={() => handlePlayAudio(audioLink)}
+            />
+          )}
+          ({partOfSpeech})
+        </VocabDiv>
+        {definition}
+      </VocabList>
     );
   }
 
@@ -458,83 +522,64 @@ export default function Review() {
         <OutcomeWrapper>
           <Message>
             {(answerCount.correct / questionsNumber) * 100 >= 80
-              ? " 你太棒了！！！我服了你 "
-              : "加油，好嗎？我對你太失望了"}
+              ? "You're amazing! Keep up the good work."
+              : "Keep fighting, Keep pushing!"}
           </Message>
           <Btns>
-            <Btn
+            <BtnDiv
               showBtn={showBtn}
               onClick={() => {
-                // window.location.reload();
                 setGameOver(false);
                 setAnswerCount({ correct: 0, wrong: 0 });
                 setReviewingQuestions(questions);
-                setNewReviewingQuestions(
-                  [...reviewingQuestions].map((question) => ({
-                    ...question,
-                  }))
-                );
-                console.log("click again", { reviewingQuestions });
                 setShowBtn(false);
                 setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
               }}
             >
-              Review again
-            </Btn>
-            <Btn showBtn={showBtn} onClick={() => navigate("/vocabbook")}>
-              Back to VocabBooks
-            </Btn>
+              <Button btnType="secondary">Review again</Button>
+            </BtnDiv>
+            <BtnDiv showBtn={showBtn} onClick={() => navigate("/vocabbook")}>
+              <Button btnType="secondary">Back to VocabBooks</Button>
+            </BtnDiv>
           </Btns>
           <ReviewVocabs>
             <WrongVocabs>
-              <LabelDiv>Wrong vocab:</LabelDiv>{" "}
+              <LabelDiv>Wrong vocab</LabelDiv>{" "}
               {reviewingQuestions.map(
-                ({ vocab, audioLink, partOfSpeech, definition, isCorrect }) => {
-                  if (!isCorrect) {
-                    return (
-                      <VocabList key={vocab + partOfSpeech}>
-                        {vocab}{" "}
-                        {audioLink ? (
-                          <AudioImg
-                            src={audio}
-                            alt="audio"
-                            onClick={() => handlePlayAudio(audioLink)}
-                          />
-                        ) : (
-                          ""
-                        )}
-                        : ({partOfSpeech}) {definition}
-                      </VocabList>
-                    );
-                  } else {
-                    return <></>;
-                  }
+                ({ vocab, audioLink, partOfSpeech, definition }) => {
+                  const answer = updateLogInVeiwingBook.find((answer) => {
+                    return answer.vocab === vocab;
+                  });
+                  const lastAnswerLog = answer?.log.at(-1);
+                  return (
+                    !lastAnswerLog?.isCorrect &&
+                    renderOutcomeVocabList(
+                      vocab,
+                      partOfSpeech,
+                      definition,
+                      audioLink
+                    )
+                  );
                 }
               )}
             </WrongVocabs>
             <CorrectVocabs>
-              <LabelDiv>Correct vocab:</LabelDiv>{" "}
+              <LabelDiv>Correct vocab</LabelDiv>{" "}
               {reviewingQuestions.map(
-                ({ vocab, audioLink, partOfSpeech, definition, isCorrect }) => {
-                  if (isCorrect) {
-                    return (
-                      <VocabList key={vocab + partOfSpeech}>
-                        {vocab}{" "}
-                        {audioLink ? (
-                          <AudioImg
-                            src={audio}
-                            alt="audio"
-                            onClick={() => handlePlayAudio(audioLink)}
-                          />
-                        ) : (
-                          ""
-                        )}
-                        : ({partOfSpeech}) {definition}
-                      </VocabList>
-                    );
-                  } else {
-                    return <></>;
-                  }
+                ({ vocab, audioLink, partOfSpeech, definition }) => {
+                  const answer = updateLogInVeiwingBook.find((answer) => {
+                    return answer.vocab === vocab;
+                  });
+                  const lastAnswerLog = answer?.log.at(-1);
+                  return (
+                    lastAnswerLog?.isCorrect &&
+                    renderOutcomeVocabList(
+                      vocab,
+                      partOfSpeech,
+                      definition,
+                      audioLink
+                    )
+                  );
                 }
               )}
             </CorrectVocabs>
@@ -548,12 +593,19 @@ export default function Review() {
     <Wrapper>
       <Img src={plant} alt="plant" />
       <Header>
-        <div>Review Round: {gameOver ? questionsNumber : round + 1}</div>
-        <div>
-          O: {answerCount.correct} X: {answerCount.wrong} / Total:{" "}
-          {questionsNumber} (
-          {Math.ceil((answerCount.correct / questionsNumber) * 100)}%)
-        </div>
+        <Div>
+          <div>
+            O: {answerCount.correct} X: {answerCount.wrong} / Total:{" "}
+            {questionsNumber}
+          </div>
+          <ScoreBar insideColor={true} score={answerCount.correct}>
+            <ScoreBar>
+              {Math.ceil((answerCount.correct / questionsNumber) * 100)}%
+            </ScoreBar>
+          </ScoreBar>
+        </Div>
+        <Div>Round: {gameOver ? questionsNumber : round + 1}</Div>
+        <Div />
       </Header>
       {gameOver ? renderOutcome() : renderTest()}
     </Wrapper>

@@ -1,5 +1,5 @@
 import styled, { css } from "styled-components";
-import { useContext, useState, useEffect, useCallback } from "react";
+import { useContext, useState, useEffect, useCallback, useRef } from "react";
 import { authContext } from "../../../context/authContext";
 import audio from "../../../components/audio.png";
 import { useReviewLayout } from "./ReviewLayout";
@@ -18,6 +18,8 @@ import {
 import { db } from "../../../firebase/firebase";
 import { useParams } from "react-router-dom";
 import plant from "./battlePlant.png";
+import Button from "../../../components/Button";
+import Alert from "../../../components/Alert/Alert";
 
 interface Props {
   correct?: boolean;
@@ -29,6 +31,7 @@ interface Props {
   isBattle?: boolean;
   insideColor?: boolean;
   score?: number;
+  stateColor?: string;
 }
 
 const Wrapper = styled.div`
@@ -38,7 +41,7 @@ const Wrapper = styled.div`
 
 const Img = styled.img`
   width: 300px;
-  position: absolute;
+  position: fixed;
   left: 100px;
   bottom: 0;
 `;
@@ -48,9 +51,23 @@ const Header = styled.div`
   justify-content: space-between;
 `;
 
-const OwnerCount = styled.div``;
+const RoundCount = styled.div`
+  margin-top: 20px;
+  text-align: center;
+`;
 
-const CompetitorCount = styled.div``;
+const OwnerCount = styled.div`
+  text-align: center;
+`;
+
+const CompetitorCount = styled.div`
+  text-align: center;
+`;
+
+const Div = styled.div`
+  width: 200px;
+  text-align: center;
+`;
 
 const ScoreBar = styled.div`
   width: 200px;
@@ -58,6 +75,7 @@ const ScoreBar = styled.div`
   line-height: 30px;
   border: 1px solid gray;
   border-radius: 20px;
+  margin-top: 10px;
   ${(props: Props) =>
     props.insideColor &&
     css`
@@ -84,6 +102,12 @@ const WaitingRoomWrapper = styled.div`
   margin: 50px auto;
   background-color: rgb(255, 255, 255, 0.7);
   width: 500px;
+`;
+
+const WaitingMessage = styled.div`
+  font-size: 20px;
+  font-weight: 600;
+  margin-top: 20px;
 `;
 
 const StartGame = styled.button`
@@ -117,15 +141,15 @@ const Options = styled.div`
 
 const Option = styled.div`
   background-color: rgb(255, 255, 255, 0.7);
+  z-index: 1;
   width: 800px;
   max-width: 90vw;
   padding: 10px;
-  border: 1px solid
-    ${(props: Props) => {
-      if (props.showAnswer === "notAnswer") return "gray";
-      if (props.showAnswer === "wrongAnswer") return "red";
-      if (props.showAnswer === "correctAnswer") return "blue";
-    }};
+  border: solid 1px gray;
+  background-color: ${(props: Props) => {
+    if (props.showAnswer === "wrongAnswer") return "#f1d8dc";
+    if (props.showAnswer === "correctAnswer") return "#d2e1ed";
+  }};
   margin-top: 20px;
   cursor: pointer;
 `;
@@ -136,16 +160,18 @@ const Btns = styled.div`
   margin-top: 20px;
 `;
 
-const Btn = styled.button`
+const BtnDiv = styled.div`
   display: ${(props: Props) => (props.showBtn ? "flex" : "none")};
-  width: 100%;
-  height: 24px;
-  line-height: 24px;
-  text-align: center;
   margin-top: 20px;
+  justify-content: flex-end;
 `;
 
-const Message = styled.div``;
+const Message = styled.div`
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+`;
 
 const OutcomeWrapper = styled.div`
   width: 50vw;
@@ -153,6 +179,7 @@ const OutcomeWrapper = styled.div`
 `;
 
 const ReviewVocabs = styled.div`
+  position: relative;
   background-color: rgb(255, 255, 255, 0.7);
   z-index: 100;
 `;
@@ -163,20 +190,33 @@ const CorrectVocabs = styled.div``;
 
 const LabelDiv = styled.div`
   border-bottom: 1px gray solid;
+  padding-bottom: 10px;
   margin-top: 20px;
   margin-bottom: 20px;
   width: 100%;
   font-weight: 600;
-  color: green;
+  color: darkgreen;
+  text-align: center;
 `;
 
 const VocabList = styled.div`
   margin-bottom: 10px;
 `;
 
+const VocabDiv = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  margin-bottom: 10px;
+`;
+
 const Title = styled.div`
   margin-top: 50px;
   border-bottom: 1px solid gray;
+  color: #607973;
+  font-weight: 600;
+  width: 400px;
 `;
 
 const InviteWrapper = styled.div`
@@ -184,9 +224,30 @@ const InviteWrapper = styled.div`
   display: flex;
   gap: 20px;
   align-items: center;
+  justify-content: space-between;
+  width: 400px;
 `;
 
-const Email = styled.div``;
+const Email = styled.div`
+  color: gray;
+`;
+
+const FriendStateWrapper = styled.div`
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: ${(props: Props) => (props.stateColor === "online" ? "green" : "")};
+`;
+
+const FriendState = styled.div`
+  width: 10px;
+  height: 10px;
+  border-radius: 10px;
+  border: 1px solid
+    ${(props: Props) => (props.stateColor === "online" ? "green" : "gray")};
+  background-color: ${(props: Props) =>
+    props.stateColor === "online" ? "green" : "white"};
+`;
 
 interface AnswerCount {
   owner: { correct: number; wrong: number };
@@ -213,6 +274,8 @@ interface RoomInfo {
   status: string;
   questions: Questions[];
 }
+
+type AddFunction = (msg: string) => void;
 
 export default function BattleReview() {
   const navigate = useNavigate();
@@ -250,6 +313,7 @@ export default function BattleReview() {
   const [friendList, setFriendList] = useState<string[]>();
   const [hasInvited, setHasInvited] = useState<boolean[]>([]);
   const [friendState, setFriendState] = useState<string[]>(["offline"]);
+  const ref = useRef<null | AddFunction>(null);
 
   const handleSyncScore = useCallback(
     async (answerCountAfterClick: AnswerCount) => {
@@ -380,14 +444,6 @@ export default function BattleReview() {
         ) {
           setIsVisitor(true);
         }
-        // console.log(
-        //   isCompetitorIn,
-        //   data.competitorId !== "",
-        //   data.competitorId,
-        //   isOwner,
-        //   userId,
-        //   data.competitorId
-        // );
         if (data.ownerId !== userId) setIsOwner(false);
         if (data.competitorName !== "") setCompetitorName(data.competitorName);
         if (isWaiting && data?.status === "playing") setIsWaiting(false);
@@ -551,7 +607,7 @@ export default function BattleReview() {
     const friendRef = collection(db, "users");
     const q = query(friendRef, where("email", "==", friendEmail));
     const querySnapshot = await getDocs(q);
-    if (querySnapshot.empty) alert("The user doesn't exist!");
+    if (querySnapshot.empty) ref.current?.("The user doesn't exist!");
     querySnapshot.forEach((friendDoc) => {
       const updateFriendStatus = async () => {
         await updateDoc(doc(db, "users", friendDoc.id), {
@@ -575,29 +631,37 @@ export default function BattleReview() {
               <StartGame onClick={handleStartBattle}>Start</StartGame>
             ) : (
               <>
-                <p>Waiting for the competitor joining the battle</p>
+                <WaitingMessage>
+                  Waiting for the competitor joining the battle
+                </WaitingMessage>
                 <Title>Friend List</Title>
                 {friendList?.map((friendEmail, index) => (
                   <InviteWrapper>
                     <Email key={friendEmail}>{friendEmail}</Email>
-                    <div>{friendState[index]}</div>
-                    <button
-                      onClick={() => {
-                        const newHasInvited = [...hasInvited];
-                        newHasInvited[index] = true;
-                        setHasInvited(newHasInvited);
-                        handleInviteFriendBattle(friendEmail, index);
-                      }}
-                    >
-                      {" "}
-                      {!hasInvited[index] ? "Invite" : "Inviting"}
-                    </button>
+                    <FriendStateWrapper stateColor={friendState[index]}>
+                      {friendState[index]}
+                      <FriendState stateColor={friendState[index]} />
+                      <div
+                        onClick={() => {
+                          const newHasInvited = [...hasInvited];
+                          newHasInvited[index] = true;
+                          setHasInvited(newHasInvited);
+                          handleInviteFriendBattle(friendEmail, index);
+                        }}
+                      >
+                        <Button btnType="secondary">
+                          {!hasInvited[index] ? "Invite" : "Inviting"}
+                        </Button>
+                      </div>
+                    </FriendStateWrapper>
                   </InviteWrapper>
                 ))}
               </>
             )
           ) : isCompetitorIn ? (
-            <p>Waiting for the owner starting the battle</p>
+            <WaitingMessage>
+              Waiting for the owner starting the battle
+            </WaitingMessage>
           ) : (
             <StartGame onClick={handleCompetitorJoinBattle}>
               Join the battle!
@@ -691,9 +755,6 @@ export default function BattleReview() {
     );
   }
 
-  if (outcomeVocabList)
-    console.log("outcomeVocabList [global]", outcomeVocabList);
-
   function renderOutcomeVocabList(
     vocab: string,
     partOfSpeech: string,
@@ -702,17 +763,18 @@ export default function BattleReview() {
   ) {
     return (
       <VocabList key={vocab + partOfSpeech}>
-        <strong>{vocab}</strong>{" "}
-        {audioLink ? (
-          <AudioImg
-            src={audio}
-            alt="audio"
-            onClick={() => handlePlayAudio(audioLink)}
-          />
-        ) : (
-          ""
-        )}
-        : ({partOfSpeech}) {definition}
+        <VocabDiv>
+          {vocab}{" "}
+          {audioLink && (
+            <AudioImg
+              src={audio}
+              alt="audio"
+              onClick={() => handlePlayAudio(audioLink)}
+            />
+          )}
+          ({partOfSpeech})
+        </VocabDiv>
+        {definition}
       </VocabList>
     );
   }
@@ -724,49 +786,47 @@ export default function BattleReview() {
           <Message>
             {isOwner
               ? (answerCount.owner.correct / questionsNumber) * 100 >= 80
-                ? " 你太棒了！！！我服了你 "
-                : "加油，好嗎？我對你太失望了"
+                ? "You're amazing! Keep up the good work."
+                : "Keep fighting, Keep pushing!"
               : (answerCount.competitor.correct / questionsNumber) * 100 >= 80
-              ? " 你太棒了！！！我服了你 "
-              : "加油，好嗎？我對你太失望了"}
+              ? "You're amazing! Keep up the good work."
+              : "Keep fighting, Keep pushing!"}
           </Message>
           <Btns>
-            <Btn showBtn={showBtn} onClick={() => navigate("/vocabbook")}>
-              Back to VocabBooks
-            </Btn>
+            <BtnDiv showBtn={showBtn} onClick={() => navigate("/vocabbook")}>
+              <Button btnType="secondary">Back to VocabBooks</Button>
+            </BtnDiv>
           </Btns>
           <ReviewVocabs>
             <WrongVocabs>
-              <LabelDiv>Wrong vocab:</LabelDiv>{" "}
+              <LabelDiv>Wrong vocab</LabelDiv>{" "}
               {outcomeVocabList?.map(
                 ({ vocab, audioLink, partOfSpeech, definition, isCorrect }) => {
-                  if (!isCorrect) {
-                    return renderOutcomeVocabList(
+                  return (
+                    !isCorrect &&
+                    renderOutcomeVocabList(
                       vocab,
                       partOfSpeech,
                       definition,
                       audioLink
-                    );
-                  } else {
-                    return <></>;
-                  }
+                    )
+                  );
                 }
               )}
             </WrongVocabs>
             <CorrectVocabs>
-              <LabelDiv>Correct vocab:</LabelDiv>{" "}
+              <LabelDiv>Correct vocab</LabelDiv>{" "}
               {outcomeVocabList?.map(
                 ({ vocab, audioLink, partOfSpeech, definition, isCorrect }) => {
-                  if (isCorrect) {
-                    return renderOutcomeVocabList(
+                  return (
+                    isCorrect &&
+                    renderOutcomeVocabList(
                       vocab,
                       partOfSpeech,
                       definition,
                       audioLink
-                    );
-                  } else {
-                    return <></>;
-                  }
+                    )
+                  );
                 }
               )}
             </CorrectVocabs>
@@ -779,44 +839,51 @@ export default function BattleReview() {
   return !isVisitor ? (
     <>
       <Img src={plant} alt="plant" />
-
+      <Alert
+        children={(add: AddFunction) => {
+          ref.current = add;
+        }}
+      />
       <Wrapper>
-        <div>Review Round: {round + 1}</div>
+        <RoundCount>Round: {round + 1}</RoundCount>
         <Header>
           <OwnerCount>
             <div>
               <p>Owner: {ownerName}</p>
               O: {answerCount.owner.correct} X: {answerCount.owner.wrong} /
-              Total: {questionsNumber} (
-              {Math.ceil((answerCount.owner.correct / questionsNumber) * 100)}
-              %)
+              Total: {questionsNumber}
             </div>
-            <ScoreBar insideColor={true} score={answerCount.owner.correct}>
-              <ScoreBar>
-                {Math.ceil((answerCount.owner.correct / questionsNumber) * 100)}
-                %
+            <Div>
+              <ScoreBar insideColor={true} score={answerCount.owner.correct}>
+                <ScoreBar>
+                  {Math.ceil(
+                    (answerCount.owner.correct / questionsNumber) * 100
+                  )}
+                  %
+                </ScoreBar>
               </ScoreBar>
-            </ScoreBar>
+            </Div>
           </OwnerCount>
           {isWaiting ? <></> : <p>{countDown} seconds left</p>}
           <CompetitorCount>
             <div>
               <p>Competitor: {competitorName}</p>
               O: {answerCount.competitor.correct} X:{" "}
-              {answerCount.competitor.wrong} / Total: {questionsNumber} (
-              {Math.ceil(
-                (answerCount.competitor.correct / questionsNumber) * 100
-              )}
-              %)
+              {answerCount.competitor.wrong} / Total: {questionsNumber}
             </div>
-            <ScoreBar insideColor={true} score={answerCount.competitor.correct}>
-              <ScoreBar>
-                {Math.ceil(
-                  (answerCount.competitor.correct / questionsNumber) * 100
-                )}
-                %
+            <Div>
+              <ScoreBar
+                insideColor={true}
+                score={answerCount.competitor.correct}
+              >
+                <ScoreBar>
+                  {Math.ceil(
+                    (answerCount.competitor.correct / questionsNumber) * 100
+                  )}
+                  %
+                </ScoreBar>
               </ScoreBar>
-            </ScoreBar>
+            </Div>
           </CompetitorCount>
         </Header>
         {isWaiting

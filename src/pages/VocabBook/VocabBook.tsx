@@ -1,9 +1,9 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { keywordContext } from "../../context/keywordContext";
 import { authContext } from "../../context/authContext";
 import { vocabBookContext } from "../../context/vocabBookContext";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import {
   doc,
   arrayUnion,
@@ -18,35 +18,32 @@ import saved from "../../components/saved.png";
 import VocabDetails from "../../components/VocabDetails";
 import { useViewingBook } from "./VocabBookLayout";
 import plant from "./plant.png";
+import deleteBtn from "./delete.png";
+import Button from "../../components/Button";
+import Alert from "../../components/Alert/Alert";
 
 const Wrapper = styled.div`
   display: flex;
   padding: 80px 20px 20px 20px;
+  gap: 30px;
 `;
 
 const Img = styled.img`
-  position: absolute;
+  position: fixed;
   right: 0px;
   bottom: 0px;
   width: 500px;
 `;
 
 const Nav = styled.nav`
-  margin-bottom: 20px;
   display: flex;
   justify-content: space-between;
-`;
-
-const NavLink = styled(Link)`
-  margin-right: 20px;
-  text-decoration: none;
-  color: darkgreen;
-  font-weight: 600;
+  align-items: center;
+  gap: 20px;
 `;
 
 const VocabBookWrapper = styled.div`
-  width: 50vw;
-  margin-right: 20px;
+  width: calc((100% - 30px) / 2);
   z-index: 1;
 `;
 
@@ -55,9 +52,8 @@ const VocabBookAndCard = styled.div``;
 const BookWrapper = styled.div`
   display: flex;
   flex: 1;
-  gap: 20px;
   width: 100%;
-  height: 150px;
+  height: 50px;
   margin-bottom: 20px;
   align-items: center;
   overflow-x: scroll;
@@ -66,23 +62,41 @@ const BookWrapper = styled.div`
 const Book = styled.div`
   text-align: center;
   min-width: 150px;
-  height: 80px;
-  border: solid
-    ${(props: Props) => (props.selected ? "2px darkgreen" : "1px gray")};
+  height: 30px;
+  line-height: 30px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  border: ${(props: Props) => (props.selected ? "1px solid gray" : "none")};
+  border-bottom: ${(props: Props) =>
+    props.selected ? "none" : "1px solid gray"};
   color: ${(props: Props) => (props.selected ? "black" : "gray")};
-  background-color: lightgray;
-  padding: 10px;
+  background-color: ${(props: Props) => (props.selected ? "white" : "none")};
+  padding: auto;
   font-size: 18px;
   font-weight: 600;
   cursor: pointer;
+`;
+
+const BookInfoWrapper = styled.div`
+  display: flex;
+  margin-bottom: 20px;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const BookButtons = styled.div`
+  display: flex;
+  gap: 20px;
+  align-items: center;
 `;
 
 const CardWrapper = styled.div`
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
+  align-content: flex-start;
   overflow-y: scroll;
-  height: calc(100vh - 350px);
+  height: calc(100vh - 232px);
 `;
 
 const Card = styled.div`
@@ -90,13 +104,14 @@ const Card = styled.div`
   flex-direction: column;
   align-items: flex-start;
   text-align: center;
-  width: calc((100% - 90px) / 2);
-  height: 100px;
-  border: 1px gray solid;
+  width: calc((100% - 20px) / 2);
+  height: 120px;
+  border: 1px solid lightgray;
+  border-top: 2px #607973 solid;
   overflow-y: scroll;
   padding: 10px;
   background-color: rgba(255, 255, 255, 0.7);
-  @media screen and (max-width: 960px) {
+  @media screen and (max-width: 1100px) {
     width: 100%;
   }
 `;
@@ -104,6 +119,7 @@ const Card = styled.div`
 const CardText = styled.div`
   text-align: start;
   font-weight: ${(props: Props) => (props.weight ? "600" : "")};
+  /* color: #607973; */
 `;
 
 const VocabHeader = styled.div`
@@ -118,6 +134,8 @@ const VocabTitle = styled.div`
   gap: 20px;
   font-size: 20px;
   font-weight: 600;
+  color: black;
+  margin-bottom: 10px;
 `;
 
 const Vocab = styled.span`
@@ -129,26 +147,53 @@ const AudioImg = styled.img`
   height: 20px;
 `;
 
-const SaveVocabImg = styled.img`
+const ButtonImg = styled.img`
   width: 20px;
+  cursor: pointer;
 `;
 
-const Button = styled.button``;
+const Input = styled.input`
+  outline: none;
+  border: 1px solid lightgray;
+  height: 25px;
+  padding-left: 10px;
+`;
+
+const AddButton = styled.button`
+  width: 20px;
+  height: 20px;
+  margin-left: 10px;
+  background-color: #607973;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+`;
 
 interface Props {
   selected?: boolean;
   weight?: boolean;
 }
 
+type AddFunction = (msg: string) => void;
+
 export default function VocabBook() {
+  const navigate = useNavigate();
   const { viewingBook, setViewingBook } = useViewingBook();
   const { userId } = useContext(authContext);
   const { setKeyword } = useContext(keywordContext);
   const { vocabBooks, getVocabBooks, isSaved, setIsSaved } =
     useContext(vocabBookContext);
   const [newBook, setNewBook] = useState<string>();
-
+  const [bookCorrectRate, setBookCorrectRate] = useState<number>();
+  const ref = useRef<null | AddFunction>(null);
   const topWrongWords = getAllWords()?.slice(0, 10);
+
+  useEffect(() => {
+    if (Object.keys(vocabBooks).length === 0) {
+      getVocabBooks(userId);
+    }
+  }, [getVocabBooks, userId, vocabBooks, vocabBooks.length]);
 
   useEffect(() => {
     if (topWrongWords?.length >= 5) {
@@ -170,7 +215,7 @@ export default function VocabBook() {
       isCorrect?: boolean | undefined;
       correctRate: number;
     }[] = [];
-    const wordsByBook = Object.keys(vocabBooks).map((key) => {
+    const wordsByBook = Object.keys(vocabBooks)?.map((key) => {
       allWords = allWords.concat(vocabBooks[key]);
       return allWords;
     });
@@ -184,7 +229,6 @@ export default function VocabBook() {
       if (item.isCorrect) {
         acc += 1;
       }
-      console.log(logOfBook.length);
       return acc;
     }, 0);
     return correctCount / logOfBook.length || 0;
@@ -248,11 +292,6 @@ export default function VocabBook() {
       await deleteDoc(doc(db, "savedVocabs", `${userId}+${vocab}`));
       getVocabBooks(userId);
       if (isSaved) setIsSaved(false);
-      setTimeout(
-        alert,
-        200,
-        `Remove vocab "${vocab}" from "${viewingBook}" sucessfully!`
-      );
     }
   };
 
@@ -263,66 +302,80 @@ export default function VocabBook() {
     }
   }
 
-  useEffect(() => {
-    if (Object.keys(vocabBooks).length === 0) {
-      getVocabBooks(userId);
-    }
-  }, [getVocabBooks, userId, vocabBooks, vocabBooks.length]);
-
   return (
     <Wrapper>
+      <Alert
+        children={(add: AddFunction) => {
+          ref.current = add;
+        }}
+      />
       <Img src={plant} alt="plant" />
       <VocabBookWrapper>
-        <Nav>
-          <div>
-            <input onChange={(e) => setNewBook(e.target.value)} />
-            <Button onClick={handleAddBook}>Add a Book</Button>
-          </div>
-          <div>
-            <NavLink to="wordle">Wordle</NavLink>
-            {vocabBooks[viewingBook]?.length >= 5 ||
-            topWrongWords?.length >= 5 ? (
-              <NavLink to="review">Review</NavLink>
-            ) : (
-              <NavLink
-                to=""
-                onClick={() =>
-                  alert("Please save at least 5 vocab cards in this book!")
-                }
-              >
-                Review
-              </NavLink>
-            )}
-          </div>
-        </Nav>
         <VocabBookAndCard>
           <BookWrapper>
             {Object.keys(vocabBooks).map((book: string, index) => (
-              <Book
-                selected={viewingBook === `${book}` ? true : false}
-                onClick={() => {
-                  setViewingBook(book);
-                }}
-              >
-                {book.toLocaleLowerCase()}({vocabBooks?.[book]?.length})
-                <br />
-                {Math.round(correctRateOfBooksArr[index] * 100)}%
-                <br />
-                <button onClick={() => handleDeleteBook(book)}>Delete</button>
-              </Book>
+              <>
+                <Book
+                  selected={viewingBook === `${book}`}
+                  onClick={() => {
+                    setViewingBook(book);
+                    setBookCorrectRate(
+                      Math.round(correctRateOfBooksArr[index] * 100)
+                    );
+                  }}
+                >
+                  {book.toLocaleLowerCase()} ({vocabBooks?.[book]?.length})
+                </Book>
+              </>
             ))}
             <Book
-              selected={viewingBook === "wrong words" ? true : false}
+              selected={viewingBook === "wrong words"}
               onClick={() => {
                 setViewingBook("wrong words");
               }}
             >
-              wrong words({topWrongWords?.length})
-              <br />
-              <div> &lt; 50%</div>
+              wrong words ({topWrongWords?.length})
               <br />
             </Book>
           </BookWrapper>
+          <BookInfoWrapper>
+            <BookButtons>
+              <div>
+                <Input
+                  onChange={(e) => setNewBook(e.target.value)}
+                  placeholder="Add a book"
+                />
+                <AddButton onClick={handleAddBook}>+</AddButton>
+              </div>
+              <div>
+                {viewingBook === "wrong words" ? null : (
+                  <ButtonImg
+                    src={deleteBtn}
+                    alt="delete"
+                    onClick={() => handleDeleteBook(viewingBook)}
+                  />
+                )}
+              </div>
+            </BookButtons>
+            <Nav>
+              <div>
+                Correct rate:{" "}
+                {viewingBook === "wrong words" ? "<50%" : `${bookCorrectRate}%`}
+              </div>
+              <div
+                onClick={() =>
+                  vocabBooks[viewingBook]?.length >= 5 ||
+                  (viewingBook === "wrong words" && topWrongWords?.length >= 5)
+                    ? navigate("/vocabbook/review")
+                    : ref.current?.(
+                        "Please save at least 5 vocab cards in this book!"
+                      )
+                }
+              >
+                <Button btnType={"primary"}>Review</Button>
+              </div>
+            </Nav>
+          </BookInfoWrapper>
           <CardWrapper>
             {viewingBook === "wrong words" ? (
               <>
@@ -393,7 +446,7 @@ export default function VocabBook() {
                             ) : (
                               ""
                             )}
-                            <SaveVocabImg
+                            <ButtonImg
                               src={saved}
                               alt="save"
                               onClick={() => handleDeleteVocabFromBook(vocab)}

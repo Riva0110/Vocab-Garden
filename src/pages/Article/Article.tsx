@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { authContext } from "../../context/authContext";
 import { keywordContext } from "../../context/keywordContext";
@@ -14,6 +14,8 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import QuillEditor from "./Editor/QuillEditor";
+import Button from "../../components/Button";
+import Alert from "../../components/Alert/Alert";
 
 const Wrapper = styled.div`
   display: flex;
@@ -25,18 +27,19 @@ const ArticleWrapper = styled.div`
   width: 100%;
 `;
 
-const TitleBtnWrapper = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
 const TitleLabel = styled.label`
   margin-bottom: 5px;
 `;
 
 const TitleInput = styled.input`
   margin-bottom: 20px;
+  border: 1px lightgray solid;
+  &:focus {
+    outline: none;
+  }
+  padding: 5px 15px;
+  color: #3f3c3c;
+  background-color: rgba(255, 255, 255, 0.7);
 `;
 
 const ContentLabel = styled(TitleLabel)`
@@ -45,33 +48,33 @@ const ContentLabel = styled(TitleLabel)`
 
 const Title = styled.div`
   line-height: 100%;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   color: black;
 `;
 
 const Content = styled.div`
   font-size: 16px;
   overflow-y: scroll;
-  height: calc(100vh - 160px);
+  height: calc(100vh - 240px);
   background-color: rgb(255, 255, 255, 0.7);
 `;
 
 const Btns = styled.div`
   display: flex;
   gap: 10px;
+  margin-bottom: 20px;
+  justify-content: flex-end;
 `;
 
-const DoneBtn = styled.button`
+const ButtonDiv = styled.div`
   margin-top: 50px;
+  display: flex;
+  justify-content: flex-end;
 `;
 
-const BackBtn = styled.button`
-  width: 50px;
-`;
-
-const EditBtn = styled(BackBtn)``;
+type AddFunction = (msg: string) => void;
 
 export default function Article() {
   const navigate = useNavigate();
@@ -81,6 +84,7 @@ export default function Article() {
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
   const articlePathName = window.location.pathname.slice(10);
+  const ref = useRef<null | AddFunction>(null);
 
   useEffect(() => {
     const getArticleContent = async (articlePathName: string) => {
@@ -105,20 +109,20 @@ export default function Article() {
 
   const renderReadMode = () => (
     <>
-      <TitleBtnWrapper>
-        <Title onClick={() => getSelectedText()}>{title}</Title>
-        <Btns>
-          <BackBtn onClick={() => navigate("/articles")}>Back</BackBtn>
-          <EditBtn
-            onClick={() => {
-              setIsEditing(true);
-              navigate(`/articles/${articlePathName}?title=${title}&edit=true`);
-            }}
-          >
-            Edit
-          </EditBtn>
-        </Btns>
-      </TitleBtnWrapper>
+      <Btns>
+        <div onClick={() => navigate("/articles")}>
+          <Button btnType="secondary">Back</Button>
+        </div>
+        <div
+          onClick={() => {
+            setIsEditing(true);
+            navigate(`/articles/${articlePathName}?title=${title}&edit=true`);
+          }}
+        >
+          <Button btnType="primary">Edit</Button>
+        </div>
+      </Btns>
+      <Title onClick={() => getSelectedText()}>{title}</Title>
       <Content
         dangerouslySetInnerHTML={{ __html: content }}
         onClick={() => getSelectedText()}
@@ -137,7 +141,7 @@ export default function Article() {
         />
         <ContentLabel>Content</ContentLabel>
         <QuillEditor content={content} setContent={setContent} />
-        <DoneBtn
+        <ButtonDiv
           onClick={async () => {
             if (title && content && userId && articlePathName !== "add") {
               setIsEditing(false);
@@ -163,18 +167,23 @@ export default function Article() {
               });
               navigate(`/articles/${docRef.id}?title=${title}`);
             } else {
-              alert("Title and content cannot be blank!");
+              ref.current?.("Title and content cannot be blank!");
             }
           }}
         >
-          Done
-        </DoneBtn>
+          <Button btnType="primary">Done</Button>
+        </ButtonDiv>
       </>
     );
   };
 
   return (
     <Wrapper>
+      <Alert
+        children={(add: AddFunction) => {
+          ref.current = add;
+        }}
+      />
       <ArticleWrapper>
         {isEditing ? renderEditMode() : renderReadMode()}
       </ArticleWrapper>

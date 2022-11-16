@@ -1,15 +1,18 @@
 import { useContext, useEffect, useState } from "react";
-import styled, { createGlobalStyle } from "styled-components";
+import styled, { createGlobalStyle, css } from "styled-components";
 import { Link, Outlet } from "react-router-dom";
 import { keywordContext } from "./context/keywordContext";
 import { authContext } from "./context/authContext";
-import logoName from "./logoName.png";
+import logo from "./logoName.png";
 import { arrayRemove, doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { db } from "./firebase/firebase";
 import bell from "./notification.png";
 import yellowBell from "./notification-yellow.png";
 
 const GlobalStyle = createGlobalStyle`
+  * {
+    box-sizing: border-box;
+  }
   body {
     margin: 0;
     padding: 0;
@@ -24,6 +27,10 @@ const Wrapper = styled.div`
   min-height: 100vh;
 `;
 
+const Loading = styled.div`
+  padding: 50vh 50vw;
+`;
+
 const Header = styled.div`
   display: flex;
   justify-content: space-between;
@@ -33,14 +40,22 @@ const Header = styled.div`
   left: 0px;
   height: 60px;
   width: 100vw;
-  z-index: 1;
+  z-index: 100;
+  background-image: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.5),
+    transparent 95%
+  );
 `;
 
 const LogoImg = styled.img`
   height: 30px;
 `;
 
+const BrandName = styled.div``;
+
 const HeaderNav = styled.div`
+  display: flex;
   margin-right: 20px;
 `;
 
@@ -48,46 +63,74 @@ const Main = styled.main`
   width: 100vw;
 `;
 
+const NavDiv = styled.div`
+  width: ${(props: Props) => (props.length ? `${props.length * 10}px` : ``)};
+  display: flex;
+  justify-content: center;
+`;
+
 const BellImg = styled.img`
   width: 16px;
+  height: 16px;
   cursor: pointer;
 `;
 
-const NavLink = styled(Link)`
+const HomeLink = styled(Link)`
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-left: 20px;
   color: #4f4f4f;
   text-decoration: none;
 `;
 
+const NavLink = styled(Link)`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 20px;
+  color: #4f4f4f;
+  text-decoration: none;
+  &:hover {
+    background-color: white;
+    padding: 0 10px;
+  }
+`;
+
 const Input = styled.input`
-  width: 200px;
+  width: 180px;
   height: 20px;
-  border: none;
+  border: 1px solid lightgray;
   border-radius: 5px;
   padding-left: 10px;
   &:focus {
     outline: none;
   }
+  margin-right: 20px;
 `;
 
 const Notification = styled.div`
   display: ${(props: Props) => (props.showInvitation ? "flex" : "none")};
-  /* width: 200px; */
-  min-height: 20px;
+  min-height: 50px;
+  line-height: 50px;
   border: 1px solid gray;
   border-radius: 10px;
-  z-index: 1;
+  z-index: 1000;
   position: fixed;
   top: 40px;
   right: 300px;
   background-color: white;
-  padding: 20px 20px 20px 0;
+  text-align: center;
+  padding: 0 10px 0 0;
+  padding: 0 10px;
 `;
 
 const Invitation = styled.div``;
 
 interface Props {
   showInvitation?: boolean;
+  length?: number;
+  isScrolling?: boolean;
 }
 
 interface BattleInvitation {
@@ -97,7 +140,7 @@ interface BattleInvitation {
 
 function App() {
   const { setKeyword } = useContext(keywordContext);
-  const { isLogin, userId } = useContext(authContext);
+  const { isLogin, userId, isLoadingUserAuth } = useContext(authContext);
   const [inputVocab, setInputVocab] = useState<string>();
   const [battleInvitation, setBattleInvitation] =
     useState<BattleInvitation[]>();
@@ -133,9 +176,10 @@ function App() {
     <Wrapper>
       <GlobalStyle />
       <Header>
-        <NavLink to="/">
-          <LogoImg src={logoName} alt="logo" />
-        </NavLink>
+        <HomeLink to="/">
+          <LogoImg src={logo} alt="logo" />
+          <BrandName>Vocab Garden</BrandName>
+        </HomeLink>
         <HeaderNav>
           <Input
             placeholder="search a word..."
@@ -144,21 +188,33 @@ function App() {
               setInputVocab(e.target.value);
             }}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && inputVocab) setKeyword(inputVocab);
+              if (e.key === "Enter" && inputVocab) {
+                setKeyword(inputVocab);
+                const target = e.target as HTMLInputElement;
+                target.value = "";
+              }
             }}
           />
-          {isLogin ? (
+          {isLogin && (
             <BellImg
               src={battleInvitation?.length !== 0 ? yellowBell : bell}
               onClick={() => setShowInvitation((prev) => !prev)}
             />
-          ) : (
-            <></>
           )}
-          <NavLink to={isLogin ? "/articles" : "/profile"}>Article</NavLink>
-          <NavLink to={isLogin ? "/vocabbook" : "/profile"}>VocabBook</NavLink>
-          <NavLink to={isLogin ? "/friends" : "/profile"}>Friend</NavLink>
-          <NavLink to={isLogin ? "/profile" : "/profile"}>Profile</NavLink>
+          <NavDiv length={"Article".length}>
+            <NavLink to={isLogin ? "/articles" : "/profile"}>Article</NavLink>
+          </NavDiv>
+          <NavDiv length={"VocabBook".length}>
+            <NavLink to={isLogin ? "/vocabbook" : "/profile"}>
+              VocabBook
+            </NavLink>
+          </NavDiv>
+          <NavDiv length={"Friend".length}>
+            <NavLink to={isLogin ? "/friends" : "/profile"}>Friend</NavLink>
+          </NavDiv>
+          <NavDiv length={"Profile".length}>
+            <NavLink to={isLogin ? "/profile" : "/profile"}>Profile</NavLink>
+          </NavDiv>
         </HeaderNav>
       </Header>
       <Main>
@@ -167,13 +223,14 @@ function App() {
             battleInvitation?.map(({ ownerName, pin }: BattleInvitation) => (
               <Invitation>
                 <NavLink
+                  style={{ marginLeft: 0 }}
                   to={`/vocabbook/review/${pin}`}
                   onClick={() => {
                     setShowInvitation(false);
                     handleClearInvitation({ ownerName, pin });
                   }}
                 >
-                  ▶ {ownerName} invites you to battle!
+                  {ownerName} invites you to battle! ▶
                 </NavLink>
               </Invitation>
             ))
@@ -181,7 +238,7 @@ function App() {
             <div>There's no invitation.</div>
           )}
         </Notification>
-        <Outlet />
+        {isLoadingUserAuth ? <Loading>Loading......</Loading> : <Outlet />}
       </Main>
     </Wrapper>
   );

@@ -7,6 +7,7 @@ import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
+import Button from "../../../components/Button";
 
 interface Props {
   correct?: boolean;
@@ -23,28 +24,26 @@ const Wrapper = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 80px 20px 20px 20px;
-  width: calc(100vw - 40px);
 `;
 
 const ModeBtns = styled.div`
   display: flex;
   gap: 20px;
 `;
-const ReviewModeBtn = styled.button`
-  cursor: pointer;
-  ${(props: Props) =>
-    props.isBattle &&
-    css`
-      border: 1px solid gray;
-      color: gray;
-    `}
 
-  ${(props: Props) =>
-    !props.isBattle &&
-    css`
-      border: none;
-      font-weight: 600;
-    `}
+const ModeBtn = styled.button`
+  width: 100px;
+  height: 25px;
+  line-height: 25px;
+  padding-left: 10px;
+  padding-right: 10px;
+  text-align: center;
+  cursor: pointer;
+  background-color: ${(props: Props) => (props.isBattle ? "#9dc0b8" : "white")};
+  color: ${(props: Props) => (props.isBattle ? "#3e4e4a" : "#607973")};
+  font-size: 14px;
+  border-radius: 5px;
+  border: none;
 `;
 
 type ContextType = {
@@ -104,25 +103,29 @@ export default function ReviewLayout() {
   return (
     <Wrapper>
       <ModeBtns>
-        <ReviewModeBtn
-          isBattle={isBattle}
+        <ModeBtn
+          isBattle={!isBattle}
           onClick={() => {
             setIsBattle(false);
             navigate("/vocabbook/review");
           }}
         >
+          {/* <Button btnType={isBattle ? "secondary" : "primary"}> */}
           Single Mode
-        </ReviewModeBtn>
-        <ReviewModeBtn
-          isBattle={!isBattle}
+          {/* </Button> */}
+        </ModeBtn>
+        <ModeBtn
+          isBattle={isBattle}
           onClick={() => {
             handleSetBattleRoom();
             setIsBattle(true);
             navigate(`/vocabbook/review/${userId + roomId}`);
           }}
         >
+          {/* <Button btnType={isBattle ? "primary" : "secondary"}> */}
           Battle Mode
-        </ReviewModeBtn>
+          {/* </Button> */}
+        </ModeBtn>
       </ModeBtns>
       <Outlet
         context={{ viewingBook, questionsNumber, isBattle, setIsBattle }}

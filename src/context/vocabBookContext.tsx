@@ -19,8 +19,7 @@ interface BooksInterface {
         audioLink: string;
         partOfSpeech: string;
         definition: string;
-        isCorrect?: boolean;
-        log?: Log[];
+        log: Log[];
         correctRate: number;
       }
     ];

@@ -62,7 +62,7 @@ export const ArticleWords = () => {
       });
     };
     getArticleContent();
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     const countArticleWords = content

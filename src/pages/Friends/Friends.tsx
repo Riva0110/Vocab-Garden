@@ -13,40 +13,31 @@ import {
 } from "firebase/firestore";
 import styled from "styled-components";
 import { db } from "../../firebase/firebase";
-import plant from "./plant.png";
-import plant2 from "./plant2.png";
-import plant3 from "./plant3.png";
+import plantRight from "./plant-right.png";
+import plantLeft from "./plant-left.png";
 import { Navigate } from "react-router-dom";
+import Button from "../../components/Button";
+import Alert from "../../components/Alert/Alert";
 
 const Wrapper = styled.div`
   display: flex;
   padding-top: 60px;
+  color: gray;
 `;
 
 const Img = styled.img`
-  position: absolute;
-  width: 50vw;
-  min-width: 400px;
-  max-width: 500px;
+  position: fixed;
+  width: 400px;
   right: 0px;
   bottom: 0px;
 `;
 
 const Img2 = styled.img`
-  position: absolute;
-  width: 400px;
-  left: 40px;
-  top: 0px;
+  position: fixed;
+  width: 550px;
+  left: 0px;
+  bottom: 0px;
 `;
-
-// const Img3 = styled.img`
-//   position: absolute;
-//   height: 100vh;
-//   min-width: 400px;
-//   max-width: 500px;
-//   right: 0px;
-//   bottom: 0px;
-// `;
 
 const FriendsWrapper = styled.div`
   display: flex;
@@ -54,7 +45,7 @@ const FriendsWrapper = styled.div`
   margin: 50px auto;
   padding: 10px;
   width: 500px;
-  height: 80vh;
+  height: 100%;
   z-index: 1;
   background-color: rgba(255, 255, 255, 0.7);
   @media screen and (max-width: 600px) {
@@ -64,23 +55,50 @@ const FriendsWrapper = styled.div`
 `;
 
 const Input = styled.input`
-  width: 80%;
-`;
-
-const FriendBtn = styled.button`
-  width: 200px;
-  height: 20px;
+  width: 70%;
+  height: 25px;
+  border: none;
+  &:focus {
+    outline: none;
+  }
 `;
 
 const Title = styled.div`
   margin-top: 50px;
   border-bottom: 1px solid gray;
+  color: #607973;
+  font-weight: 600;
+`;
+
+const FriendStateWrapper = styled.div`
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: ${(props: Props) => (props.stateColor === "online" ? "green" : "")};
+`;
+
+const FriendState = styled.div`
+  width: 10px;
+  height: 10px;
+  border-radius: 10px;
+  border: 1px solid
+    ${(props: Props) => (props.stateColor === "online" ? "green" : "gray")};
+  background-color: ${(props: Props) =>
+    props.stateColor === "online" ? "green" : "white"};
 `;
 
 const FriendRequest = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border: 1px solid gray;
+  border-radius: 10px;
+  padding: 20px;
+  background-color: white;
+`;
+
+const ReplyBtns = styled.div`
+  display: flex;
 `;
 
 const Email = styled.div``;
@@ -92,6 +110,12 @@ const Friend = styled.div`
   margin-top: 20px;
 `;
 
+interface Props {
+  stateColor: string;
+}
+
+type AddFunction = (msg: string) => void;
+
 export default function Friends() {
   const { isLogin, userId } = useContext(authContext);
   const [myEmail, setMyEmail] = useState<string>();
@@ -101,6 +125,7 @@ export default function Friends() {
   const [friendState, setFriendState] = useState<string[]>([]);
   const [awaitingFriendReply, setAwaitingFriendReply] = useState<string[]>();
   const emailInput = useRef<HTMLInputElement>(null);
+  const ref = useRef<null | AddFunction>(null);
 
   useEffect(() => {
     let unsub;
@@ -129,7 +154,6 @@ export default function Friends() {
               const querySnapshot = await getDocs(q);
               querySnapshot.forEach((friendDoc) => {
                 newFriendState = [...newFriendState, friendDoc.data().state];
-                console.log("newFriendState", newFriendState);
               });
               setFriendState(newFriendState);
             }
@@ -150,7 +174,6 @@ export default function Friends() {
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((friendDoc) => {
           newFriendState = [...newFriendState, friendDoc.data().state];
-          console.log("newFriendState", newFriendState);
         });
         setFriendState(newFriendState);
       }
@@ -162,17 +185,14 @@ export default function Friends() {
     const friendRef = collection(db, "users");
     const q = query(friendRef, where("email", "==", searchingEmail));
     const querySnapshot = await getDocs(q);
-    if (querySnapshot.empty) return alert("The user doesn't exist!");
+    if (querySnapshot.empty) return ref.current?.("The user doesn't exist!");
     if (awaitingFriendReply?.includes(searchingEmail))
-      return alert("You have already sent request to the user!");
+      return ref.current?.("Already sent!");
     querySnapshot.forEach((friendDoc) => {
       const updateFriendStatus = async () => {
         await updateDoc(doc(db, "users", friendDoc.id), {
           friendRequest: arrayUnion(myEmail),
         });
-        alert(
-          `You have sent friend request to ${searchingEmail} successfully!`
-        );
         await updateDoc(doc(db, "users", userId), {
           awaitingFriendReply: arrayUnion(searchingEmail),
         });
@@ -185,7 +205,7 @@ export default function Friends() {
     const friendRef = collection(db, "users");
     const q = query(friendRef, where("email", "==", friendEmail));
     const querySnapshot = await getDocs(q);
-    if (querySnapshot.empty) alert("The user doesn't exist!");
+    if (querySnapshot.empty) ref.current?.("The user doesn't exist!");
     querySnapshot.forEach((friendDoc) => {
       const updateFriendStatus = async () => {
         await updateDoc(doc(db, "users", friendDoc.id), {
@@ -205,7 +225,7 @@ export default function Friends() {
     const friendRef = collection(db, "users");
     const q = query(friendRef, where("email", "==", friendEmail));
     const querySnapshot = await getDocs(q);
-    if (querySnapshot.empty) alert("The user doesn't exist!");
+    if (querySnapshot.empty) ref.current?.("The user doesn't exist!");
     querySnapshot.forEach((friendDoc) => {
       const updateFriendStatus = async () => {
         await updateDoc(doc(db, "users", friendDoc.id), {
@@ -221,16 +241,21 @@ export default function Friends() {
 
   return isLogin ? (
     <Wrapper>
-      <Img src={plant} alt="plant" />
-      <Img2 src={plant2} alt="plant" />
+      <Alert
+        children={(add: AddFunction) => {
+          ref.current = add;
+        }}
+      />
+      <Img src={plantRight} alt="plant" />
+      <Img2 src={plantLeft} alt="plant" />
       <FriendsWrapper>
         <FriendRequest>
           <Input
             ref={emailInput}
-            placeholder="search by email..."
+            placeholder="search friends by email..."
             onChange={(e) => setSearchingEmail(e.target.value)}
           />
-          <FriendBtn
+          <div
             onClick={() => {
               if (
                 emailInput.current !== undefined &&
@@ -241,35 +266,48 @@ export default function Friends() {
               handleSendRequest();
             }}
           >
-            Send Request
-          </FriendBtn>
+            <Button btnType="primary">Send request</Button>
+          </div>
         </FriendRequest>
         <Title>Friend List</Title>
         {friendList?.map((friendEmail: string, index: number) => (
           <Friend>
             <Email key={friendEmail}>{friendEmail}</Email>
-            <div>{friendState[index]}</div>
+            <FriendStateWrapper stateColor={friendState[index]}>
+              {friendState[index]}
+              <FriendState stateColor={friendState[index]} />
+            </FriendStateWrapper>
           </Friend>
         ))}
 
         <Title>Friend Request</Title>
         {friendRequest?.map((friendEmail) => (
-          <FriendRequest>
+          <Friend>
             <Email key={friendEmail}>{friendEmail}</Email>
-            <div>
-              <FriendBtn onClick={() => handleAccept(friendEmail)}>
-                Accept
-              </FriendBtn>
-              <FriendBtn onClick={() => handleReject(friendEmail)}>
-                Reject
-              </FriendBtn>
-            </div>
-          </FriendRequest>
+            <ReplyBtns>
+              <div
+                onClick={() => {
+                  handleAccept(friendEmail);
+                }}
+              >
+                <Button btnType="primary">Accept</Button>
+              </div>
+              <div
+                onClick={() => {
+                  handleReject(friendEmail);
+                }}
+              >
+                <Button btnType="secondary">Reject</Button>
+              </div>
+            </ReplyBtns>
+          </Friend>
         ))}
         <Title>Awaiting Reply</Title>
-        {awaitingFriendReply?.map((friendEmail) => (
-          <Email key={friendEmail}>{friendEmail}</Email>
-        ))}
+        <Friend>
+          {awaitingFriendReply?.map((friendEmail) => (
+            <Email key={friendEmail}>{friendEmail}</Email>
+          ))}
+        </Friend>
       </FriendsWrapper>
     </Wrapper>
   ) : (

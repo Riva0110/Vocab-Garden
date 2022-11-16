@@ -5,11 +5,20 @@ import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { useEffect } from "react";
 import { authContext } from "../../context/authContext";
+import Button from "../../components/Button";
 
 const ArticlesWrapper = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
+`;
+
+const NoArticle = styled.div`
+  display: flex;
+  width: 100%;
+  height: 500px;
+  justify-content: center;
+  align-items: center;
 `;
 
 const ArticleTitle = styled.div`
@@ -23,17 +32,16 @@ const Time = styled.div`
 `;
 
 const Title = styled.div`
-  border-bottom: 1px solid gray;
+  border-bottom: 1px solid lightgray;
+  padding-bottom: 10px;
+  padding-top: 10px;
+  font-weight: 600;
 `;
 
 const Btns = styled.div`
   display: flex;
   gap: 10px;
   justify-content: flex-end;
-`;
-
-const Btn = styled.button`
-  width: 100px;
 `;
 
 interface ArticleListInterface {
@@ -72,35 +80,39 @@ export default function Articles() {
     <div className="App">
       <ArticlesWrapper>
         <Btns>
-          <Btn
+          {/* <div
             onClick={() => {
               navigate("/articles/words");
             }}
           >
-            Article Words
-          </Btn>
-          <Btn
+            <Button btnType="secondary">Article Words</Button>
+          </div> */}
+          <div
             onClick={() => {
               navigate("/articles/add");
             }}
           >
-            Add Article
-          </Btn>
+            <Button btnType="primary">Add Article</Button>
+          </div>
         </Btns>
-        {articleList?.map(({ time, title, id }, index) => {
-          const newDate = new Date(time.seconds * 1000);
-          return (
-            <ArticleTitle
-              key={index}
-              onClick={() => {
-                navigate(`/articles/${id}?title=${title}`);
-              }}
-            >
-              <Time>{newDate.toLocaleString()}</Time>
-              <Title>{title}</Title>
-            </ArticleTitle>
-          );
-        })}
+        {articleList.length > 0 ? (
+          articleList?.map(({ time, title, id }, index) => {
+            const newDate = new Date(time.seconds * 1000);
+            return (
+              <ArticleTitle
+                key={index}
+                onClick={() => {
+                  navigate(`/articles/${id}?title=${title}`);
+                }}
+              >
+                <Time>{newDate.toLocaleString()}</Time>
+                <Title>{title}</Title>
+              </ArticleTitle>
+            );
+          })
+        ) : (
+          <NoArticle>Add articles, and start reading TODAY!</NoArticle>
+        )}
       </ArticlesWrapper>
     </div>
   );

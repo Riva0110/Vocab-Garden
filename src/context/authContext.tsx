@@ -27,6 +27,8 @@ interface AuthInterface {
   setUserId: React.Dispatch<React.SetStateAction<string>>;
   isLogin: boolean;
   setIsLogin: React.Dispatch<React.SetStateAction<boolean>>;
+  isLoadingUserAuth: boolean;
+  setIsLoadingUserAuth: React.Dispatch<React.SetStateAction<boolean>>;
   logout(): void;
   login(email: string, password: string): void;
   signup(email: string, password: string, name: string): void;
@@ -37,6 +39,8 @@ export const authContext = createContext<AuthInterface>({
   setUserId: () => {},
   isLogin: false,
   setIsLogin: () => {},
+  isLoadingUserAuth: true,
+  setIsLoadingUserAuth: () => {},
   logout: () => {},
   login: () => {},
   signup: () => {},
@@ -45,6 +49,7 @@ export const authContext = createContext<AuthInterface>({
 export function AuthContextProvider({ children }: ContextProviderProps) {
   const [isLogin, setIsLogin] = useState(false);
   const [userId, setUserId] = useState("");
+  const [isLoadingUserAuth, setIsLoadingUserAuth] = useState(true);
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -54,6 +59,7 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
       } else {
         setIsLogin(false);
       }
+      setIsLoadingUserAuth(false);
     });
   }, [userId]);
 
@@ -145,6 +151,8 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
         signup,
         login,
         logout,
+        isLoadingUserAuth,
+        setIsLoadingUserAuth,
       }}
     >
       {children}
