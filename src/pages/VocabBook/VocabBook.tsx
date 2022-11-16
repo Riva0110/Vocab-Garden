@@ -45,6 +45,10 @@ const Nav = styled.nav`
 const VocabBookWrapper = styled.div`
   width: calc((100% - 30px) / 2);
   z-index: 1;
+  @media screen and (max-width: 600px) {
+    width: calc(100vw - 20px);
+    padding: 0 10px;
+  }
 `;
 
 const VocabBookAndCard = styled.div``;
@@ -97,6 +101,9 @@ const CardWrapper = styled.div`
   align-content: flex-start;
   overflow-y: scroll;
   height: calc(100vh - 232px);
+  @media screen and (max-width: 600px) {
+    /* height: auto; */
+  }
 `;
 
 const Card = styled.div`
@@ -114,12 +121,14 @@ const Card = styled.div`
   @media screen and (max-width: 1100px) {
     width: 100%;
   }
+  @media screen and (max-width: 600px) {
+    height: auto;
+  }
 `;
 
 const CardText = styled.div`
   text-align: start;
   font-weight: ${(props: Props) => (props.weight ? "600" : "")};
-  /* color: #607973; */
 `;
 
 const VocabHeader = styled.div`

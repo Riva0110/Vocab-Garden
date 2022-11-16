@@ -15,6 +15,9 @@ interface Props {
 const Wrapper = styled.div`
   padding: 80px 20px 20px 20px;
   display: flex;
+  @media screen and (max-width: 601px) {
+    flex-direction: column;
+  }
 `;
 
 const LoginWrapper = styled.div`
@@ -104,14 +107,18 @@ const UserInfoWrapper = styled.div`
   align-items: center;
   gap: 20px;
   width: 30vw;
+  @media screen and (max-width: 601px) {
+    width: calc(100% - 20px);
+    padding: 0 10px;
+  }
 `;
 
 const GrowingPlantImg = styled.img`
   width: 250px;
   height: 300px;
   @media screen and (max-width: 600px) {
-    width: 100px;
-    height: 120px;
+    width: 200px;
+    height: 240px;
   }
 `;
 
@@ -122,6 +129,9 @@ const Plants = styled.div`
   width: 65vw;
   gap: 20px;
   align-content: flex-start;
+  @media screen and (max-width: 601px) {
+    width: calc(100% - 20px);
+  }
 `;
 
 const PlantBorder = styled.div`
@@ -134,8 +144,8 @@ const PlantBorder = styled.div`
   height: 260px;
   padding: 30px;
   @media screen and (max-width: 600px) {
-    width: 100px;
-    height: 120px;
+    width: calc((100vw - 80px) / 2);
+    height: calc((100vw - 20px) / 2 * 1.3);
   }
 `;
 

@@ -32,6 +32,11 @@ const Img2 = styled.img`
 const OutletWrapper = styled.div`
   width: calc((100% - 30px) / 2);
   z-index: 1;
+  @media screen and (max-width: 601px) {
+    width: calc((100% - 20px));
+    margin: 0 auto;
+    padding: auto 10px;
+  }
 `;
 
 export default function ArticlesLayout() {
