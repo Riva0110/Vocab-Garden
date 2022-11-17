@@ -31,6 +31,14 @@ const LoginWrapper = styled.div`
   position: relative;
   z-index: 1;
   min-height: calc(100vh - 60px);
+  @media screen and (max-width: 601px) {
+    width: 100%;
+  }
+`;
+
+const LoginDiv = styled.div`
+  display: flex;
+  justify-content: center;
 `;
 
 const BackgroundImg = styled.div`
@@ -48,6 +56,7 @@ const WelcomeMsg = styled.div`
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 20px;
+  text-align: center;
 `;
 
 const Toggle = styled.div`
@@ -156,6 +165,10 @@ const Plants = styled.div`
   @media screen and (max-width: 801px) {
     width: 100%;
   }
+  @media screen and (max-width: 601px) {
+    width: 100%;
+    justify-content: center;
+  }
 `;
 
 const PlantBorder = styled.div`
@@ -170,6 +183,10 @@ const PlantBorder = styled.div`
   @media screen and (max-width: 801px) {
     width: calc((100vw - 100px) / 3);
     height: calc((100vw - 64px) / 3 * 1.3);
+  }
+  @media screen and (max-width: 601px) {
+    width: calc((100vw - 160px));
+    height: calc((100vw - 160px) * 1.3);
   }
 `;
 
@@ -431,9 +448,9 @@ export default function Profile() {
                 onChange={(e) => setPassword(e.target.value)}
               />
               <div>
-                <div onClick={() => login(email, password)}>
+                <LoginDiv onClick={() => login(email, password)}>
                   <Button btnType="primary">Log in</Button>
-                </div>
+                </LoginDiv>
                 <Toggle onClick={() => setIsMember(false)}>
                   not a member？
                 </Toggle>

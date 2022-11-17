@@ -16,6 +16,9 @@ const Wrapper = styled.button`
     props.btnType === BUTTON_TYPE.primary ? "white" : "#607973"};
   border: 1px solid #607973;
   cursor: pointer;
+  @media screen and (max-width: 601px) {
+    min-width: 0px;
+  }
 `;
 
 interface Props {

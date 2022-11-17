@@ -182,6 +182,9 @@ const Input = styled.input`
     outline: none;
   }
   margin-right: 20px;
+  @media screen and (max-width: 281px) {
+    width: 120px;
+  }
 `;
 
 const Notification = styled.div`

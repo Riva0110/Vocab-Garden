@@ -45,13 +45,13 @@ const FriendsWrapper = styled.div`
   display: flex;
   flex-direction: column;
   margin: 50px auto;
-  padding: 10px;
+  padding: 20px;
   min-width: 500px;
   height: 100%;
   z-index: 1;
   @media screen and (max-width: 601px) {
     width: 100%;
-    padding: 20px;
+    min-width: 0px;
   }
 `;
 
