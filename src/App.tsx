@@ -57,6 +57,7 @@ const InputWrapper = styled.div`
 
 const LogoImg = styled.img`
   height: 30px;
+  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.1);
 `;
 
 const Menu = styled.img`
@@ -69,7 +70,11 @@ const Menu = styled.img`
   }
 `;
 
-const BrandName = styled.div``;
+const BrandName = styled.div`
+  @media screen and (max-width: 441px) {
+    display: none;
+  }
+`;
 
 const HeaderNav = styled.div`
   display: flex;
@@ -172,12 +177,17 @@ const Notification = styled.div`
   border-radius: 10px;
   z-index: 1000;
   position: fixed;
-  top: 40px;
+  top: 45px;
   right: 300px;
-  background-color: white;
+  background-color: #607973;
+  color: white;
   text-align: center;
   padding: 0 10px 0 0;
   padding: 0 10px;
+  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+  @media screen and (max-width: 601px) {
+    right: 50px;
+  }
 `;
 
 const Invitation = styled.div``;

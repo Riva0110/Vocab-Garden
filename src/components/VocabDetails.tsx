@@ -49,7 +49,7 @@ const Wrapper = styled.div`
       css`
         opacity: 1;
         visibility: 1;
-        height: calc(100vh - 160px);
+        height: calc(100vh - 300px);
       `}
   }
 `;
@@ -109,6 +109,9 @@ const SavePopup = styled.div`
   display: ${(props: Props) => (props.isPopuping ? "block" : "none")};
   padding: 10px;
   box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+  @media screen and (max-width: 601px) {
+    top: 50px;
+  }
 `;
 
 const Select = styled.select`

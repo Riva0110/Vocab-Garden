@@ -1,6 +1,5 @@
 import styled from "styled-components";
 import banner from "./banner.png";
-import banner2 from "./banner2.jpg";
 import VocabDetails from "../../components/VocabDetails";
 
 const Wrapper = styled.div`
@@ -28,13 +27,6 @@ const BackgroundImg = styled.div`
   opacity: 0.6;
 `;
 
-const Banner = styled.img`
-  position: fixed;
-  left: 20px;
-  bottom: 100px;
-  height: 35%;
-`;
-
 const Title = styled.div`
   position: fixed;
   left: 10%;
@@ -42,6 +34,13 @@ const Title = styled.div`
   font-size: 30px;
   font-weight: 600;
   color: black;
+  @media screen and (max-width: 1201px) {
+    max-width: calc((100vw - 10% - 100px) / 2);
+  }
+  @media screen and (max-width: 601px) {
+    max-width: calc((100vw - 20%));
+    top: 20%;
+  }
 `;
 
 const Author = styled.span`
@@ -53,10 +52,9 @@ export default function Home() {
   return (
     <Wrapper>
       <BackgroundImg />
-      {/* <Banner src={banner2} alt="banner-plant"></Banner> */}
       <Title>
         The best way to predict the future
-        <br /> is to create it. <br />
+        {window.innerWidth > 601 && <br />} is to create it. <br />
         <Author>– Abraham Lincoln</Author>
       </Title>
       <BannerWrapper />
