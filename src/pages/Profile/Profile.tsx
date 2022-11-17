@@ -15,7 +15,7 @@ interface Props {
 const Wrapper = styled.div`
   padding: 80px 20px 20px 20px;
   display: flex;
-  @media screen and (max-width: 601px) {
+  @media screen and (max-width: 801px) {
     flex-direction: column;
   }
 `;
@@ -106,9 +106,21 @@ const UserInfoWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 20px;
-  width: 30vw;
-  @media screen and (max-width: 601px) {
-    width: calc(100% - 20px);
+  width: 30%;
+  @media screen and (max-width: 1269px) {
+    width: 40%;
+  }
+  @media screen and (max-width: 1108px) {
+    width: 35%;
+  }
+  @media screen and (max-width: 1025px) {
+    width: 50%;
+  }
+  @media screen and (max-width: 880px) {
+    width: 40%;
+  }
+  @media screen and (max-width: 801px) {
+    width: 100%;
     padding: 0 10px;
   }
 `;
@@ -116,7 +128,7 @@ const UserInfoWrapper = styled.div`
 const GrowingPlantImg = styled.img`
   width: 250px;
   height: 300px;
-  @media screen and (max-width: 600px) {
+  @media screen and (max-width: 801px) {
     width: 200px;
     height: 240px;
   }
@@ -126,11 +138,23 @@ const Plants = styled.div`
   display: flex;
   flex-wrap: wrap;
   margin-top: 30px;
-  width: 65vw;
+  width: 70%;
   gap: 20px;
   align-content: flex-start;
-  @media screen and (max-width: 601px) {
-    width: calc(100% - 20px);
+  @media screen and (max-width: 1269px) {
+    width: 60%;
+  }
+  @media screen and (max-width: 1108px) {
+    width: 65%;
+  }
+  @media screen and (max-width: 1025px) {
+    width: 50%;
+  }
+  @media screen and (max-width: 880px) {
+    width: 60%;
+  }
+  @media screen and (max-width: 801px) {
+    width: 100%;
   }
 `;
 
@@ -143,9 +167,9 @@ const PlantBorder = styled.div`
   width: 200px;
   height: 260px;
   padding: 30px;
-  @media screen and (max-width: 600px) {
-    width: calc((100vw - 80px) / 2);
-    height: calc((100vw - 20px) / 2 * 1.3);
+  @media screen and (max-width: 801px) {
+    width: calc((100vw - 100px) / 3);
+    height: calc((100vw - 64px) / 3 * 1.3);
   }
 `;
 
