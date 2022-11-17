@@ -44,6 +44,7 @@ const Img = styled.img`
   position: fixed;
   left: 100px;
   bottom: 0;
+  opacity: 0.4;
 `;
 
 const Header = styled.div`
@@ -67,6 +68,9 @@ const CompetitorCount = styled.div`
 const Div = styled.div`
   width: 200px;
   text-align: center;
+  @media screen and (max-width: 601px) {
+    width: 150px;
+  }
 `;
 
 const ScoreBar = styled.div`
@@ -76,6 +80,7 @@ const ScoreBar = styled.div`
   border: 1px solid gray;
   border-radius: 20px;
   margin-top: 10px;
+  z-index: 3;
   ${(props: Props) =>
     props.insideColor &&
     css`
@@ -83,9 +88,18 @@ const ScoreBar = styled.div`
       background-color: #95caca;
       width: ${(props: Props) =>
         props.score ? `${props.score * 40}px` : "0px"};
-      z-index: -1;
+      z-index: 2;
       margin-bottom: 20px;
     `}
+  @media screen and (max-width: 601px) {
+    width: 150px;
+    ${(props: Props) =>
+      props.insideColor &&
+      css`
+        width: ${(props: Props) =>
+          props.score ? `${props.score * 30}px` : "0px"};
+      `}
+  }
 `;
 
 const Main = styled.div`
@@ -100,14 +114,24 @@ const WaitingRoomWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   margin: 50px auto;
-  background-color: rgb(255, 255, 255, 0.7);
   width: 500px;
+  padding: 20px 0;
+  @media screen and (max-width: 601px) {
+    width: 100%;
+  }
+`;
+
+const Pin = styled.div`
+  text-align: center;
 `;
 
 const WaitingMessage = styled.div`
   font-size: 20px;
   font-weight: 600;
   margin-top: 20px;
+  @media screen and (max-width: 601px) {
+    font-size: 16px;
+  }
 `;
 
 const StartGame = styled.button`
@@ -116,15 +140,25 @@ const StartGame = styled.button`
 `;
 
 const VocabWrapper = styled.div`
+  position: relative;
+  z-index: 1;
   display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 20px;
   align-items: center;
-  margin: 50px auto;
+  margin: 0px auto;
+  background-color: rgb(255, 255, 255, 0.6);
+  padding: 30px;
+  border-radius: 30px;
 `;
 
 const Vocab = styled.div`
   font-weight: 600;
   font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
 `;
 
 const AudioImg = styled.img`
@@ -217,6 +251,9 @@ const Title = styled.div`
   color: #607973;
   font-weight: 600;
   width: 400px;
+  @media screen and (max-width: 601px) {
+    width: 100%;
+  }
 `;
 
 const InviteWrapper = styled.div`
@@ -226,6 +263,9 @@ const InviteWrapper = styled.div`
   align-items: center;
   justify-content: space-between;
   width: 400px;
+  @media screen and (max-width: 601px) {
+    width: 100%;
+  }
 `;
 
 const Email = styled.div`
@@ -625,7 +665,7 @@ export default function BattleReview() {
     return (
       <Main>
         <WaitingRoomWrapper>
-          PIN Code: {pin}
+          <Pin>PIN Code: {pin}</Pin>
           {isOwner ? (
             isCompetitorIn ? (
               <StartGame onClick={handleStartBattle}>Start</StartGame>
@@ -676,21 +716,22 @@ export default function BattleReview() {
     return (
       <Main>
         <VocabWrapper>
-          <Vocab>{correctVocab?.vocab}</Vocab>
-          <p>({correctVocab?.partOfSpeech})</p>
-          {correctVocab?.audioLink ? (
-            <AudioImg
-              src={audio}
-              alt="audio"
-              onClick={() =>
-                correctVocab?.audioLink &&
-                handlePlayAudio(correctVocab?.audioLink)
-              }
-            />
-          ) : (
-            ""
-          )}
+          <Vocab>
+            {correctVocab?.vocab}
+            {correctVocab?.audioLink && (
+              <AudioImg
+                src={audio}
+                alt="audio"
+                onClick={() =>
+                  correctVocab?.audioLink &&
+                  handlePlayAudio(correctVocab?.audioLink)
+                }
+              />
+            )}
+          </Vocab>
+          ({correctVocab?.partOfSpeech})
         </VocabWrapper>
+
         <Options>
           {currentOptions?.map(([clickedVocab, def], index) => (
             <Option
@@ -849,7 +890,10 @@ export default function BattleReview() {
         <Header>
           <OwnerCount>
             <div>
-              <p>Owner: {ownerName}</p>
+              <p>
+                Owner:
+                {window.innerWidth < 601 && <br />} {ownerName}
+              </p>
               O: {answerCount.owner.correct} X: {answerCount.owner.wrong} /
               Total: {questionsNumber}
             </div>
@@ -867,7 +911,11 @@ export default function BattleReview() {
           {isWaiting ? <></> : <p>{countDown} seconds left</p>}
           <CompetitorCount>
             <div>
-              <p>Competitor: {competitorName}</p>
+              <p>
+                Competitor:
+                {window.innerWidth < 601 && <br />}{" "}
+                {competitorName || (window.innerWidth < 601 && <br />)}
+              </p>
               O: {answerCount.competitor.correct} X:{" "}
               {answerCount.competitor.wrong} / Total: {questionsNumber}
             </div>

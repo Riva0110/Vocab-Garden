@@ -86,7 +86,7 @@ const BookInfoWrapper = styled.div`
   margin-bottom: 20px;
   justify-content: space-between;
   align-items: center;
-  @media screen and (max-width: 601px) {
+  @media screen and (max-width: 1031px) {
     flex-direction: column;
     gap: 20px;
   }

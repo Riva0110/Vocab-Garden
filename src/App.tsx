@@ -42,12 +42,28 @@ const Header = styled.div`
   left: 0px;
   height: 60px;
   width: 100vw;
-  z-index: 100;
+  z-index: 500;
   background-image: linear-gradient(
     to bottom,
     rgba(255, 255, 255, 0.5),
     transparent 95%
   );
+  @media screen and (max-width: 601px) {
+    z-index: 400;
+  }
+`;
+
+const MobileDarkBackground = styled.div`
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  height: 100vh;
+  width: 100vw;
+  z-index: 500;
+  background-color: rgb(0, 0, 0, 0.8);
+  @media screen and (max-width: 601px) {
+    display: ${(props: Props) => (props.showNav ? "flex" : "none")};
+  }
 `;
 
 const InputWrapper = styled.div`
@@ -92,6 +108,7 @@ const Nav = styled.div`
     position: fixed;
     right: 0px;
     top: 0;
+    z-index: 600;
   }
 `;
 
@@ -241,7 +258,7 @@ function App() {
 
   function renderNav() {
     return (
-      <Nav showNav={showNav} onClick={() => setShowNav(false)}>
+      <>
         <XDiv size={16} />
         <NavDiv length={"Article".length}>
           <NavLink to={isLogin ? "/articles" : "/profile"}>Article</NavLink>
@@ -255,13 +272,14 @@ function App() {
         <NavDiv length={"Profile".length}>
           <NavLink to={isLogin ? "/profile" : "/profile"}>Profile</NavLink>
         </NavDiv>
-      </Nav>
+      </>
     );
   }
 
   return (
     <Wrapper>
       <GlobalStyle />
+      <MobileDarkBackground showNav={showNav} />
       <Header>
         <HomeLink to="/">
           <LogoImg src={logo} alt="logo" />
@@ -291,9 +309,13 @@ function App() {
             )}
             <Menu src={menu} alt="menu" onClick={() => setShowNav(true)} />
           </InputWrapper>
-          {renderNav()}
+          <Nav>{renderNav()}</Nav>
         </HeaderNav>
       </Header>
+      <Nav showNav={showNav} onClick={() => setShowNav(false)}>
+        {" "}
+        {renderNav()}
+      </Nav>
       <Main>
         <Notification showInvitation={showInvitation}>
           {battleInvitation?.length !== 0 ? (
