@@ -46,7 +46,7 @@ const VocabBookWrapper = styled.div`
   width: calc((100% - 30px) / 2);
   z-index: 1;
   @media screen and (max-width: 600px) {
-    width: calc(100vw - 20px);
+    width: calc(100vw - 40px);
     padding: 0 10px;
   }
 `;
@@ -86,6 +86,10 @@ const BookInfoWrapper = styled.div`
   margin-bottom: 20px;
   justify-content: space-between;
   align-items: center;
+  @media screen and (max-width: 601px) {
+    flex-direction: column;
+    gap: 20px;
+  }
 `;
 
 const BookButtons = styled.div`
@@ -101,9 +105,6 @@ const CardWrapper = styled.div`
   align-content: flex-start;
   overflow-y: scroll;
   height: calc(100vh - 232px);
-  @media screen and (max-width: 600px) {
-    /* height: auto; */
-  }
 `;
 
 const Card = styled.div`
@@ -118,10 +119,10 @@ const Card = styled.div`
   overflow-y: scroll;
   padding: 10px;
   background-color: rgba(255, 255, 255, 0.7);
-  @media screen and (max-width: 1100px) {
+  @media screen and (max-width: 1101px) {
     width: 100%;
   }
-  @media screen and (max-width: 600px) {
+  @media screen and (max-width: 601px) {
     height: auto;
   }
 `;

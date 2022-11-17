@@ -241,8 +241,8 @@ function App() {
 
   function renderNav() {
     return (
-      <Nav showNav={showNav}>
-        <XDiv size={16} onClick={() => setShowNav(false)} />
+      <Nav showNav={showNav} onClick={() => setShowNav(false)}>
+        <XDiv size={16} />
         <NavDiv length={"Article".length}>
           <NavLink to={isLogin ? "/articles" : "/profile"}>Article</NavLink>
         </NavDiv>
