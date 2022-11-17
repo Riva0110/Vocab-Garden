@@ -61,9 +61,7 @@ const MobileDarkBackground = styled.div`
   width: 100vw;
   z-index: 500;
   background-color: rgb(0, 0, 0, 0.8);
-  @media screen and (max-width: 601px) {
-    display: ${(props: Props) => (props.showNav ? "flex" : "none")};
-  }
+  display: ${(props: Props) => (props.showNav ? "flex" : "none")};
 `;
 
 const InputWrapper = styled.div`
@@ -312,10 +310,13 @@ function App() {
           <Nav>{renderNav()}</Nav>
         </HeaderNav>
       </Header>
-      <Nav showNav={showNav} onClick={() => setShowNav(false)}>
-        {" "}
-        {renderNav()}
-      </Nav>
+      {window.innerWidth < 601 && (
+        <Nav showNav={showNav} onClick={() => setShowNav(false)}>
+          {" "}
+          {renderNav()}
+        </Nav>
+      )}
+
       <Main>
         <Notification showInvitation={showInvitation}>
           {battleInvitation?.length !== 0 ? (
