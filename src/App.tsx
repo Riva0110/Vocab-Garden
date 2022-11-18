@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import styled, { createGlobalStyle, css } from "styled-components";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { keywordContext } from "./context/keywordContext";
 import { authContext } from "./context/authContext";
 import logo from "./logoName.png";
@@ -225,11 +225,13 @@ interface BattleInvitation {
 function App() {
   const { setKeyword } = useContext(keywordContext);
   const { isLogin, userId, isLoadingUserAuth } = useContext(authContext);
+  const navigate = useNavigate();
   const [inputVocab, setInputVocab] = useState<string>();
   const [battleInvitation, setBattleInvitation] =
     useState<BattleInvitation[]>();
   const [showInvitation, setShowInvitation] = useState<boolean>(false);
   const [showNav, setShowNav] = useState<boolean>(false);
+  const pathName = window.location.pathname;
 
   useEffect(() => {
     let unsub;
@@ -299,6 +301,12 @@ function App() {
                   setKeyword(inputVocab);
                   const target = e.target as HTMLInputElement;
                   target.value = "";
+                  if (pathName === "/profile") {
+                    navigate("/");
+                  }
+                  if (pathName === "/friends") {
+                    navigate("/");
+                  }
                 }
               }}
             />

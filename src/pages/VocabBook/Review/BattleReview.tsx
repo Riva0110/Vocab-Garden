@@ -450,7 +450,6 @@ export default function BattleReview() {
               const querySnapshot = await getDocs(q);
               querySnapshot.forEach((friendDoc) => {
                 newFriendState = [...newFriendState, friendDoc.data().state];
-                console.log("newFriendState", newFriendState);
               });
               setFriendState(newFriendState);
             }

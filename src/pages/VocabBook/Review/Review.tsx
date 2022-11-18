@@ -57,9 +57,9 @@ const Header = styled.div`
 const Div = styled.div`
   display: flex;
   justify-content: center;
-  @media screen and (max-width: 601px) {
-    width: 150px;
-  }
+  /* @media screen and (max-width: 601px) { */
+  width: 150px;
+  /* } */
 `;
 
 const ScoreBar = styled.div`
@@ -70,6 +70,7 @@ const ScoreBar = styled.div`
   border-radius: 20px;
   margin-top: 10px;
   z-index: 3;
+  transform: translateX(-50%);
   ${(props: Props) =>
     props.insideColor &&
     css`

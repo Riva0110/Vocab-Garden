@@ -286,12 +286,42 @@ export default function VocabDetails() {
     }
   };
 
+  function check() {
+    const userAgentInfo = navigator.userAgent;
+    const Agents = [
+      "Android",
+      "iPhone",
+      "SymbianOS",
+      "Windows Phone",
+      "iPad",
+      "iPod",
+    ];
+    let flag = "desktop";
+    for (var v = 0; v < Agents.length; v++) {
+      if (userAgentInfo.indexOf(Agents[v]) > 0) {
+        flag = "mobile";
+        break;
+      }
+    }
+    return flag;
+  }
+
   function getSelectedText() {
+    if (check() === "mobile") return;
     if (window.getSelection) {
       const txt = window.getSelection()?.toString();
       if (typeof txt !== "undefined") setKeyword(txt);
     }
   }
+
+  useEffect(() => {
+    if (check() === "desktop") return;
+    const mobileSlection = document.addEventListener("selectionchange", () => {
+      const value = document.getSelection()?.toString();
+      if (value) setKeyword(value);
+    });
+    return mobileSlection;
+  }, [setKeyword]);
 
   useEffect(() => {
     async function fetchVocabDetails(resourceUrl: string) {

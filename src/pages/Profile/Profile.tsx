@@ -36,6 +36,11 @@ const LoginWrapper = styled.div`
   }
 `;
 
+const ErrorMsg = styled.div`
+  margin-bottom: 10px;
+  color: #c28e96;
+`;
+
 const LoginDiv = styled.div`
   display: flex;
   justify-content: center;
@@ -214,6 +219,7 @@ interface PlantsListInterface {
 
 export default function Profile() {
   const { isLogin, login, logout, signup, userId } = useContext(authContext);
+  const [errorMsg, setErrorMsg] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -448,8 +454,17 @@ export default function Profile() {
                 placeholder="password"
                 onChange={(e) => setPassword(e.target.value)}
               />
+              <ErrorMsg>{errorMsg}</ErrorMsg>
               <div>
-                <LoginDiv onClick={() => login(email, password)}>
+                <LoginDiv
+                  onClick={async () => {
+                    const loginStatus = await login(email, password);
+                    if (typeof loginStatus === "string") {
+                      const loginErrorMsg = loginStatus.slice(9) as string;
+                      setErrorMsg(loginErrorMsg);
+                    }
+                  }}
+                >
                   <Button btnType="primary">Log in</Button>
                 </LoginDiv>
                 <Toggle onClick={() => setIsMember(false)}>
@@ -475,7 +490,20 @@ export default function Profile() {
                 placeholder="password"
                 onChange={(e) => setPassword(e.target.value)}
               />
-              <div onClick={() => signup(email, password, name)}>
+              <ErrorMsg>{errorMsg}</ErrorMsg>
+              <div
+                onClick={async () => {
+                  if (name === "") {
+                    setErrorMsg("Please fill in your name.");
+                    return;
+                  }
+                  const signupStatus = await signup(email, password, name);
+                  if (typeof signupStatus === "string") {
+                    const signupErrorMsg = signupStatus.slice(9) as string;
+                    setErrorMsg(signupErrorMsg);
+                  }
+                }}
+              >
                 <Button btnType="primary">Signup</Button>
               </div>
               <Toggle onClick={() => setIsMember(true)}>
