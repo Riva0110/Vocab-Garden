@@ -13,10 +13,10 @@ import {
 } from "firebase/firestore";
 import styled from "styled-components";
 import { db } from "../../firebase/firebase";
-import plantRight from "./plant-right.png";
-import plantLeft from "./plant-left.png";
+import plantRight from "./plant-right.webp";
+import plantLeft from "./plant-left.webp";
 import { Navigate } from "react-router-dom";
-import Button from "../../components/Button";
+import Button from "../../components/Button/Button";
 import Alert from "../../components/Alert/Alert";
 
 const Wrapper = styled.div`

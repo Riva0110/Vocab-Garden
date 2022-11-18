@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import banner from "./banner.png";
+import banner from "./banner.webp";
 import VocabDetails from "../../components/VocabDetails";
 
 const Wrapper = styled.div`

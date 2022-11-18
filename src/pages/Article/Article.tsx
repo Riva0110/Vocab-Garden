@@ -14,7 +14,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import QuillEditor from "./Editor/QuillEditor";
-import Button from "../../components/Button";
+import Button from "../../components/Button/Button";
 import Alert from "../../components/Alert/Alert";
 
 const Wrapper = styled.div`

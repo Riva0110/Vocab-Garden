@@ -5,7 +5,7 @@ import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { useEffect } from "react";
 import { authContext } from "../../context/authContext";
-import Button from "../../components/Button";
+import Button from "../../components/Button/Button";
 
 const ArticlesWrapper = styled.div`
   display: flex;

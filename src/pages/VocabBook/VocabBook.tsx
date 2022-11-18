@@ -17,9 +17,9 @@ import audio from "../../components/audio.png";
 import saved from "../../components/saved.png";
 import VocabDetails from "../../components/VocabDetails";
 import { useViewingBook } from "./VocabBookLayout";
-import plant from "./plant.png";
+import plant from "./plant.webp";
 import deleteBtn from "./delete.png";
-import Button from "../../components/Button";
+import Button from "../../components/Button/Button";
 import Alert from "../../components/Alert/Alert";
 
 const Wrapper = styled.div`

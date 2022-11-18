@@ -1,8 +1,8 @@
 import styled from "styled-components";
 import VocabDetails from "../../components/VocabDetails";
 import { Outlet, Navigate } from "react-router-dom";
-import plant from "./plant.png";
-import plant2 from "./plant2.png";
+import plant from "./plant.webp";
+import plant2 from "./plant2.webp";
 import { useContext } from "react";
 import { authContext } from "../../context/authContext";
 

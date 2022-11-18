@@ -17,8 +17,8 @@ import {
 } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
 import { useParams } from "react-router-dom";
-import plant from "./battlePlant.png";
-import Button from "../../../components/Button";
+import plant from "./battlePlant.webp";
+import Button from "../../../components/Button/Button";
 import Alert from "../../../components/Alert/Alert";
 
 interface Props {

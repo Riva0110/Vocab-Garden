@@ -17,7 +17,7 @@ import save from "./save.png";
 import saved from "./saved.png";
 import spinner from "./spinner.gif";
 import Alert from "./Alert/Alert";
-import Button from "./Button";
+import Button from "./Button/Button";
 import { X } from "react-feather";
 
 interface Props {

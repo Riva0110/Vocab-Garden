@@ -4,8 +4,8 @@ import { useContext, useState, useEffect } from "react";
 import { arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { plantImgsObj } from "./plantImgs";
-import Button from "../../components/Button";
-import plant from "./loginBackground.png";
+import Button from "../../components/Button/Button";
+import plant from "./banner.webp";
 
 interface Props {
   insideColor?: boolean;
@@ -81,6 +81,7 @@ const Select = styled.select`
   &:focus {
     outline: none;
   }
+  cursor: pointer;
 `;
 
 const ScoreBarWrapper = styled.div`

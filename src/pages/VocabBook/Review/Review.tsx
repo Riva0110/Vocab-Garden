@@ -7,8 +7,8 @@ import audio from "../../../components/audio.png";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
-import plant from "./reviewPlant.png";
-import Button from "../../../components/Button";
+import plant from "./reviewPlant.webp";
+import Button from "../../../components/Button/Button";
 
 interface Props {
   correct?: boolean;

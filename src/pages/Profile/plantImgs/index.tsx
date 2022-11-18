@@ -1,38 +1,38 @@
-const plantBegonia_1_ = require("./plant1-1-.png");
-const plantBegonia_1 = require("./plant1-1.png");
-const plantBegonia_3_ = require("./plant1-3-.png");
-const plantBegonia_3 = require("./plant1-3.png");
-const plantBegonia_5 = require("./plant1-5.png");
+const plantBegonia_1_ = require("./plant1-1-.webp");
+const plantBegonia_1 = require("./plant1-1.webp");
+const plantBegonia_3_ = require("./plant1-3-.webp");
+const plantBegonia_3 = require("./plant1-3.webp");
+const plantBegonia_5 = require("./plant1-5.webp");
 
-const plantMirrorGrass_1_ = require("./plant2-1-.png");
-const plantMirrorGrass_1 = require("./plant2-1.png");
-const plantMirrorGrass_3_ = require("./plant2-3-.png");
-const plantMirrorGrass_3 = require("./plant2-3.png");
-const plantMirrorGrass_5 = require("./plant2-5.png");
+const plantMirrorGrass_1_ = require("./plant2-1-.webp");
+const plantMirrorGrass_1 = require("./plant2-1.webp");
+const plantMirrorGrass_3_ = require("./plant2-3-.webp");
+const plantMirrorGrass_3 = require("./plant2-3.webp");
+const plantMirrorGrass_5 = require("./plant2-5.webp");
 
-const plantTravelerBanana_1_ = require("./plant3-1-.png");
-const plantTravelerBanana_1 = require("./plant3-1.png");
-const plantTravelerBanana_3_ = require("./plant3-3-.png");
-const plantTravelerBanana_3 = require("./plant3-3.png");
-const plantTravelerBanana_5 = require("./plant3-5.png");
+const plantTravelerBanana_1_ = require("./plant3-1-.webp");
+const plantTravelerBanana_1 = require("./plant3-1.webp");
+const plantTravelerBanana_3_ = require("./plant3-3-.webp");
+const plantTravelerBanana_3 = require("./plant3-3.webp");
+const plantTravelerBanana_5 = require("./plant3-5.webp");
 
-const plantPhilodendron_1_ = require("./plant4-1-.png");
-const plantPhilodendron_1 = require("./plant4-1.png");
-const plantPhilodendron_3_ = require("./plant4-3-.png");
-const plantPhilodendron_3 = require("./plant4-3.png");
-const plantPhilodendron_5 = require("./plant4-5.png");
+const plantPhilodendron_1_ = require("./plant4-1-.webp");
+const plantPhilodendron_1 = require("./plant4-1.webp");
+const plantPhilodendron_3_ = require("./plant4-3-.webp");
+const plantPhilodendron_3 = require("./plant4-3.webp");
+const plantPhilodendron_5 = require("./plant4-5.webp");
 
-const plantCeriman_1_ = require("./plant5-1-.png");
-const plantCeriman_1 = require("./plant5-1.png");
-const plantCeriman_3_ = require("./plant5-3-.png");
-const plantCeriman_3 = require("./plant5-3.png");
-const plantCeriman_5 = require("./plant5-5.png");
+const plantCeriman_1_ = require("./plant5-1-.webp");
+const plantCeriman_1 = require("./plant5-1.webp");
+const plantCeriman_3_ = require("./plant5-3-.webp");
+const plantCeriman_3 = require("./plant5-3.webp");
+const plantCeriman_5 = require("./plant5-5.webp");
 
-const plantBirdOfParadise_1_ = require("./plant6-1-.png");
-const plantBirdOfParadise_1 = require("./plant6-1.png");
-const plantBirdOfParadise_3_ = require("./plant6-3-.png");
-const plantBirdOfParadise_3 = require("./plant6-3.png");
-const plantBirdOfParadise_5 = require("./plant6-5.png");
+const plantBirdOfParadise_1_ = require("./plant6-1-.webp");
+const plantBirdOfParadise_1 = require("./plant6-1.webp");
+const plantBirdOfParadise_3_ = require("./plant6-3-.webp");
+const plantBirdOfParadise_3 = require("./plant6-3.webp");
+const plantBirdOfParadise_5 = require("./plant6-5.webp");
 
 type ImgInterface = Record<string, string>;
 
