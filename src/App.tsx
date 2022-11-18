@@ -1,4 +1,5 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
+import { useOnClickOutside } from "./components/useOnClickOutside";
 import styled, { createGlobalStyle, css } from "styled-components";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { keywordContext } from "./context/keywordContext";
@@ -239,6 +240,8 @@ function App() {
   const [showInvitation, setShowInvitation] = useState<boolean>(false);
   const [showNav, setShowNav] = useState<boolean>(false);
   const pathName = window.location.pathname;
+  const notificationRef = useRef(null);
+  useOnClickOutside(notificationRef, () => setShowInvitation(false));
 
   useEffect(() => {
     let unsub;
@@ -336,7 +339,7 @@ function App() {
       )}
 
       <Main>
-        <Notification showInvitation={showInvitation}>
+        <Notification showInvitation={showInvitation} ref={notificationRef}>
           {battleInvitation?.length !== 0 ? (
             battleInvitation?.map(({ ownerName, pin }: BattleInvitation) => (
               <Invitation>

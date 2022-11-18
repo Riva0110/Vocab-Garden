@@ -30,7 +30,10 @@ const Img = styled.img`
   width: 400px;
   right: 0px;
   bottom: 0px;
-  opacity: 0.2;
+  opacity: 0.4;
+  @media screen and (max-width: 801px) {
+    opacity: 0.2;
+  }
 `;
 
 const Img2 = styled.img`
@@ -38,7 +41,10 @@ const Img2 = styled.img`
   width: 550px;
   left: 0px;
   bottom: 0px;
-  opacity: 0.2;
+  opacity: 0.4;
+  @media screen and (max-width: 801px) {
+    opacity: 0.2;
+  }
 `;
 
 const FriendsWrapper = styled.div`

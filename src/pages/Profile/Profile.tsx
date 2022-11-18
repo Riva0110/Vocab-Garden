@@ -354,7 +354,10 @@ export default function Profile() {
           ...prev,
           {
             plantName: currentPlant,
-            time: new Date(),
+            time: {
+              seconds: new Date().getSeconds,
+              nanoseconds: new Date().getSeconds,
+            },
           },
         ] as PlantsListInterface[]
     );

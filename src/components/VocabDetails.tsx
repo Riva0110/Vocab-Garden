@@ -1,4 +1,5 @@
 import { useEffect, useState, useContext, useRef } from "react";
+import { useOnClickOutside } from "./useOnClickOutside";
 import styled, { css } from "styled-components";
 import { keywordContext } from "../context/keywordContext";
 import { authContext } from "../context/authContext";
@@ -216,11 +217,29 @@ export default function VocabDetails() {
     useState<string>("unsorted");
   const [isLoading, setIsLoading] = useState(true);
   const [isPopuping, setIsPopuping] = useState(false);
-  const popup = useRef<HTMLDivElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
   const resourceUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${keyword}`;
   const ref = useRef<null | AddFunction>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [showVocabInMobile, setShowVocabInMobile] = useState(false);
+  useOnClickOutside(popupRef, () => setIsPopuping(false));
+
+  // function useOnClickOutside(ref: RefObject<HTMLDivElement>, handler: any) {
+  //   useEffect(() => {
+  //     const listener = (event: any) => {
+  //       if (!ref.current || ref.current.contains(event.target)) {
+  //         return;
+  //       }
+  //       handler(event);
+  //     };
+  //     document.addEventListener("mousedown", listener);
+  //     document.addEventListener("touchstart", listener);
+  //     return () => {
+  //       document.removeEventListener("mousedown", listener);
+  //       document.removeEventListener("touchstart", listener);
+  //     };
+  //   }, [ref, handler]);
+  // }
 
   const handlePlayAudio = () => {
     const audio = new Audio(vocabDetails?.phonetics?.[0].audio);
@@ -338,13 +357,13 @@ export default function VocabDetails() {
 
   // const handleClickElement = useCallback(
   //   (e: any) => {
-  //     if (isPopuping && popup.current && !popup.current.contains(e.target)) {
+  //     if (isPopuping && popupRef.current && !popupRef.current.contains(e.target)) {
   //       console.log(2);
   //       setIsPopuping(false);
   //       console.log({ isPopuping });
   //     }
 
-  //     console.log(popup?.current?.contains(e.target));
+  //     console.log(popupRef?.current?.contains(e.target));
   //   },
   //   [isPopuping]
   // );
@@ -397,7 +416,7 @@ export default function VocabDetails() {
                 isSaved ? handleDeleteVocabFromBook() : setIsPopuping(true)
               }
             />
-            <SavePopup isPopuping={isPopuping} ref={popup}>
+            <SavePopup isPopuping={isPopuping} ref={popupRef}>
               <label>Save to Book:</label>
               <Select
                 value={selectedvocabBook}
