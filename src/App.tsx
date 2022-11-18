@@ -95,8 +95,15 @@ const HeaderNav = styled.div`
   margin-right: 20px;
 `;
 
-const Nav = styled.div`
+const DesktopNav = styled.div`
   display: flex;
+  @media screen and (max-width: 601px) {
+    display: none;
+  }
+`;
+
+const MobileNav = styled.div`
+  display: none;
   @media screen and (max-width: 601px) {
     display: ${(props: Props) => (props.showNav ? "flex" : "none")};
     flex-direction: column;
@@ -318,14 +325,14 @@ function App() {
             )}
             <Menu src={menu} alt="menu" onClick={() => setShowNav(true)} />
           </InputWrapper>
-          <Nav>{renderNav()}</Nav>
+          <DesktopNav>{renderNav()}</DesktopNav>
         </HeaderNav>
       </Header>
       {window.innerWidth < 601 && (
-        <Nav showNav={showNav} onClick={() => setShowNav(false)}>
+        <MobileNav showNav={showNav} onClick={() => setShowNav(false)}>
           {" "}
           {renderNav()}
-        </Nav>
+        </MobileNav>
       )}
 
       <Main>

@@ -123,7 +123,7 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
       await setDoc(doc(db, "plantsList", user.uid), {
         plants: [],
       });
-      return "Sign up successfully!";
+      // return "Sign up successfully!";
     } catch (error) {
       if (error instanceof Error) return error["message"];
     }
@@ -139,7 +139,7 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
         });
       };
       updateState();
-      return "Log in successfully!";
+      // return "Log in successfully!";
     } catch (error) {
       if (error instanceof Error) return error["message"];
     }
