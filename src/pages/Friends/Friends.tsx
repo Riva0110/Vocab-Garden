@@ -13,10 +13,10 @@ import {
 } from "firebase/firestore";
 import styled from "styled-components";
 import { db } from "../../firebase/firebase";
-import plantRight from "./plant-right.png";
-import plantLeft from "./plant-left.png";
+import plantRight from "./plant-right.webp";
+import plantLeft from "./plant-left.webp";
 import { Navigate } from "react-router-dom";
-import Button from "../../components/Button";
+import Button from "../../components/Button/Button";
 import Alert from "../../components/Alert/Alert";
 
 const Wrapper = styled.div`
@@ -30,6 +30,10 @@ const Img = styled.img`
   width: 400px;
   right: 0px;
   bottom: 0px;
+  opacity: 0.4;
+  @media screen and (max-width: 801px) {
+    opacity: 0.2;
+  }
 `;
 
 const Img2 = styled.img`
@@ -37,20 +41,23 @@ const Img2 = styled.img`
   width: 550px;
   left: 0px;
   bottom: 0px;
+  opacity: 0.4;
+  @media screen and (max-width: 801px) {
+    opacity: 0.2;
+  }
 `;
 
 const FriendsWrapper = styled.div`
   display: flex;
   flex-direction: column;
   margin: 50px auto;
-  padding: 10px;
-  width: 500px;
+  padding: 20px;
+  min-width: 500px;
   height: 100%;
   z-index: 1;
-  background-color: rgba(255, 255, 255, 0.7);
-  @media screen and (max-width: 600px) {
+  @media screen and (max-width: 601px) {
     width: 100%;
-    margin: 50px 10px;
+    min-width: 0px;
   }
 `;
 
@@ -108,6 +115,10 @@ const Friend = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-top: 20px;
+`;
+
+const Empty = styled.div`
+  width: 20px;
 `;
 
 interface Props {
@@ -303,11 +314,12 @@ export default function Friends() {
           </Friend>
         ))}
         <Title>Awaiting Reply</Title>
-        <Friend>
-          {awaitingFriendReply?.map((friendEmail) => (
+        {awaitingFriendReply?.map((friendEmail) => (
+          <Friend>
             <Email key={friendEmail}>{friendEmail}</Email>
-          ))}
-        </Friend>
+            <Empty />
+          </Friend>
+        ))}
       </FriendsWrapper>
     </Wrapper>
   ) : (

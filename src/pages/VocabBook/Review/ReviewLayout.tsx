@@ -7,7 +7,6 @@ import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
-import Button from "../../../components/Button";
 
 interface Props {
   correct?: boolean;
@@ -29,6 +28,8 @@ const Wrapper = styled.div`
 const ModeBtns = styled.div`
   display: flex;
   gap: 20px;
+  position: relative;
+  z-index: 100;
 `;
 
 const ModeBtn = styled.button`
@@ -39,7 +40,8 @@ const ModeBtn = styled.button`
   padding-right: 10px;
   text-align: center;
   cursor: pointer;
-  background-color: ${(props: Props) => (props.isBattle ? "#9dc0b8" : "white")};
+  background-color: ${(props: Props) =>
+    props.isBattle ? "#9dc0b8" : "rgb(255, 255, 255, 0.3)"};
   color: ${(props: Props) => (props.isBattle ? "#3e4e4a" : "#607973")};
   font-size: 14px;
   border-radius: 5px;
@@ -110,9 +112,7 @@ export default function ReviewLayout() {
             navigate("/vocabbook/review");
           }}
         >
-          {/* <Button btnType={isBattle ? "secondary" : "primary"}> */}
           Single Mode
-          {/* </Button> */}
         </ModeBtn>
         <ModeBtn
           isBattle={isBattle}
@@ -122,9 +122,7 @@ export default function ReviewLayout() {
             navigate(`/vocabbook/review/${userId + roomId}`);
           }}
         >
-          {/* <Button btnType={isBattle ? "primary" : "secondary"}> */}
           Battle Mode
-          {/* </Button> */}
         </ModeBtn>
       </ModeBtns>
       <Outlet

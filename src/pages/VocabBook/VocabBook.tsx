@@ -17,9 +17,9 @@ import audio from "../../components/audio.png";
 import saved from "../../components/saved.png";
 import VocabDetails from "../../components/VocabDetails";
 import { useViewingBook } from "./VocabBookLayout";
-import plant from "./plant.png";
+import plant from "./plant.webp";
 import deleteBtn from "./delete.png";
-import Button from "../../components/Button";
+import Button from "../../components/Button/Button";
 import Alert from "../../components/Alert/Alert";
 
 const Wrapper = styled.div`
@@ -45,6 +45,10 @@ const Nav = styled.nav`
 const VocabBookWrapper = styled.div`
   width: calc((100% - 30px) / 2);
   z-index: 1;
+  @media screen and (max-width: 600px) {
+    width: calc(100vw - 40px);
+    padding: 0 10px;
+  }
 `;
 
 const VocabBookAndCard = styled.div``;
@@ -82,6 +86,10 @@ const BookInfoWrapper = styled.div`
   margin-bottom: 20px;
   justify-content: space-between;
   align-items: center;
+  @media screen and (max-width: 1031px) {
+    flex-direction: column;
+    gap: 20px;
+  }
 `;
 
 const BookButtons = styled.div`
@@ -111,15 +119,17 @@ const Card = styled.div`
   overflow-y: scroll;
   padding: 10px;
   background-color: rgba(255, 255, 255, 0.7);
-  @media screen and (max-width: 1100px) {
+  @media screen and (max-width: 1101px) {
     width: 100%;
+  }
+  @media screen and (max-width: 601px) {
+    height: auto;
   }
 `;
 
 const CardText = styled.div`
   text-align: start;
   font-weight: ${(props: Props) => (props.weight ? "600" : "")};
-  /* color: #607973; */
 `;
 
 const VocabHeader = styled.div`

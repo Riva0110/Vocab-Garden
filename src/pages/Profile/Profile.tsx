@@ -4,8 +4,8 @@ import { useContext, useState, useEffect } from "react";
 import { arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { plantImgsObj } from "./plantImgs";
-import Button from "../../components/Button";
-import plant from "./loginBackground.png";
+import Button from "../../components/Button/Button";
+import plant from "./banner.webp";
 
 interface Props {
   insideColor?: boolean;
@@ -15,6 +15,9 @@ interface Props {
 const Wrapper = styled.div`
   padding: 80px 20px 20px 20px;
   display: flex;
+  @media screen and (max-width: 801px) {
+    flex-direction: column;
+  }
 `;
 
 const LoginWrapper = styled.div`
@@ -27,7 +30,20 @@ const LoginWrapper = styled.div`
   padding: 20px;
   position: relative;
   z-index: 1;
-  height: calc(100vh - 60px);
+  min-height: calc(100vh - 60px);
+  @media screen and (max-width: 601px) {
+    width: 100%;
+  }
+`;
+
+const ErrorMsg = styled.div`
+  margin-bottom: 10px;
+  color: #c28e96;
+`;
+
+const LoginDiv = styled.div`
+  display: flex;
+  justify-content: center;
 `;
 
 const BackgroundImg = styled.div`
@@ -45,6 +61,7 @@ const WelcomeMsg = styled.div`
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 20px;
+  text-align: center;
 `;
 
 const Toggle = styled.div`
@@ -69,6 +86,7 @@ const Select = styled.select`
   &:focus {
     outline: none;
   }
+  cursor: pointer;
 `;
 
 const ScoreBarWrapper = styled.div`
@@ -103,15 +121,31 @@ const UserInfoWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 20px;
-  width: 30vw;
+  width: 30%;
+  @media screen and (max-width: 1269px) {
+    width: 40%;
+  }
+  @media screen and (max-width: 1108px) {
+    width: 35%;
+  }
+  @media screen and (max-width: 1025px) {
+    width: 50%;
+  }
+  @media screen and (max-width: 880px) {
+    width: 40%;
+  }
+  @media screen and (max-width: 801px) {
+    width: 100%;
+    padding: 0 10px;
+  }
 `;
 
 const GrowingPlantImg = styled.img`
   width: 250px;
   height: 300px;
-  @media screen and (max-width: 600px) {
-    width: 100px;
-    height: 120px;
+  @media screen and (max-width: 801px) {
+    width: 200px;
+    height: 240px;
   }
 `;
 
@@ -119,9 +153,28 @@ const Plants = styled.div`
   display: flex;
   flex-wrap: wrap;
   margin-top: 30px;
-  width: 65vw;
+  width: 70%;
   gap: 20px;
   align-content: flex-start;
+  @media screen and (max-width: 1269px) {
+    width: 60%;
+  }
+  @media screen and (max-width: 1108px) {
+    width: 65%;
+  }
+  @media screen and (max-width: 1025px) {
+    width: 50%;
+  }
+  @media screen and (max-width: 880px) {
+    width: 60%;
+  }
+  @media screen and (max-width: 801px) {
+    width: 100%;
+  }
+  @media screen and (max-width: 601px) {
+    width: 100%;
+    justify-content: center;
+  }
 `;
 
 const PlantBorder = styled.div`
@@ -133,9 +186,13 @@ const PlantBorder = styled.div`
   width: 200px;
   height: 260px;
   padding: 30px;
-  @media screen and (max-width: 600px) {
-    width: 100px;
-    height: 120px;
+  @media screen and (max-width: 801px) {
+    width: calc((100vw - 100px) / 3);
+    height: calc((100vw - 64px) / 3 * 1.3);
+  }
+  @media screen and (max-width: 601px) {
+    width: calc((100vw - 160px));
+    height: calc((100vw - 160px) * 1.3);
   }
 `;
 
@@ -162,6 +219,7 @@ interface PlantsListInterface {
 
 export default function Profile() {
   const { isLogin, login, logout, signup, userId } = useContext(authContext);
+  const [errorMsg, setErrorMsg] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -296,7 +354,10 @@ export default function Profile() {
           ...prev,
           {
             plantName: currentPlant,
-            time: new Date(),
+            time: {
+              seconds: new Date().getSeconds,
+              nanoseconds: new Date().getSeconds,
+            },
           },
         ] as PlantsListInterface[]
     );
@@ -396,10 +457,19 @@ export default function Profile() {
                 placeholder="password"
                 onChange={(e) => setPassword(e.target.value)}
               />
+              <ErrorMsg>{errorMsg}</ErrorMsg>
               <div>
-                <div onClick={() => login(email, password)}>
+                <LoginDiv
+                  onClick={async () => {
+                    const loginStatus = await login(email, password);
+                    if (typeof loginStatus === "string") {
+                      const loginErrorMsg = loginStatus.slice(9) as string;
+                      setErrorMsg(loginErrorMsg);
+                    }
+                  }}
+                >
                   <Button btnType="primary">Log in</Button>
-                </div>
+                </LoginDiv>
                 <Toggle onClick={() => setIsMember(false)}>
                   not a member？
                 </Toggle>
@@ -423,7 +493,20 @@ export default function Profile() {
                 placeholder="password"
                 onChange={(e) => setPassword(e.target.value)}
               />
-              <div onClick={() => signup(email, password, name)}>
+              <ErrorMsg>{errorMsg}</ErrorMsg>
+              <div
+                onClick={async () => {
+                  if (name === "") {
+                    setErrorMsg("Please fill in your name.");
+                    return;
+                  }
+                  const signupStatus = await signup(email, password, name);
+                  if (typeof signupStatus === "string") {
+                    const signupErrorMsg = signupStatus.slice(9) as string;
+                    setErrorMsg(signupErrorMsg);
+                  }
+                }}
+              >
                 <Button btnType="primary">Signup</Button>
               </div>
               <Toggle onClick={() => setIsMember(true)}>

@@ -1,6 +1,7 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
+import { useOnClickOutside } from "./components/useOnClickOutside";
 import styled, { createGlobalStyle, css } from "styled-components";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { keywordContext } from "./context/keywordContext";
 import { authContext } from "./context/authContext";
 import logo from "./logoName.png";
@@ -8,6 +9,8 @@ import { arrayRemove, doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { db } from "./firebase/firebase";
 import bell from "./notification.png";
 import yellowBell from "./notification-yellow.png";
+import menu from "./menu.png";
+import { X } from "react-feather";
 
 const GlobalStyle = createGlobalStyle`
   * {
@@ -40,23 +43,90 @@ const Header = styled.div`
   left: 0px;
   height: 60px;
   width: 100vw;
-  z-index: 100;
+  z-index: 500;
   background-image: linear-gradient(
     to bottom,
     rgba(255, 255, 255, 0.5),
     transparent 95%
   );
+  @media screen and (max-width: 601px) {
+    z-index: 400;
+  }
+`;
+
+const MobileDarkBackground = styled.div`
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  height: 100vh;
+  width: 100vw;
+  z-index: 500;
+  background-color: rgb(0, 0, 0, 0.8);
+  display: ${(props: Props) => (props.showNav ? "flex" : "none")};
+`;
+
+const InputWrapper = styled.div`
+  display: flex;
+  justify-content: center;
 `;
 
 const LogoImg = styled.img`
   height: 30px;
+  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.1);
 `;
 
-const BrandName = styled.div``;
+const Menu = styled.img`
+  height: 30px;
+  display: none;
+  cursor: pointer;
+  @media screen and (max-width: 601px) {
+    display: flex;
+    margin-left: 10px;
+  }
+`;
+
+const BrandName = styled.div`
+  @media screen and (max-width: 441px) {
+    display: none;
+  }
+`;
 
 const HeaderNav = styled.div`
   display: flex;
   margin-right: 20px;
+`;
+
+const DesktopNav = styled.div`
+  display: flex;
+  @media screen and (max-width: 601px) {
+    display: none;
+  }
+`;
+
+const MobileNav = styled.div`
+  display: none;
+  @media screen and (max-width: 601px) {
+    display: ${(props: Props) => (props.showNav ? "flex" : "none")};
+    flex-direction: column;
+    width: 200px;
+    height: 100vh;
+    background-color: #607973;
+    position: fixed;
+    right: 0px;
+    top: 0;
+    z-index: 600;
+  }
+`;
+
+const XDiv = styled(X)`
+  display: none;
+  cursor: pointer;
+  @media screen and (max-width: 601px) {
+    display: flex;
+    color: white;
+    width: 100%;
+    margin-top: 20px;
+  } ;
 `;
 
 const Main = styled.main`
@@ -67,11 +137,16 @@ const NavDiv = styled.div`
   width: ${(props: Props) => (props.length ? `${props.length * 10}px` : ``)};
   display: flex;
   justify-content: center;
+  @media screen and (max-width: 601px) {
+    justify-content: flex-start;
+    margin-top: 20px;
+  }
 `;
 
 const BellImg = styled.img`
-  width: 16px;
-  height: 16px;
+  margin-top: 5px;
+  width: 20px;
+  height: 20px;
   cursor: pointer;
 `;
 
@@ -95,11 +170,19 @@ const NavLink = styled(Link)`
     background-color: white;
     padding: 0 10px;
   }
+  @media screen and (max-width: 601px) {
+    color: white;
+    &:hover {
+      background-color: white;
+      padding: 0 10px;
+      color: #4f4f4f;
+    }
+  }
 `;
 
 const Input = styled.input`
   width: 180px;
-  height: 20px;
+  height: 30px;
   border: 1px solid lightgray;
   border-radius: 5px;
   padding-left: 10px;
@@ -107,6 +190,9 @@ const Input = styled.input`
     outline: none;
   }
   margin-right: 20px;
+  @media screen and (max-width: 281px) {
+    width: 120px;
+  }
 `;
 
 const Notification = styled.div`
@@ -117,12 +203,17 @@ const Notification = styled.div`
   border-radius: 10px;
   z-index: 1000;
   position: fixed;
-  top: 40px;
+  top: 45px;
   right: 300px;
-  background-color: white;
+  background-color: #607973;
+  color: white;
   text-align: center;
   padding: 0 10px 0 0;
   padding: 0 10px;
+  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+  @media screen and (max-width: 601px) {
+    right: 50px;
+  }
 `;
 
 const Invitation = styled.div``;
@@ -131,6 +222,7 @@ interface Props {
   showInvitation?: boolean;
   length?: number;
   isScrolling?: boolean;
+  showNav?: boolean;
 }
 
 interface BattleInvitation {
@@ -141,10 +233,15 @@ interface BattleInvitation {
 function App() {
   const { setKeyword } = useContext(keywordContext);
   const { isLogin, userId, isLoadingUserAuth } = useContext(authContext);
+  const navigate = useNavigate();
   const [inputVocab, setInputVocab] = useState<string>();
   const [battleInvitation, setBattleInvitation] =
     useState<BattleInvitation[]>();
-  const [showInvitation, setShowInvitation] = useState<boolean>(true);
+  const [showInvitation, setShowInvitation] = useState<boolean>(false);
+  const [showNav, setShowNav] = useState<boolean>(false);
+  const pathName = window.location.pathname;
+  const notificationRef = useRef(null);
+  useOnClickOutside(notificationRef, () => setShowInvitation(false));
 
   useEffect(() => {
     let unsub;
@@ -172,53 +269,77 @@ function App() {
     });
   };
 
+  function renderNav() {
+    return (
+      <>
+        <XDiv size={16} />
+        <NavDiv length={"Article".length}>
+          <NavLink to={isLogin ? "/articles" : "/profile"}>Article</NavLink>
+        </NavDiv>
+        <NavDiv length={"VocabBook".length}>
+          <NavLink to={isLogin ? "/vocabbook" : "/profile"}>VocabBook</NavLink>
+        </NavDiv>
+        <NavDiv length={"Friend".length}>
+          <NavLink to={isLogin ? "/friends" : "/profile"}>Friend</NavLink>
+        </NavDiv>
+        <NavDiv length={"Profile".length}>
+          <NavLink to={isLogin ? "/profile" : "/profile"}>Profile</NavLink>
+        </NavDiv>
+      </>
+    );
+  }
+
   return (
     <Wrapper>
       <GlobalStyle />
+      <MobileDarkBackground showNav={showNav} />
       <Header>
         <HomeLink to="/">
           <LogoImg src={logo} alt="logo" />
           <BrandName>Vocab Garden</BrandName>
         </HomeLink>
         <HeaderNav>
-          <Input
-            placeholder="search a word..."
-            onChange={(e) => {
-              e.target.value = e.target.value.toLowerCase();
-              setInputVocab(e.target.value);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && inputVocab) {
-                setKeyword(inputVocab);
-                const target = e.target as HTMLInputElement;
-                target.value = "";
-              }
-            }}
-          />
-          {isLogin && (
-            <BellImg
-              src={battleInvitation?.length !== 0 ? yellowBell : bell}
-              onClick={() => setShowInvitation((prev) => !prev)}
+          <InputWrapper>
+            <Input
+              placeholder="search a word..."
+              onChange={(e) => {
+                e.target.value = e.target.value.toLowerCase();
+                setInputVocab(e.target.value);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && inputVocab) {
+                  setKeyword(inputVocab);
+                  const target = e.target as HTMLInputElement;
+                  target.value = "";
+                  if (pathName === "/profile") {
+                    navigate("/");
+                  }
+                  if (pathName === "/friends") {
+                    navigate("/");
+                  }
+                }
+              }}
             />
-          )}
-          <NavDiv length={"Article".length}>
-            <NavLink to={isLogin ? "/articles" : "/profile"}>Article</NavLink>
-          </NavDiv>
-          <NavDiv length={"VocabBook".length}>
-            <NavLink to={isLogin ? "/vocabbook" : "/profile"}>
-              VocabBook
-            </NavLink>
-          </NavDiv>
-          <NavDiv length={"Friend".length}>
-            <NavLink to={isLogin ? "/friends" : "/profile"}>Friend</NavLink>
-          </NavDiv>
-          <NavDiv length={"Profile".length}>
-            <NavLink to={isLogin ? "/profile" : "/profile"}>Profile</NavLink>
-          </NavDiv>
+            {isLogin && (
+              <BellImg
+                src={battleInvitation?.length !== 0 ? yellowBell : bell}
+                onClick={() => setShowInvitation((prev) => !prev)}
+              />
+            )}
+            <Menu src={menu} alt="menu" onClick={() => setShowNav(true)} />
+          </InputWrapper>
+          <DesktopNav>{renderNav()}</DesktopNav>
         </HeaderNav>
       </Header>
+      {window.innerWidth < 601 && (
+        <MobileNav showNav={showNav} onClick={() => setShowNav(false)}>
+          {" "}
+          {renderNav()}
+        </MobileNav>
+      )}
+
       <Main>
-        <Notification showInvitation={showInvitation}>
+        <Notification showInvitation={showInvitation} ref={notificationRef}>
           {battleInvitation?.length !== 0 ? (
             battleInvitation?.map(({ ownerName, pin }: BattleInvitation) => (
               <Invitation>

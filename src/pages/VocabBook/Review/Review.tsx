@@ -7,8 +7,8 @@ import audio from "../../../components/audio.png";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
-import plant from "./reviewPlant.png";
-import Button from "../../../components/Button";
+import plant from "./reviewPlant.webp";
+import Button from "../../../components/Button/Button";
 
 interface Props {
   correct?: boolean;
@@ -34,17 +34,32 @@ const Img = styled.img`
   position: fixed;
   right: 0px;
   bottom: 50px;
+  opacity: 0.5;
+`;
+
+const RoundCount = styled.div`
+  margin-top: 20px;
+  text-align: center;
 `;
 
 const Header = styled.div`
-  display: flex;
-  justify-content: space-between;
+  /* display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: auto; */
   margin-top: 20px;
+  /* align-items: center; */
+  text-align: center;
+  position: relative;
+  z-index: 1;
 `;
 
 const Div = styled.div`
-  width: 200px;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  /* @media screen and (max-width: 601px) { */
+  width: 150px;
+  /* } */
 `;
 
 const ScoreBar = styled.div`
@@ -54,6 +69,8 @@ const ScoreBar = styled.div`
   border: 1px solid gray;
   border-radius: 20px;
   margin-top: 10px;
+  z-index: 3;
+  transform: translateX(-50%);
   ${(props: Props) =>
     props.insideColor &&
     css`
@@ -61,9 +78,18 @@ const ScoreBar = styled.div`
       background-color: #95caca;
       width: ${(props: Props) =>
         props.score ? `${props.score * 40}px` : "0px"};
-      z-index: -1;
+      z-index: 2;
       margin-bottom: 20px;
     `}
+  @media screen and (max-width: 601px) {
+    width: 150px;
+    ${(props: Props) =>
+      props.insideColor &&
+      css`
+        width: ${(props: Props) =>
+          props.score ? `${props.score * 30}px` : "0px"};
+      `}
+  }
 `;
 
 const Main = styled.div`
@@ -73,15 +99,24 @@ const Main = styled.div`
 `;
 
 const VocabWrapper = styled.div`
+  position: relative;
+  z-index: 1;
   display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 20px;
   align-items: center;
-  margin: 50px auto;
+  margin: 0px auto;
+  padding: 30px;
+  border-radius: 30px;
 `;
 
 const Vocab = styled.div`
   font-weight: 600;
   font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
 `;
 
 const AudioImg = styled.img`
@@ -90,7 +125,7 @@ const AudioImg = styled.img`
 `;
 
 const Options = styled.div`
-  margin: 50px auto;
+  margin: 0 auto;
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -299,17 +334,17 @@ export default function Review() {
     return (
       <Main>
         <VocabWrapper>
-          <Vocab>{correctVocab?.vocab}</Vocab>
-          <p>({correctVocab?.partOfSpeech})</p>
-          {correctVocab?.audioLink ? (
-            <AudioImg
-              src={audio}
-              alt="audio"
-              onClick={() => handlePlayAudio(correctVocab?.audioLink)}
-            />
-          ) : (
-            ""
-          )}
+          <Vocab>
+            {correctVocab?.vocab}
+            {correctVocab?.audioLink && (
+              <AudioImg
+                src={audio}
+                alt="audio"
+                onClick={() => handlePlayAudio(correctVocab?.audioLink)}
+              />
+            )}
+          </Vocab>
+          ({correctVocab?.partOfSpeech})
         </VocabWrapper>
         <Options>
           {currentOptions?.map(([clickedVocab, def], index) => (
@@ -592,20 +627,19 @@ export default function Review() {
   return (
     <Wrapper>
       <Img src={plant} alt="plant" />
+      <RoundCount>Round: {gameOver ? questionsNumber : round + 1}</RoundCount>
       <Header>
+        <div>
+          O: {answerCount.correct} X: {answerCount.wrong} / Total:{" "}
+          {questionsNumber}
+        </div>
         <Div>
-          <div>
-            O: {answerCount.correct} X: {answerCount.wrong} / Total:{" "}
-            {questionsNumber}
-          </div>
           <ScoreBar insideColor={true} score={answerCount.correct}>
             <ScoreBar>
               {Math.ceil((answerCount.correct / questionsNumber) * 100)}%
             </ScoreBar>
           </ScoreBar>
         </Div>
-        <Div>Round: {gameOver ? questionsNumber : round + 1}</Div>
-        <Div />
       </Header>
       {gameOver ? renderOutcome() : renderTest()}
     </Wrapper>

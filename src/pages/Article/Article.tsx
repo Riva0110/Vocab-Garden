@@ -14,7 +14,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import QuillEditor from "./Editor/QuillEditor";
-import Button from "../../components/Button";
+import Button from "../../components/Button/Button";
 import Alert from "../../components/Alert/Alert";
 
 const Wrapper = styled.div`
@@ -25,6 +25,7 @@ const ArticleWrapper = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
+  background-color: rgba(255, 255, 255, 0.9);
 `;
 
 const TitleLabel = styled.label`
@@ -39,7 +40,6 @@ const TitleInput = styled.input`
   }
   padding: 5px 15px;
   color: #3f3c3c;
-  background-color: rgba(255, 255, 255, 0.7);
 `;
 
 const ContentLabel = styled(TitleLabel)`
@@ -58,7 +58,6 @@ const Content = styled.div`
   font-size: 16px;
   overflow-y: scroll;
   height: calc(100vh - 240px);
-  background-color: rgb(255, 255, 255, 0.7);
 `;
 
 const Btns = styled.div`

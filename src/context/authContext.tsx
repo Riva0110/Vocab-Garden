@@ -30,21 +30,25 @@ interface AuthInterface {
   isLoadingUserAuth: boolean;
   setIsLoadingUserAuth: React.Dispatch<React.SetStateAction<boolean>>;
   logout(): void;
-  login(email: string, password: string): void;
-  signup(email: string, password: string, name: string): void;
+  login(email: string, password: string): Promise<string | undefined>;
+  signup(
+    email: string,
+    password: string,
+    name: string
+  ): Promise<string | undefined>;
 }
 
 export const authContext = createContext<AuthInterface>({
-  userId: "",
-  setUserId: () => {},
-  isLogin: false,
-  setIsLogin: () => {},
-  isLoadingUserAuth: true,
-  setIsLoadingUserAuth: () => {},
-  logout: () => {},
-  login: () => {},
-  signup: () => {},
-});
+  // userId: "",
+  // setUserId: () => {},
+  // isLogin: false,
+  // setIsLogin: () => {},
+  // isLoadingUserAuth: true,
+  // setIsLoadingUserAuth: () => {},
+  // logout: () => {},
+  // login: "",
+  // signup: () => {},
+} as AuthInterface);
 
 export function AuthContextProvider({ children }: ContextProviderProps) {
   const [isLogin, setIsLogin] = useState(false);
@@ -91,43 +95,54 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
   }, [userId]);
 
   const signup = async (email: string, password: string, name: string) => {
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-    const user = userCredential.user;
-    await setDoc(doc(db, "users", user.uid), {
-      name,
-      email,
-      state: "online",
-      currentPlant: "begonia",
-      currentScore: 0,
-      lastTimeUpdateScore: new Date(),
-      isChallenging: false,
-      friendList: [],
-      friendRequest: [],
-      awaitingFriendReply: [],
-      battleInvitation: [],
-    });
-    setIsLogin(true);
-    await setDoc(doc(db, "vocabBooks", user.uid), {
-      unsorted: arrayUnion(),
-    });
-    await setDoc(doc(db, "plantsList", user.uid), {
-      plants: [],
-    });
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+
+      await setDoc(doc(db, "users", user.uid), {
+        name,
+        email,
+        state: "online",
+        currentPlant: "begonia",
+        currentScore: 0,
+        lastTimeUpdateScore: new Date(),
+        isChallenging: false,
+        friendList: [],
+        friendRequest: [],
+        awaitingFriendReply: [],
+        battleInvitation: [],
+      });
+      setIsLogin(true);
+      await setDoc(doc(db, "vocabBooks", user.uid), {
+        unsorted: arrayUnion(),
+      });
+      await setDoc(doc(db, "plantsList", user.uid), {
+        plants: [],
+      });
+      // return "Sign up successfully!";
+    } catch (error) {
+      if (error instanceof Error) return error["message"];
+    }
   };
 
   const login = async (email: string, password: string) => {
-    const res = await signInWithEmailAndPassword(auth, email, password);
-    const updateState = async () => {
-      await updateDoc(doc(db, "users", res.user.uid), {
-        state: "online",
-        state_last_changed: new Date(),
-      });
-    };
-    updateState();
+    try {
+      const res = await signInWithEmailAndPassword(auth, email, password);
+      const updateState = async () => {
+        await updateDoc(doc(db, "users", res.user.uid), {
+          state: "online",
+          state_last_changed: new Date(),
+        });
+      };
+      updateState();
+      // return "Log in successfully!";
+    } catch (error) {
+      if (error instanceof Error) return error["message"];
+    }
   };
 
   const logout = async () => {

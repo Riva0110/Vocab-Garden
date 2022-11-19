@@ -5,12 +5,13 @@ import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { useEffect } from "react";
 import { authContext } from "../../context/authContext";
-import Button from "../../components/Button";
+import Button from "../../components/Button/Button";
 
 const ArticlesWrapper = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
+  background-color: rgba(255, 255, 255, 0.7);
 `;
 
 const NoArticle = styled.div`
@@ -36,6 +37,9 @@ const Title = styled.div`
   padding-bottom: 10px;
   padding-top: 10px;
   font-weight: 600;
+  @media screen and (max-width: 601px) {
+    border-bottom: 1px solid gray;
+  }
 `;
 
 const Btns = styled.div`
