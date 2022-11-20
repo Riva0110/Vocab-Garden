@@ -199,6 +199,10 @@ export default function Friends() {
     if (querySnapshot.empty) return ref.current?.("The user doesn't exist!");
     if (awaitingFriendReply?.includes(searchingEmail))
       return ref.current?.("Already sent!");
+    if (friendList?.includes(searchingEmail))
+      return ref.current?.("Already in friend list!");
+    if (friendRequest?.includes(searchingEmail))
+      return ref.current?.("The user is waiting for your reply!");
     querySnapshot.forEach((friendDoc) => {
       const updateFriendStatus = async () => {
         await updateDoc(doc(db, "users", friendDoc.id), {

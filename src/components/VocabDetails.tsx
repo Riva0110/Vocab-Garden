@@ -224,23 +224,6 @@ export default function VocabDetails() {
   const [showVocabInMobile, setShowVocabInMobile] = useState(false);
   useOnClickOutside(popupRef, () => setIsPopuping(false));
 
-  // function useOnClickOutside(ref: RefObject<HTMLDivElement>, handler: any) {
-  //   useEffect(() => {
-  //     const listener = (event: any) => {
-  //       if (!ref.current || ref.current.contains(event.target)) {
-  //         return;
-  //       }
-  //       handler(event);
-  //     };
-  //     document.addEventListener("mousedown", listener);
-  //     document.addEventListener("touchstart", listener);
-  //     return () => {
-  //       document.removeEventListener("mousedown", listener);
-  //       document.removeEventListener("touchstart", listener);
-  //     };
-  //   }, [ref, handler]);
-  // }
-
   const handlePlayAudio = () => {
     const audio = new Audio(vocabDetails?.phonetics?.[0].audio);
     audio.play();
@@ -305,7 +288,7 @@ export default function VocabDetails() {
     }
   };
 
-  function check() {
+  function checkDevice() {
     const userAgentInfo = navigator.userAgent;
     const Agents = [
       "Android",
@@ -326,19 +309,27 @@ export default function VocabDetails() {
   }
 
   function getSelectedText() {
-    if (check() === "mobile") return;
-    if (window.getSelection) {
-      const txt = window.getSelection()?.toString();
-      if (typeof txt !== "undefined") setKeyword(txt);
+    if (checkDevice() === "desktop") {
+      console.log("desktop");
+      if (window.getSelection) {
+        const txt = window.getSelection()?.toString();
+        if (typeof txt !== "undefined") setKeyword(txt);
+      }
     }
   }
 
   useEffect(() => {
-    if (check() === "desktop") return;
-    const mobileSlection = document.addEventListener("selectionchange", () => {
-      const value = document.getSelection()?.toString();
-      if (value) setKeyword(value);
-    });
+    let mobileSlection;
+    if (checkDevice() === "mobile") {
+      console.log("selectionchange");
+      mobileSlection = document.addEventListener("selectionchange", (e) => {
+        const value = document.getSelection()?.toString();
+        if (value) {
+          setKeyword(value);
+          document.getSelection()?.empty();
+        }
+      });
+    }
     return mobileSlection;
   }, [setKeyword]);
 
@@ -355,28 +346,13 @@ export default function VocabDetails() {
     fetchVocabDetails(resourceUrl);
   }, [resourceUrl]);
 
-  // const handleClickElement = useCallback(
-  //   (e: any) => {
-  //     if (isPopuping && popupRef.current && !popupRef.current.contains(e.target)) {
-  //       console.log(2);
-  //       setIsPopuping(false);
-  //       console.log({ isPopuping });
-  //     }
-
-  //     console.log(popupRef?.current?.contains(e.target));
-  //   },
-  //   [isPopuping]
-  // );
+  useEffect(() => {
+    getVocabBooks(userId);
+  }, [getVocabBooks, userId]);
 
   // useEffect(() => {
-  //   getVocabBooks(userId);
-  //   if (isPopuping) {
-  //     document.addEventListener("click", handleClickElement, false);
-  //   }
-  //   return () => {
-  //     document.removeEventListener("click", handleClickElement, false);
-  //   };
-  // }, [getVocabBooks, handleClickElement, isPopuping, userId]);
+  //   if (keyword === "") setKeyword("welcome");
+  // }, [keyword, setKeyword]);
 
   useEffect(() => {
     setIsSaved(false);

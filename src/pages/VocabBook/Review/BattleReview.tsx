@@ -208,7 +208,7 @@ const Message = styled.div`
 `;
 
 const OutcomeWrapper = styled.div`
-  width: 50vw;
+  width: 100%;
   margin: 50px auto;
 `;
 
@@ -420,7 +420,6 @@ export default function BattleReview() {
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((friendDoc) => {
           newFriendState = [...newFriendState, friendDoc.data().state];
-          console.log("newFriendState", newFriendState);
         });
         setFriendState(newFriendState);
       }
@@ -466,7 +465,6 @@ export default function BattleReview() {
 
     if (pin) {
       unsub = onSnapshot(doc(db, "battleRooms", pin), (doc) => {
-        console.log("onSnapshot Current data: ", doc.data());
         const data = doc.data() as RoomInfo;
         const ownerAnswerCount =
           data?.answerCount.owner.correct + data?.answerCount.owner.wrong;
@@ -510,7 +508,6 @@ export default function BattleReview() {
     let countDownTimer: string | number | NodeJS.Timeout | undefined;
     if (countDown > 0 && !isWaiting) {
       countDownTimer = setTimeout(() => setCountDown((prev) => prev - 1), 1000);
-      console.log("countDown", countDown);
     }
     return () => clearTimeout(countDownTimer);
   }, [countDown, isWaiting]);
@@ -762,8 +759,6 @@ export default function BattleReview() {
 
                     const vocabListAfterClick = [...outcomeVocabList];
 
-                    console.log("vocabListAfterClick []", vocabListAfterClick);
-
                     if (clickedVocab === correctVocab?.vocab) {
                       if (isOwner) answerCountAfterClick.owner.correct += 1;
                       else answerCountAfterClick.competitor.correct += 1;
@@ -776,13 +771,8 @@ export default function BattleReview() {
                       vocabListAfterClick[round].isCorrect = false;
                     }
 
-                    console.log(
-                      "vocabListAfterClick [after]",
-                      vocabListAfterClick
-                    );
                     handleSyncScore(answerCountAfterClick);
                     setOutcomeVocabList(vocabListAfterClick);
-                    console.log("vocabListAfterClick", vocabListAfterClick);
                   }
                 }
               }}

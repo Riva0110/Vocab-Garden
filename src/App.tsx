@@ -218,6 +218,12 @@ const Notification = styled.div`
 
 const Invitation = styled.div``;
 
+const InvitationA = styled.a`
+  cursor: pointer;
+  color: white;
+  text-decoration: none;
+`;
+
 interface Props {
   showInvitation?: boolean;
   length?: number;
@@ -337,22 +343,24 @@ function App() {
           {renderNav()}
         </MobileNav>
       )}
-
       <Main>
         <Notification showInvitation={showInvitation} ref={notificationRef}>
           {battleInvitation?.length !== 0 ? (
             battleInvitation?.map(({ ownerName, pin }: BattleInvitation) => (
               <Invitation>
-                <NavLink
+                <InvitationA
                   style={{ marginLeft: 0 }}
-                  to={`/vocabbook/review/${pin}`}
-                  onClick={() => {
-                    setShowInvitation(false);
-                    handleClearInvitation({ ownerName, pin });
-                  }}
+                  href={`/vocabbook/review/${pin}`}
                 >
-                  {ownerName} invites you to battle! ▶
-                </NavLink>
+                  <div
+                    onClick={() => {
+                      setShowInvitation(false);
+                      handleClearInvitation({ ownerName, pin });
+                    }}
+                  >
+                    {ownerName} invites you to battle! ▶
+                  </div>
+                </InvitationA>
               </Invitation>
             ))
           ) : (

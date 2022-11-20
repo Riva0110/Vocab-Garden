@@ -33,6 +33,7 @@ const Img = styled.img`
   right: 0px;
   bottom: 0px;
   width: 500px;
+  opacity: 0.5;
 `;
 
 const Nav = styled.nav`
@@ -259,6 +260,15 @@ export default function VocabBook() {
     });
     return log;
   }
+
+  useEffect(() => {
+    if (typeof bookCorrectRate !== "undefined") return;
+    const findUnsorted = (e: string) => e === "unsorted";
+    const indexOfUnsorted = Object.keys(vocabBooks).findIndex(findUnsorted);
+    setBookCorrectRate(
+      Math.round(correctRateOfBooksArr[indexOfUnsorted] * 100)
+    );
+  }, [bookCorrectRate, correctRateOfBooksArr, vocabBooks]);
 
   const handlePlayAudio = (audioLink: string) => {
     const audio = new Audio(audioLink);

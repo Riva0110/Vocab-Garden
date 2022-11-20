@@ -20,6 +20,10 @@ const Img = styled.img`
   position: fixed;
   right: 0;
   width: 400px;
+  opacity: 0.5;
+  @media screen and (max-width: 601px) {
+    display: none;
+  }
 `;
 
 const Img2 = styled.img`
@@ -27,6 +31,7 @@ const Img2 = styled.img`
   left: 0;
   bottom: 0;
   width: 400px;
+  opacity: 0.5;
 `;
 
 const OutletWrapper = styled.div`
