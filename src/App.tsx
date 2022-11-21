@@ -20,6 +20,11 @@ const GlobalStyle = createGlobalStyle`
     margin: 0;
     padding: 0;
     color: #4f4f4f;
+    font-family: "Poppins";
+  }
+
+  p {
+    margin: 0px;
   }
 `;
 
@@ -134,7 +139,7 @@ const Main = styled.main`
 `;
 
 const NavDiv = styled.div`
-  width: ${(props: Props) => (props.length ? `${props.length * 10}px` : ``)};
+  width: ${(props: Props) => (props.length ? `${props.length * 12}px` : ``)};
   display: flex;
   justify-content: center;
   @media screen and (max-width: 601px) {
@@ -218,7 +223,7 @@ const Notification = styled.div`
 
 const Invitation = styled.div``;
 
-const InvitationA = styled.a`
+const InvitationA = styled(Link)`
   cursor: pointer;
   color: white;
   text-decoration: none;
@@ -350,16 +355,14 @@ function App() {
               <Invitation>
                 <InvitationA
                   style={{ marginLeft: 0 }}
-                  href={`/vocabbook/review/${pin}`}
+                  to={`/vocabbook/review/${pin}`}
+                  onClick={() => {
+                    setShowInvitation(false);
+                    handleClearInvitation({ ownerName, pin });
+                  }}
+                  // href={`/vocabbook/review/${pin}`}
                 >
-                  <div
-                    onClick={() => {
-                      setShowInvitation(false);
-                      handleClearInvitation({ ownerName, pin });
-                    }}
-                  >
-                    {ownerName} invites you to battle! ▶
-                  </div>
+                  {ownerName} invites you to battle! ▶
                 </InvitationA>
               </Invitation>
             ))

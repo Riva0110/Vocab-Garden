@@ -47,7 +47,7 @@ const ContentLabel = styled(TitleLabel)`
 `;
 
 const Title = styled.div`
-  line-height: 100%;
+  line-height: 150%;
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 10px;

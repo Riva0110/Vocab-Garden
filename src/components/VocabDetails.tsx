@@ -319,10 +319,9 @@ export default function VocabDetails() {
   }
 
   useEffect(() => {
-    let mobileSlection;
+    let mobileSelection;
     if (checkDevice() === "mobile") {
-      console.log("selectionchange");
-      mobileSlection = document.addEventListener("selectionchange", (e) => {
+      mobileSelection = document.addEventListener("selectionchange", (e) => {
         const value = document.getSelection()?.toString();
         if (value) {
           setKeyword(value);
@@ -330,29 +329,36 @@ export default function VocabDetails() {
         }
       });
     }
-    return mobileSlection;
+    return mobileSelection;
   }, [setKeyword]);
 
   useEffect(() => {
+    if (keyword === "") {
+      setIsLoading(false);
+      return;
+    }
+
     async function fetchVocabDetails(resourceUrl: string) {
       const response = await fetch(resourceUrl);
       const data = await response.json();
-      if (data.title === "No Definitions Found")
-        return ref.current?.("Sorry......No result.");
-      setVocabDetails(data[0]);
       setIsLoading(false);
-      setShowVocabInMobile(true);
+      if (response.status === 200) {
+        setVocabDetails(data[0]);
+        setShowVocabInMobile(true);
+      } else if (data.title === "No Definitions Found") {
+        ref.current?.("Sorry......No result.");
+      } else {
+        setKeyword("error");
+        ref.current?.(`Error: ${response.status.toString()}`);
+      }
     }
+
     fetchVocabDetails(resourceUrl);
-  }, [resourceUrl]);
+  }, [keyword, resourceUrl, setKeyword]);
 
   useEffect(() => {
     getVocabBooks(userId);
   }, [getVocabBooks, userId]);
-
-  // useEffect(() => {
-  //   if (keyword === "") setKeyword("welcome");
-  // }, [keyword, setKeyword]);
 
   useEffect(() => {
     setIsSaved(false);
@@ -475,7 +481,7 @@ export default function VocabDetails() {
                     )
                   )}
                 </ul>
-                {synonyms?.length !== 0 ? (
+                {synonyms?.length !== 0 && (
                   <>
                     <SubTitle onClick={() => getSelectedText()}>
                       Synonyms
@@ -492,11 +498,17 @@ export default function VocabDetails() {
                       </Synonyms>
                     ))}
                   </>
-                ) : (
-                  ""
                 )}
               </>
             )
+          )}
+          {keyword === "" && (
+            <>
+              <br />
+              <div style={{ color: "gray" }}>
+                Select or double click any words to get more information!
+              </div>
+            </>
           )}
         </Meanings>
       </VocabWrapper>

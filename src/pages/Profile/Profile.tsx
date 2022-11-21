@@ -251,7 +251,7 @@ export default function Profile() {
 
       const timeDifference =
         Date.now() - data?.lastTimeUpdateScore.seconds * 1000;
-      const deduction = Math.floor(timeDifference / 300000);
+      const deduction = Math.floor(timeDifference / (300000 * 576));
 
       if (data?.isChallenging && deduction > 0) {
         setIsDying(true);

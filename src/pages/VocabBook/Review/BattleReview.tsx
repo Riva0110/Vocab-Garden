@@ -317,9 +317,13 @@ interface RoomInfo {
 
 type AddFunction = (msg: string) => void;
 
-export default function BattleReview() {
-  const navigate = useNavigate();
+export default function BattleReviewWrapper() {
   const { pin } = useParams();
+  return <BattleReview pin={pin ?? ""} key={pin} />;
+}
+
+function BattleReview({ pin }: { pin: string }) {
+  const navigate = useNavigate();
   const { isLogin, userId } = useContext(authContext);
   const { questionsNumber, setIsBattle } = useReviewLayout();
   const [isWaiting, setIsWaiting] = useState<boolean>(true);

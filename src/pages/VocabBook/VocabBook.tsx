@@ -186,6 +186,11 @@ interface Props {
   weight?: boolean;
 }
 
+interface Log {
+  isCorrect: boolean;
+  testTime: {};
+}
+
 type AddFunction = (msg: string) => void;
 
 export default function VocabBook() {
@@ -225,13 +230,14 @@ export default function VocabBook() {
       definition: string;
       isCorrect?: boolean | undefined;
       correctRate: number;
+      log: Log[];
     }[] = [];
     const wordsByBook = Object.keys(vocabBooks)?.map((key) => {
       allWords = allWords.concat(vocabBooks[key]);
       return allWords;
     });
     return wordsByBook[wordsByBook.length - 1]?.filter(
-      (vocab) => vocab.correctRate < 0.5
+      (vocab) => vocab.correctRate < 0.5 && vocab.log.length >= 5
     );
   }
 
@@ -266,7 +272,7 @@ export default function VocabBook() {
     const findUnsorted = (e: string) => e === "unsorted";
     const indexOfUnsorted = Object.keys(vocabBooks).findIndex(findUnsorted);
     setBookCorrectRate(
-      Math.round(correctRateOfBooksArr[indexOfUnsorted] * 100)
+      Math.round(correctRateOfBooksArr[indexOfUnsorted] * 100) || 0
     );
   }, [bookCorrectRate, correctRateOfBooksArr, vocabBooks]);
 
