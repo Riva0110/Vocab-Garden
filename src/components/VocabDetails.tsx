@@ -313,7 +313,7 @@ export default function VocabDetails() {
       console.log("desktop");
       if (window.getSelection) {
         const txt = window.getSelection()?.toString();
-        if (typeof txt !== "undefined") setKeyword(txt);
+        if (typeof txt !== "undefined" && txt !== "") setKeyword(txt);
       }
     }
   }
@@ -333,19 +333,21 @@ export default function VocabDetails() {
   }, [setKeyword]);
 
   useEffect(() => {
-    if (keyword === "") {
-      setIsLoading(false);
-      return;
-    }
-
     async function fetchVocabDetails(resourceUrl: string) {
       const response = await fetch(resourceUrl);
       const data = await response.json();
       setIsLoading(false);
+
       if (response.status === 200) {
-        setVocabDetails(data[0]);
+        if (vocabDetails && vocabDetails.word !== data[0].word) {
+          setVocabDetails(data[0]);
+        } else if (!vocabDetails) {
+          setVocabDetails(data[0]);
+        }
         setShowVocabInMobile(true);
       } else if (data.title === "No Definitions Found") {
+        if (vocabDetails && vocabDetails.word !== undefined)
+          setKeyword(vocabDetails.word);
         ref.current?.("Sorry......No result.");
       } else {
         setKeyword("error");
@@ -354,7 +356,7 @@ export default function VocabDetails() {
     }
 
     fetchVocabDetails(resourceUrl);
-  }, [keyword, resourceUrl, setKeyword]);
+  }, [keyword, resourceUrl, setKeyword, vocabDetails]);
 
   useEffect(() => {
     getVocabBooks(userId);
@@ -490,7 +492,7 @@ export default function VocabDetails() {
                       <Synonyms
                         key={index}
                         onClick={() => {
-                          setKeyword(synonym);
+                          synonym !== "" && setKeyword(synonym);
                           setIsPopuping(false);
                         }}
                       >

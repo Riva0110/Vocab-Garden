@@ -77,7 +77,7 @@ const Book = styled.div`
   color: ${(props: Props) => (props.selected ? "black" : "gray")};
   background-color: ${(props: Props) => (props.selected ? "white" : "none")};
   padding: auto;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
 `;
@@ -99,6 +99,22 @@ const BookButtons = styled.div`
   align-items: center;
 `;
 
+const AddButton = styled.button`
+  width: 20px;
+  height: 20px;
+  margin-left: 10px;
+  background-color: #607973;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+`;
+
+const Delete = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
 const CardWrapper = styled.div`
   display: flex;
   gap: 20px;
@@ -116,7 +132,7 @@ const Card = styled.div`
   width: calc((100% - 20px) / 2);
   height: 120px;
   border: 1px solid lightgray;
-  border-top: 2px #607973 solid;
+  border-top: 3px #607973 solid;
   overflow-y: scroll;
   padding: 10px;
   background-color: rgba(255, 255, 255, 0.7);
@@ -143,7 +159,7 @@ const VocabTitle = styled.div`
   display: flex;
   align-items: center;
   gap: 20px;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   color: black;
   margin-bottom: 10px;
@@ -170,17 +186,6 @@ const Input = styled.input`
   padding-left: 10px;
 `;
 
-const AddButton = styled.button`
-  width: 20px;
-  height: 20px;
-  margin-left: 10px;
-  background-color: #607973;
-  color: #ffffff;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-`;
-
 interface Props {
   selected?: boolean;
   weight?: boolean;
@@ -203,6 +208,7 @@ export default function VocabBook() {
   const [newBook, setNewBook] = useState<string>();
   const [bookCorrectRate, setBookCorrectRate] = useState<number>();
   const ref = useRef<null | AddFunction>(null);
+  const newBookRef = useRef<HTMLInputElement>(null);
   const topWrongWords = getAllWords()?.slice(0, 10);
 
   useEffect(() => {
@@ -288,6 +294,9 @@ export default function VocabBook() {
         [newBook]: arrayUnion(),
       });
       getVocabBooks(userId);
+      if (newBookRef.current) {
+        newBookRef.current.value = "";
+      }
     }
   };
 
@@ -324,7 +333,7 @@ export default function VocabBook() {
   function getSelectedText() {
     if (window.getSelection) {
       const txt = window.getSelection()?.toString();
-      if (typeof txt !== "undefined") setKeyword(txt);
+      if (typeof txt !== "undefined" && txt !== "") setKeyword(txt);
     }
   }
 
@@ -370,10 +379,11 @@ export default function VocabBook() {
                 <Input
                   onChange={(e) => setNewBook(e.target.value)}
                   placeholder="Add a book"
+                  ref={newBookRef}
                 />
                 <AddButton onClick={handleAddBook}>+</AddButton>
               </div>
-              <div>
+              <Delete>
                 {viewingBook === "wrong words" ? null : (
                   <ButtonImg
                     src={deleteBtn}
@@ -381,7 +391,7 @@ export default function VocabBook() {
                     onClick={() => handleDeleteBook(viewingBook)}
                   />
                 )}
-              </div>
+              </Delete>
             </BookButtons>
             <Nav>
               <div>
@@ -416,7 +426,7 @@ export default function VocabBook() {
                           <VocabTitle>
                             <Vocab
                               key={index}
-                              onClick={() => setKeyword(vocab)}
+                              onClick={() => vocab !== "" && setKeyword(vocab)}
                             >
                               {vocab}
                             </Vocab>
@@ -459,7 +469,7 @@ export default function VocabBook() {
                           <VocabTitle>
                             <Vocab
                               key={index}
-                              onClick={() => setKeyword(vocab)}
+                              onClick={() => vocab !== "" && setKeyword(vocab)}
                             >
                               {vocab}
                             </Vocab>

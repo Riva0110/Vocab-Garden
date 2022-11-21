@@ -26,6 +26,10 @@ const GlobalStyle = createGlobalStyle`
   p {
     margin: 0px;
   }
+
+  button {
+    font-family: "Poppins";
+  }
 `;
 
 const Wrapper = styled.div`
@@ -318,7 +322,7 @@ function App() {
                 setInputVocab(e.target.value);
               }}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && inputVocab) {
+                if (e.key === "Enter" && inputVocab && inputVocab !== "") {
                   setKeyword(inputVocab);
                   const target = e.target as HTMLInputElement;
                   target.value = "";

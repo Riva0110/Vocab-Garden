@@ -121,7 +121,7 @@ export const ArticleWords = () => {
         </Buttons>
         <Words>
           {articleWords?.map((word) => (
-            <div onClick={() => setKeyword(word[0])}>
+            <div onClick={() => word[0] !== "" && setKeyword(word[0])}>
               {word[0]}: {word[1]}
             </div>
           ))}

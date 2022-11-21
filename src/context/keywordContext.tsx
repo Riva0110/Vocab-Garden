@@ -16,7 +16,9 @@ export const keywordContext = createContext<keywordType>({
 
 export function KeywordContextProvider({ children }: ContextProviderProps) {
   const [keyword, setKeyword] = useState("welcome");
+
   console.log("keyword context", keyword);
+
   return (
     <keywordContext.Provider value={{ keyword, setKeyword }}>
       {children}
