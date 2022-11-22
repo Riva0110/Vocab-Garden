@@ -53,19 +53,12 @@ const Title = styled.div`
 const Content = styled.div`
   font-size: 16px;
   overflow-y: scroll;
-  /* height: calc(100vh - 276px); */
 `;
 
 const Btns = styled.div`
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
-  justify-content: flex-end;
-`;
-
-const ButtonDiv = styled.div`
-  margin-top: 50px;
-  display: flex;
   justify-content: flex-end;
 `;
 

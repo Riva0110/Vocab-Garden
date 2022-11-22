@@ -608,6 +608,7 @@ function BattleReview({ pin }: { pin: string }) {
     answerCount.competitor,
     answerCount.owner,
     countDown,
+    gameOver,
     handleSyncScore,
     isAnswered,
     isOwner,
@@ -688,8 +689,8 @@ function BattleReview({ pin }: { pin: string }) {
                 </WaitingMessage>
                 <Title>Friend List</Title>
                 {friendList?.map((friendEmail, index) => (
-                  <InviteWrapper>
-                    <Email key={friendEmail}>{friendEmail}</Email>
+                  <InviteWrapper key={friendEmail}>
+                    <Email>{friendEmail}</Email>
                     <FriendStateWrapper stateColor={friendState[index]}>
                       {friendState[index]}
                       <FriendState stateColor={friendState[index]} />

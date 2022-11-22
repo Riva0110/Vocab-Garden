@@ -336,6 +336,7 @@ export default function VocabDetails() {
       const response = await fetch(resourceUrl);
       const data = await response.json();
       setIsLoading(false);
+      setShowVocabInMobile(true);
 
       if (response.status === 200) {
         if (vocabDetails && vocabDetails.word !== data[0].word) {
@@ -343,7 +344,6 @@ export default function VocabDetails() {
         } else if (!vocabDetails) {
           setVocabDetails(data[0]);
         }
-        setShowVocabInMobile(true);
       } else if (data.title === "No Definitions Found") {
         if (vocabDetails && vocabDetails.word !== undefined)
           setKeyword(vocabDetails.word);

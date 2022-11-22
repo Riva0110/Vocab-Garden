@@ -3,6 +3,7 @@ import banner from "./banner.webp";
 import VocabDetails from "../../components/VocabDetails";
 import { keywordContext } from "../../context/keywordContext";
 import { useContext } from "react";
+import { Link } from "react-router-dom";
 
 const Wrapper = styled.div`
   display: flex;
@@ -29,13 +30,17 @@ const BannerWrapper = styled.div`
   width: calc((100% - 30px) / 2);
   position: relative;
   padding-left: 50px;
+  @media screen and (max-width: 601px) {
+    width: calc(100vw - 40px);
+    padding-left: 0px;
+  }
 `;
 
 const Title = styled.div`
   font-size: 30px;
   font-weight: 600;
-  margin-top: 50px;
-  margin-bottom: 50px;
+  margin-top: 100px;
+  margin-bottom: 80px;
   color: black;
 `;
 
@@ -46,13 +51,26 @@ const Author = styled.span`
 
 const IntroWrapper = styled.div`
   color: #292727;
-  padding: 20px;
 `;
 
 const QuickStart = styled.div`
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 20px;
+  border: 1px solid lightgray;
+  width: 150px;
+  text-align: center;
+  background-color: #fff;
+`;
+
+const Intro = styled(Link)`
+  height: 30px;
+  text-decoration: none;
+  color: #1c1b1b;
+  padding-left: 10px;
+  &:hover {
+    background-color: #ffffff77;
+  }
 `;
 
 export default function Home() {
@@ -69,19 +87,32 @@ export default function Home() {
       <BackgroundImg />
       <BannerWrapper onClick={() => getSelectedText()}>
         <Title>
-          The best way to predict the future
+          Boost your English reading and vocabulary skills!
+          <br />
+          {/* <Author>FORM NOW ON......</Author> */}
+          {/* The best way to predict the future
           {window.innerWidth > 601 && <br />} is to create it. <br />
-          <Author>– Abraham Lincoln</Author>
+          <Author>– Abraham Lincoln</Author> */}
         </Title>
         <IntroWrapper>
           <QuickStart>Quick Start</QuickStart>
-          <div>▶ Search: double click or select any words!</div>
-          <div>▶ Read (smoothly): look up unfamilier words while reading!</div>
-          <div>▶ Review: save word cards and review!</div>
-          <div>
-            ▶ Battle: invite your friends to review words with you. Have fun!
-          </div>
-          <div>▶ Achieve: review everyday and enrich your Vocab Garden!</div>
+          <Intro to={"/"}>▶ 【Search】 double click or select any words!</Intro>
+          <br />
+          <Intro to={"/articles"}>
+            ▶ 【Read】 look up unfamiliar words while reading!
+          </Intro>
+          <br />
+          <Intro to={"/vocabbook"}>
+            ▶ 【Review】 save word cards and review!
+          </Intro>
+          <br />
+          <Intro to={"/vocabbook"}>
+            ▶ 【Battle】 invite your friends to review words with you. Have fun!
+          </Intro>
+          <br />
+          <Intro to={"/profile"}>
+            ▶ 【Achieve】 review everyday and enrich your Vocab Garden!
+          </Intro>
         </IntroWrapper>
       </BannerWrapper>
       <VocabDetails />

@@ -32,9 +32,6 @@ const GlobalStyle = createGlobalStyle`
     font-family: "Poppins";
   }
 
-  a {
-    color: #607973;
-  }
 `;
 
 const Wrapper = styled.div`
