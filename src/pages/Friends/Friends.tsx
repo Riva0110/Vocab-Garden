@@ -286,8 +286,8 @@ export default function Friends() {
         </FriendRequest>
         <Title>Friend List</Title>
         {friendList?.map((friendEmail: string, index: number) => (
-          <Friend>
-            <Email key={friendEmail}>{friendEmail}</Email>
+          <Friend key={friendEmail}>
+            <Email>{friendEmail}</Email>
             <FriendStateWrapper stateColor={friendState[index]}>
               {friendState[index]}
               <FriendState stateColor={friendState[index]} />
@@ -297,8 +297,8 @@ export default function Friends() {
 
         <Title>Friend Request</Title>
         {friendRequest?.map((friendEmail) => (
-          <Friend>
-            <Email key={friendEmail}>{friendEmail}</Email>
+          <Friend key={friendEmail}>
+            <Email>{friendEmail}</Email>
             <ReplyBtns>
               <div
                 onClick={() => {
@@ -319,8 +319,8 @@ export default function Friends() {
         ))}
         <Title>Awaiting Reply</Title>
         {awaitingFriendReply?.map((friendEmail) => (
-          <Friend>
-            <Email key={friendEmail}>{friendEmail}</Email>
+          <Friend key={friendEmail}>
+            <Email>{friendEmail}</Email>
             <Empty />
           </Friend>
         ))}

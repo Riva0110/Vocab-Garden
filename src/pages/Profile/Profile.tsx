@@ -425,7 +425,7 @@ export default function Profile() {
           {plantsList?.map(({ plantName, time }, index) => {
             const newDate = new Date(time.seconds * 1000);
             return (
-              <PlantBorder>
+              <PlantBorder key={time + plantName}>
                 <PlantImg
                   src={plantImgsObj[plantName]["5"]}
                   alt="plants"

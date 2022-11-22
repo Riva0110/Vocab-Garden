@@ -3,7 +3,14 @@ import styled from "styled-components";
 import { keywordContext } from "../../context/keywordContext";
 import { authContext } from "../../context/authContext";
 import { vocabBookContext, VocabBooks } from "../../context/vocabBookContext";
-import React, { useContext, useState, useEffect, useRef, useMemo } from "react";
+import React, {
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  Fragment,
+} from "react";
 import {
   doc,
   arrayUnion,
@@ -255,29 +262,15 @@ export default function VocabBook() {
         definition: definition,
       }));
   }, [vocabBooks]);
-  // const topWrongWords = getAllWords()
-  //   ?.slice(0, 10)
-  //   .map(({ vocab, correctRate, definition }) => ({
-  //     text: vocab,
-  //     value: Math.floor(correctRate * 100),
-  //     definition: definition,
-  //   }));
 
   const callbacks = useMemo(() => {
     return {
       onWordClick: (word: any) => {
         setKeyword(word.text);
       },
-      getWordTooltip: (word: any) => `${word.text}(${word.value}%)`,
+      getWordTooltip: (word: any) => null,
     };
   }, [setKeyword]);
-
-  // const callbacks = {
-  //   onWordClick: (word: any) => {
-  //     setKeyword(word.text);
-  //   },
-  //   getWordTooltip: (word: any) => `${word.text}(${word.value}%)`,
-  // };
 
   useEffect(() => {
     if (Object.keys(vocabBooks).length === 0) {
@@ -397,7 +390,7 @@ export default function VocabBook() {
       <VocabBookWrapper>
         <BookWrapper>
           {Object.keys(vocabBooks).map((book: string, index) => (
-            <>
+            <Fragment key={book}>
               <Book
                 selected={viewingBook === `${book}`}
                 onClick={() => {
@@ -409,7 +402,7 @@ export default function VocabBook() {
               >
                 {book.toLocaleLowerCase()} ({vocabBooks?.[book]?.length})
               </Book>
-            </>
+            </Fragment>
           ))}
           <Book
             selected={viewingBook === "wrong words"}
@@ -464,51 +457,12 @@ export default function VocabBook() {
         </BookInfoWrapper>
         <CardWrapper>
           {viewingBook === "wrong words" ? (
-            <>
-              <ReactWordcloud
-                words={topWrongWords}
-                callbacks={callbacks}
-                options={options}
-                size={size}
-              />
-              {/* {topWrongWords?.map(
-                (
-                  { vocab, audioLink, partOfSpeech, definition, correctRate },
-                  index
-                ) => (
-                  <>
-                    <Card>
-                      <VocabHeader>
-                        <VocabTitle>
-                          <Vocab
-                            key={index}
-                            onClick={() => vocab !== "" && setKeyword(vocab)}
-                          >
-                            {vocab}
-                          </Vocab>
-                          {audioLink ? (
-                            <AudioImg
-                              src={audio}
-                              alt="audio"
-                              onClick={() => handlePlayAudio(audioLink)}
-                            />
-                          ) : (
-                            ""
-                          )}
-                        </VocabTitle>
-                        <div>{Math.round(correctRate * 100)}%</div>
-                      </VocabHeader>
-                      <CardText weight={true} onClick={() => getSelectedText()}>
-                        ({partOfSpeech})
-                      </CardText>
-                      <CardText onClick={() => getSelectedText()}>
-                        {definition}
-                      </CardText>
-                    </Card>
-                  </>
-                )
-              )} */}
-            </>
+            <ReactWordcloud
+              words={topWrongWords}
+              callbacks={callbacks}
+              options={options}
+              size={size}
+            />
           ) : (
             <>
               {vocabBooks[viewingBook]?.map(
@@ -516,7 +470,7 @@ export default function VocabBook() {
                   { vocab, audioLink, partOfSpeech, definition, correctRate },
                   index
                 ) => (
-                  <>
+                  <Fragment key={vocab}>
                     <Card>
                       <VocabHeader>
                         <VocabTitle>
@@ -550,7 +504,7 @@ export default function VocabBook() {
                         {definition}
                       </CardText>
                     </Card>
-                  </>
+                  </Fragment>
                 )
               )}
             </>

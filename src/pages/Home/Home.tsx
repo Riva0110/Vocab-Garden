@@ -67,9 +67,8 @@ export default function Home() {
   return (
     <Wrapper>
       <BackgroundImg />
-
-      <BannerWrapper>
-        <Title onClick={() => getSelectedText()}>
+      <BannerWrapper onClick={() => getSelectedText()}>
+        <Title>
           The best way to predict the future
           {window.innerWidth > 601 && <br />} is to create it. <br />
           <Author>– Abraham Lincoln</Author>
