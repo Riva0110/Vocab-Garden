@@ -233,7 +233,7 @@ function getAllWords(vocabBooks: VocabBooks) {
     correctRate: number;
     log: Log[];
   }[] = [];
-  const wordsByBook = Object.keys(vocabBooks)?.map((key) => {
+  const wordsByBook = Object.keys(vocabBooks).map((key) => {
     allWords = allWords.concat(vocabBooks[key]);
     return allWords;
   });

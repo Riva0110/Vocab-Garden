@@ -407,11 +407,12 @@ export default function VocabDetails() {
                   setSelectedvocabBook(e.target.value);
                 }}
               >
-                {Object.keys(vocabBooks)?.map((vocabBook, index) => (
-                  <option key={vocabBook + index}>
-                    {vocabBook.toLocaleLowerCase()}
-                  </option>
-                ))}
+                {vocabBooks &&
+                  Object.keys(vocabBooks)?.map((vocabBook, index) => (
+                    <option key={vocabBook + index}>
+                      {vocabBook.toLocaleLowerCase()}
+                    </option>
+                  ))}
               </Select>
               <div>
                 <Input
