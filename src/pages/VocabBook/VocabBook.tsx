@@ -21,7 +21,7 @@ import plant from "./plant.webp";
 import deleteBtn from "./delete.png";
 import Button from "../../components/Button/Button";
 import Alert from "../../components/Alert/Alert";
-import ReactWordcloud, { Optional, Options, Word } from "react-wordcloud";
+import ReactWordcloud, { Optional, Options } from "react-wordcloud";
 
 const Wrapper = styled.div`
   display: flex;

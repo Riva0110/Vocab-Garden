@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { useOnClickOutside } from "./components/useOnClickOutside";
-import styled, { createGlobalStyle, css } from "styled-components";
+import styled, { createGlobalStyle } from "styled-components";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { keywordContext } from "./context/keywordContext";
 import { authContext } from "./context/authContext";
@@ -16,6 +16,7 @@ const GlobalStyle = createGlobalStyle`
   * {
     box-sizing: border-box;
   }
+  
   body {
     margin: 0;
     padding: 0;
@@ -29,6 +30,10 @@ const GlobalStyle = createGlobalStyle`
 
   button {
     font-family: "Poppins";
+  }
+
+  a {
+    color: #607973;
   }
 `;
 
