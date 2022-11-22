@@ -128,6 +128,44 @@ export default function Article() {
   const renderEditMode = () => {
     return (
       <>
+        <Btns>
+          <div onClick={() => navigate("/articles")}>
+            <Button btnType="secondary">Back</Button>
+          </div>
+          <div
+            onClick={async () => {
+              if (title && content && userId && articlePathName !== "add") {
+                setIsEditing(false);
+                const docRef = doc(
+                  db,
+                  "users",
+                  userId,
+                  "articles",
+                  articlePathName
+                );
+                await updateDoc(docRef, {
+                  title,
+                  content,
+                });
+              } else if (title && content) {
+                setIsEditing(false);
+                const docRef = doc(collection(db, "users", userId, "articles"));
+                await setDoc(docRef, {
+                  id: docRef.id,
+                  title,
+                  content,
+                  time: new Date(),
+                });
+                navigate(`/articles/${docRef.id}?title=${title}`);
+              } else {
+                ref.current?.("Title and content cannot be blank!");
+              }
+            }}
+          >
+            <Button btnType="primary">Done</Button>
+          </div>
+        </Btns>
+
         <TitleLabel>Title</TitleLabel>
         <TitleInput
           type="text"
@@ -136,38 +174,6 @@ export default function Article() {
         />
         <ContentLabel>Content</ContentLabel>
         <QuillEditor content={content} setContent={setContent} />
-        <ButtonDiv
-          onClick={async () => {
-            if (title && content && userId && articlePathName !== "add") {
-              setIsEditing(false);
-              const docRef = doc(
-                db,
-                "users",
-                userId,
-                "articles",
-                articlePathName
-              );
-              await updateDoc(docRef, {
-                title,
-                content,
-              });
-            } else if (title && content) {
-              setIsEditing(false);
-              const docRef = doc(collection(db, "users", userId, "articles"));
-              await setDoc(docRef, {
-                id: docRef.id,
-                title,
-                content,
-                time: new Date(),
-              });
-              navigate(`/articles/${docRef.id}?title=${title}`);
-            } else {
-              ref.current?.("Title and content cannot be blank!");
-            }
-          }}
-        >
-          <Button btnType="primary">Done</Button>
-        </ButtonDiv>
       </>
     );
   };
