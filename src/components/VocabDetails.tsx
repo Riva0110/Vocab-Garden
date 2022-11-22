@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, useRef } from "react";
+import { useEffect, useState, useContext, useRef, Fragment } from "react";
 import { useOnClickOutside } from "./useOnClickOutside";
 import styled, { css } from "styled-components";
 import { keywordContext } from "../context/keywordContext";
@@ -452,12 +452,9 @@ export default function VocabDetails() {
         </TitleContainer>
         <Meanings>
           {vocabDetails?.meanings?.map(
-            ({ partOfSpeech, definitions, synonyms }) => (
-              <>
-                <PartOfSpeech
-                  key={partOfSpeech}
-                  onClick={() => getSelectedText()}
-                >
+            ({ partOfSpeech, definitions, synonyms }, index) => (
+              <Fragment key={index}>
+                <PartOfSpeech onClick={() => getSelectedText()}>
                   {partOfSpeech}
                 </PartOfSpeech>
                 <SubTitle onClick={() => getSelectedText()}>
@@ -500,7 +497,7 @@ export default function VocabDetails() {
                     ))}
                   </>
                 )}
-              </>
+              </Fragment>
             )
           )}
           {keyword === "" && (
