@@ -39,6 +39,13 @@ const Wrapper = styled.div`
   z-index: 1;
 `;
 
+const HasStarted = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 70vh;
+`;
+
 const Img = styled.img`
   width: 300px;
   position: fixed;
@@ -123,6 +130,7 @@ const WaitingRoomWrapper = styled.div`
 
 const Pin = styled.div`
   text-align: center;
+  margin-bottom: 20px;
 `;
 
 const WaitingMessage = styled.div`
@@ -132,11 +140,6 @@ const WaitingMessage = styled.div`
   @media screen and (max-width: 601px) {
     font-size: 16px;
   }
-`;
-
-const StartGame = styled.button`
-  width: 300px;
-  margin-top: 20px;
 `;
 
 const VocabWrapper = styled.div`
@@ -346,6 +349,7 @@ function BattleReview({ pin }: { pin: string }) {
   const [isVisitor, setIsVisitor] = useState<boolean>(false);
   const [isCompetitorIn, setIsCompetitorIn] = useState<boolean>(false);
   const [isAnswered, setIsAnswered] = useState<boolean>(false);
+  const [addScore, setAddScore] = useState<boolean>(false);
   const [answerCount, setAnswerCount] = useState({
     owner: { correct: 0, wrong: 0 },
     competitor: { correct: 0, wrong: 0 },
@@ -526,20 +530,20 @@ function BattleReview({ pin }: { pin: string }) {
         competitor: { ...answerCount.competitor },
       };
 
-      const vocabListAfterTimeup = [...outcomeVocabList];
+      const vocabListAfterTimeout = [...outcomeVocabList];
 
       if (answerCount.owner.correct + answerCount.owner.wrong < round + 1)
         answerCountAfterClick.owner.wrong += 1;
-      vocabListAfterTimeup[round].isCorrect = false;
+      vocabListAfterTimeout[round].isCorrect = false;
       if (
         answerCount.competitor.correct + answerCount.competitor.wrong <
         round + 1
       )
         answerCountAfterClick.competitor.wrong += 1;
-      vocabListAfterTimeup[round].isCorrect = false;
+      vocabListAfterTimeout[round].isCorrect = false;
 
       handleSyncScore(answerCountAfterClick);
-      setOutcomeVocabList(vocabListAfterTimeup);
+      setOutcomeVocabList(vocabListAfterTimeout);
     }
 
     if (countDown === 0 && round + 1 < questionsNumber) {
@@ -551,7 +555,7 @@ function BattleReview({ pin }: { pin: string }) {
       }, 500);
     }
 
-    if (countDown === 0 && round + 1 === questionsNumber) {
+    if (!gameOver && countDown === 0 && round + 1 === questionsNumber) {
       setGameOver(true);
       setIsAnswered(true);
       setShowBtn(true);
@@ -572,6 +576,7 @@ function BattleReview({ pin }: { pin: string }) {
 
         const score = docSnap.data().currentScore;
         const isChallenging = docSnap.data().isChallenging;
+        console.log({ score });
 
         if (isChallenging) {
           if (typeof score === "number" && score < 5) {
@@ -580,6 +585,7 @@ function BattleReview({ pin }: { pin: string }) {
               lastTimeUpdateScore: new Date(),
               isDying: false,
             });
+            setAddScore(true);
           }
         }
       };
@@ -657,6 +663,7 @@ function BattleReview({ pin }: { pin: string }) {
           battleInvitation: arrayUnion({
             ownerName,
             pin: pin,
+            time: new Date(),
           }),
         });
       };
@@ -671,7 +678,9 @@ function BattleReview({ pin }: { pin: string }) {
           <Pin>PIN Code: {pin}</Pin>
           {isOwner ? (
             isCompetitorIn ? (
-              <StartGame onClick={handleStartBattle}>Start</StartGame>
+              <div onClick={handleStartBattle}>
+                <Button btnType="primary">Start</Button>
+              </div>
             ) : (
               <>
                 <WaitingMessage>
@@ -706,9 +715,9 @@ function BattleReview({ pin }: { pin: string }) {
               Waiting for the owner starting the battle
             </WaitingMessage>
           ) : (
-            <StartGame onClick={handleCompetitorJoinBattle}>
-              Join the battle!
-            </StartGame>
+            <div onClick={handleCompetitorJoinBattle}>
+              <Button btnType="primary">Join the battle!</Button>
+            </div>
           )}
         </WaitingRoomWrapper>
       </Main>
@@ -828,6 +837,8 @@ function BattleReview({ pin }: { pin: string }) {
               : (answerCount.competitor.correct / questionsNumber) * 100 >= 80
               ? "You're amazing! Keep up the good work."
               : "Keep fighting, Keep pushing!"}
+            <br />
+            {addScore && "You've got 1 point!"}
           </Message>
           <Btns>
             <BtnDiv showBtn={showBtn} onClick={() => navigate("/vocabbook")}>
@@ -836,7 +847,9 @@ function BattleReview({ pin }: { pin: string }) {
           </Btns>
           <ReviewVocabs>
             <WrongVocabs>
-              <LabelDiv>Wrong vocab</LabelDiv>{" "}
+              {outcomeVocabList?.find((vocab) => !vocab.isCorrect) && (
+                <LabelDiv>Wrong vocab</LabelDiv>
+              )}{" "}
               {outcomeVocabList?.map(
                 ({ vocab, audioLink, partOfSpeech, definition, isCorrect }) => {
                   return (
@@ -852,7 +865,9 @@ function BattleReview({ pin }: { pin: string }) {
               )}
             </WrongVocabs>
             <CorrectVocabs>
-              <LabelDiv>Correct vocab</LabelDiv>{" "}
+              {outcomeVocabList?.find((vocab) => vocab.isCorrect) && (
+                <LabelDiv>Correct vocab</LabelDiv>
+              )}{" "}
               {outcomeVocabList?.map(
                 ({ vocab, audioLink, partOfSpeech, definition, isCorrect }) => {
                   return (
@@ -939,7 +954,7 @@ function BattleReview({ pin }: { pin: string }) {
     </>
   ) : (
     <Wrapper>
-      <p>The game has started.</p>
+      <HasStarted>The battle was finished.</HasStarted>
     </Wrapper>
   );
 }
