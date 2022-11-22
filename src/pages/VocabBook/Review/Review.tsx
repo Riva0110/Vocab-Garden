@@ -186,7 +186,9 @@ const VocabDiv = styled.div`
   align-items: center;
   gap: 10px;
   font-weight: 600;
+  font-size: 16px;
   margin-bottom: 10px;
+  color: #607973;
 `;
 
 const LabelDiv = styled.div`
@@ -201,7 +203,8 @@ const LabelDiv = styled.div`
 `;
 
 const VocabList = styled.div`
-  margin-bottom: 10px;
+  margin-bottom: 30px;
+  font-size: 14px;
 `;
 
 interface Log {
@@ -523,7 +526,7 @@ export default function Review() {
     return (
       <VocabList key={vocab + partOfSpeech}>
         <VocabDiv>
-          {vocab}{" "}
+          ▶ {vocab}{" "}
           {audioLink && (
             <AudioImg
               src={audio}

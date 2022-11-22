@@ -17,15 +17,11 @@ import QuillEditor from "./Editor/QuillEditor";
 import Button from "../../components/Button/Button";
 import Alert from "../../components/Alert/Alert";
 
-const Wrapper = styled.div`
-  display: flex;
-`;
-
 const ArticleWrapper = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  background-color: rgba(255, 255, 255, 0.9);
+  height: 100%;
 `;
 
 const TitleLabel = styled.label`
@@ -57,7 +53,7 @@ const Title = styled.div`
 const Content = styled.div`
   font-size: 16px;
   overflow-y: scroll;
-  height: calc(100vh - 240px);
+  /* height: calc(100vh - 276px); */
 `;
 
 const Btns = styled.div`
@@ -177,7 +173,7 @@ export default function Article() {
   };
 
   return (
-    <Wrapper>
+    <>
       <Alert
         children={(add: AddFunction) => {
           ref.current = add;
@@ -186,6 +182,6 @@ export default function Article() {
       <ArticleWrapper>
         {isEditing ? renderEditMode() : renderReadMode()}
       </ArticleWrapper>
-    </Wrapper>
+    </>
   );
 }

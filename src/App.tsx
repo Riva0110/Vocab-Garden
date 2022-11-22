@@ -364,7 +364,6 @@ function App() {
                     setShowInvitation(false);
                     handleClearInvitation({ ownerName, pin });
                   }}
-                  // href={`/vocabbook/review/${pin}`}
                 >
                   {ownerName} invites you to battle! ▶
                 </InvitationA>

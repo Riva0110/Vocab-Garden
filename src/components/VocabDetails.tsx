@@ -29,8 +29,8 @@ interface Props {
 const Wrapper = styled.div`
   font-size: 16px;
   width: calc((100% - 30px) / 2);
-  padding: 20px;
   height: calc(100vh - 160px);
+  padding: 20px;
   background-color: rgba(255, 255, 255, 0.7);
   border: 1px solid lightgray;
   z-index: 1;
@@ -310,10 +310,9 @@ export default function VocabDetails() {
 
   function getSelectedText() {
     if (checkDevice() === "desktop") {
-      console.log("desktop");
       if (window.getSelection) {
         const txt = window.getSelection()?.toString();
-        if (typeof txt !== "undefined" && txt !== "") setKeyword(txt);
+        if (typeof txt !== "undefined") setKeyword(txt);
       }
     }
   }

@@ -31,11 +31,12 @@ const Img2 = styled.img`
   left: 0;
   bottom: 0;
   width: 400px;
-  opacity: 0.5;
+  opacity: 0.4;
 `;
 
 const OutletWrapper = styled.div`
   width: calc((100% - 30px) / 2);
+  height: calc(100vh - 160px);
   z-index: 1;
   @media screen and (max-width: 601px) {
     width: calc((100% - 20px));

@@ -33,7 +33,7 @@ const ModeBtns = styled.div`
 `;
 
 const ModeBtn = styled.button`
-  width: 100px;
+  width: 150px;
   height: 25px;
   line-height: 25px;
   padding-left: 10px;

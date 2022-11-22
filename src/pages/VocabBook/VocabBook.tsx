@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { keywordContext } from "../../context/keywordContext";
 import { authContext } from "../../context/authContext";
 import { vocabBookContext } from "../../context/vocabBookContext";
-import { useContext, useState, useEffect, useRef } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import {
   doc,
   arrayUnion,
@@ -21,6 +21,7 @@ import plant from "./plant.webp";
 import deleteBtn from "./delete.png";
 import Button from "../../components/Button/Button";
 import Alert from "../../components/Alert/Alert";
+import ReactWordcloud, { Optional, Options, Word } from "react-wordcloud";
 
 const Wrapper = styled.div`
   display: flex;
@@ -45,14 +46,13 @@ const Nav = styled.nav`
 
 const VocabBookWrapper = styled.div`
   width: calc((100% - 30px) / 2);
+  height: calc(100vh - 160px);
   z-index: 1;
-  @media screen and (max-width: 600px) {
+  @media screen and (max-width: 601px) {
     width: calc(100vw - 40px);
     padding: 0 10px;
   }
 `;
-
-const VocabBookAndCard = styled.div``;
 
 const BookWrapper = styled.div`
   display: flex;
@@ -121,7 +121,10 @@ const CardWrapper = styled.div`
   flex-wrap: wrap;
   align-content: flex-start;
   overflow-y: scroll;
-  height: calc(100vh - 232px);
+  height: calc(100vh - 277px);
+  @media screen and (max-width: 1031px) {
+    height: calc(100vh - 322px);
+  }
 `;
 
 const Card = styled.div`
@@ -138,8 +141,6 @@ const Card = styled.div`
   background-color: rgba(255, 255, 255, 0.7);
   @media screen and (max-width: 1101px) {
     width: 100%;
-  }
-  @media screen and (max-width: 601px) {
     height: auto;
   }
 `;
@@ -197,6 +198,9 @@ interface Log {
 }
 
 type AddFunction = (msg: string) => void;
+interface TopWrongWords extends Word {
+  def: string;
+}
 
 export default function VocabBook() {
   const navigate = useNavigate();
@@ -209,7 +213,37 @@ export default function VocabBook() {
   const [bookCorrectRate, setBookCorrectRate] = useState<number>();
   const ref = useRef<null | AddFunction>(null);
   const newBookRef = useRef<HTMLInputElement>(null);
-  const topWrongWords = getAllWords()?.slice(0, 10);
+  const topWrongWords = getAllWords()
+    ?.slice(0, 10)
+    .map(({ vocab, correctRate, definition }) => ({
+      text: vocab,
+      value: Math.floor(correctRate * 100),
+      definition: definition,
+    }));
+
+  const callbacks = {
+    onWordClick: (word: any) => {
+      setKeyword(word.text);
+    },
+    getWordTooltip: (word: any) => `${word.text}(${word.value}%)`,
+  };
+
+  const options = {
+    enableTooltip: true,
+    deterministic: false,
+    fontFamily: "Poppins",
+    fontSizes: [30, 50],
+    fontStyle: "normal",
+    fontWeight: "normal",
+    padding: 1,
+    rotations: 2,
+    rotationAngles: [0, 0],
+    scale: "sqrt",
+    spiral: "archimedean",
+    transitionDuration: 1000,
+  } as Optional<Options>;
+
+  const size = [600, 600] as [number, number];
 
   useEffect(() => {
     if (Object.keys(vocabBooks).length === 0) {
@@ -346,167 +380,167 @@ export default function VocabBook() {
       />
       <Img src={plant} alt="plant" />
       <VocabBookWrapper>
-        <VocabBookAndCard>
-          <BookWrapper>
-            {Object.keys(vocabBooks).map((book: string, index) => (
-              <>
-                <Book
-                  selected={viewingBook === `${book}`}
-                  onClick={() => {
-                    setViewingBook(book);
-                    setBookCorrectRate(
-                      Math.round(correctRateOfBooksArr[index] * 100)
-                    );
-                  }}
-                >
-                  {book.toLocaleLowerCase()} ({vocabBooks?.[book]?.length})
-                </Book>
-              </>
-            ))}
-            <Book
-              selected={viewingBook === "wrong words"}
-              onClick={() => {
-                setViewingBook("wrong words");
-              }}
-            >
-              wrong words ({topWrongWords?.length})
-              <br />
-            </Book>
-          </BookWrapper>
-          <BookInfoWrapper>
-            <BookButtons>
-              <div>
-                <Input
-                  onChange={(e) => setNewBook(e.target.value)}
-                  placeholder="Add a book"
-                  ref={newBookRef}
-                />
-                <AddButton onClick={handleAddBook}>+</AddButton>
-              </div>
-              <Delete>
-                {viewingBook === "wrong words" ? null : (
-                  <ButtonImg
-                    src={deleteBtn}
-                    alt="delete"
-                    onClick={() => handleDeleteBook(viewingBook)}
-                  />
-                )}
-              </Delete>
-            </BookButtons>
-            <Nav>
-              <div>
-                Correct rate:{" "}
-                {viewingBook === "wrong words" ? "<50%" : `${bookCorrectRate}%`}
-              </div>
-              <div
-                onClick={() =>
-                  vocabBooks[viewingBook]?.length >= 5 ||
-                  (viewingBook === "wrong words" && topWrongWords?.length >= 5)
-                    ? navigate("/vocabbook/review")
-                    : ref.current?.(
-                        "Please save at least 5 vocab cards in this book!"
-                      )
-                }
+        <BookWrapper>
+          {Object.keys(vocabBooks).map((book: string, index) => (
+            <>
+              <Book
+                selected={viewingBook === `${book}`}
+                onClick={() => {
+                  setViewingBook(book);
+                  setBookCorrectRate(
+                    Math.round(correctRateOfBooksArr[index] * 100)
+                  );
+                }}
               >
+                {book.toLocaleLowerCase()} ({vocabBooks?.[book]?.length})
+              </Book>
+            </>
+          ))}
+          <Book
+            selected={viewingBook === "wrong words"}
+            onClick={() => {
+              setViewingBook("wrong words");
+            }}
+          >
+            wrong words ({topWrongWords?.length})
+            <br />
+          </Book>
+        </BookWrapper>
+        <BookInfoWrapper>
+          <BookButtons>
+            <div>
+              <Input
+                onChange={(e) => setNewBook(e.target.value)}
+                placeholder="Add a book"
+                ref={newBookRef}
+              />
+              <AddButton onClick={handleAddBook}>+</AddButton>
+            </div>
+            <Delete>
+              {viewingBook !== "wrong words" && (
+                <ButtonImg
+                  src={deleteBtn}
+                  alt="delete"
+                  onClick={() => handleDeleteBook(viewingBook)}
+                />
+              )}
+            </Delete>
+          </BookButtons>
+          <Nav>
+            <div>
+              Correct rate:{" "}
+              {viewingBook === "wrong words" ? "<50%" : `${bookCorrectRate}%`}
+            </div>
+            <div
+              onClick={() =>
+                vocabBooks[viewingBook]?.length >= 5 ||
+                (viewingBook === "wrong words" && topWrongWords?.length >= 5)
+                  ? navigate("/vocabbook/review")
+                  : ref.current?.(
+                      "Please save at least 5 vocab cards in this book!"
+                    )
+              }
+            >
+              {viewingBook !== "wrong words" && (
                 <Button btnType={"primary"}>Review</Button>
-              </div>
-            </Nav>
-          </BookInfoWrapper>
-          <CardWrapper>
-            {viewingBook === "wrong words" ? (
-              <>
-                {topWrongWords?.map(
-                  (
-                    { vocab, audioLink, partOfSpeech, definition, correctRate },
-                    index
-                  ) => (
-                    <>
-                      <Card>
-                        <VocabHeader>
-                          <VocabTitle>
-                            <Vocab
-                              key={index}
-                              onClick={() => vocab !== "" && setKeyword(vocab)}
-                            >
-                              {vocab}
-                            </Vocab>
-                            {audioLink ? (
-                              <AudioImg
-                                src={audio}
-                                alt="audio"
-                                onClick={() => handlePlayAudio(audioLink)}
-                              />
-                            ) : (
-                              ""
-                            )}
-                          </VocabTitle>
-                          <div>{Math.round(correctRate * 100)}%</div>
-                        </VocabHeader>
-                        <CardText
-                          weight={true}
-                          onClick={() => getSelectedText()}
-                        >
-                          ({partOfSpeech})
-                        </CardText>
-                        <CardText onClick={() => getSelectedText()}>
-                          {definition}
-                        </CardText>
-                      </Card>
-                    </>
-                  )
-                )}
-              </>
-            ) : (
-              <>
-                {vocabBooks[viewingBook]?.map(
-                  (
-                    { vocab, audioLink, partOfSpeech, definition, correctRate },
-                    index
-                  ) => (
-                    <>
-                      <Card>
-                        <VocabHeader>
-                          <VocabTitle>
-                            <Vocab
-                              key={index}
-                              onClick={() => vocab !== "" && setKeyword(vocab)}
-                            >
-                              {vocab}
-                            </Vocab>
-                            {audioLink ? (
-                              <AudioImg
-                                src={audio}
-                                alt="audio"
-                                onClick={() => handlePlayAudio(audioLink)}
-                              />
-                            ) : (
-                              ""
-                            )}
-                            <ButtonImg
-                              src={saved}
-                              alt="save"
-                              onClick={() => handleDeleteVocabFromBook(vocab)}
+              )}
+            </div>
+          </Nav>
+        </BookInfoWrapper>
+        <CardWrapper>
+          {viewingBook === "wrong words" ? (
+            <>
+              <ReactWordcloud
+                words={topWrongWords}
+                callbacks={callbacks}
+                options={options}
+                size={size}
+              />
+              {/* {topWrongWords?.map(
+                (
+                  { vocab, audioLink, partOfSpeech, definition, correctRate },
+                  index
+                ) => (
+                  <>
+                    <Card>
+                      <VocabHeader>
+                        <VocabTitle>
+                          <Vocab
+                            key={index}
+                            onClick={() => vocab !== "" && setKeyword(vocab)}
+                          >
+                            {vocab}
+                          </Vocab>
+                          {audioLink ? (
+                            <AudioImg
+                              src={audio}
+                              alt="audio"
+                              onClick={() => handlePlayAudio(audioLink)}
                             />
-                          </VocabTitle>
-                          <div>{Math.round(correctRate * 100)}%</div>
-                        </VocabHeader>
-                        <CardText
-                          weight={true}
-                          onClick={() => getSelectedText()}
-                        >
-                          ({partOfSpeech})
-                        </CardText>
-                        <CardText onClick={() => getSelectedText()}>
-                          {definition}
-                        </CardText>
-                      </Card>
-                    </>
-                  )
-                )}
-              </>
-            )}
-          </CardWrapper>
-        </VocabBookAndCard>
+                          ) : (
+                            ""
+                          )}
+                        </VocabTitle>
+                        <div>{Math.round(correctRate * 100)}%</div>
+                      </VocabHeader>
+                      <CardText weight={true} onClick={() => getSelectedText()}>
+                        ({partOfSpeech})
+                      </CardText>
+                      <CardText onClick={() => getSelectedText()}>
+                        {definition}
+                      </CardText>
+                    </Card>
+                  </>
+                )
+              )} */}
+            </>
+          ) : (
+            <>
+              {vocabBooks[viewingBook]?.map(
+                (
+                  { vocab, audioLink, partOfSpeech, definition, correctRate },
+                  index
+                ) => (
+                  <>
+                    <Card>
+                      <VocabHeader>
+                        <VocabTitle>
+                          <Vocab
+                            key={index}
+                            onClick={() => vocab !== "" && setKeyword(vocab)}
+                          >
+                            {vocab}
+                          </Vocab>
+                          {audioLink ? (
+                            <AudioImg
+                              src={audio}
+                              alt="audio"
+                              onClick={() => handlePlayAudio(audioLink)}
+                            />
+                          ) : (
+                            ""
+                          )}
+                          <ButtonImg
+                            src={saved}
+                            alt="save"
+                            onClick={() => handleDeleteVocabFromBook(vocab)}
+                          />
+                        </VocabTitle>
+                        <div>{Math.round(correctRate * 100)}%</div>
+                      </VocabHeader>
+                      <CardText weight={true} onClick={() => getSelectedText()}>
+                        ({partOfSpeech})
+                      </CardText>
+                      <CardText onClick={() => getSelectedText()}>
+                        {definition}
+                      </CardText>
+                    </Card>
+                  </>
+                )
+              )}
+            </>
+          )}
+        </CardWrapper>
       </VocabBookWrapper>
       <VocabDetails />
     </Wrapper>

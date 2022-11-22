@@ -234,7 +234,8 @@ const LabelDiv = styled.div`
 `;
 
 const VocabList = styled.div`
-  margin-bottom: 10px;
+  margin-bottom: 30px;
+  font-size: 14px;
 `;
 
 const VocabDiv = styled.div`
@@ -243,6 +244,8 @@ const VocabDiv = styled.div`
   gap: 10px;
   font-weight: 600;
   margin-bottom: 10px;
+  color: #607973;
+  font-size: 16px;
 `;
 
 const Title = styled.div`
@@ -798,7 +801,7 @@ function BattleReview({ pin }: { pin: string }) {
     return (
       <VocabList key={vocab + partOfSpeech}>
         <VocabDiv>
-          {vocab}{" "}
+          ▶ {vocab}{" "}
           {audioLink && (
             <AudioImg
               src={audio}
