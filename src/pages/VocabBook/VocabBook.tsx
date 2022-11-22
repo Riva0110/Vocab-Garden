@@ -2,8 +2,8 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { keywordContext } from "../../context/keywordContext";
 import { authContext } from "../../context/authContext";
-import { vocabBookContext } from "../../context/vocabBookContext";
-import React, { useContext, useState, useEffect, useRef } from "react";
+import { vocabBookContext, VocabBooks } from "../../context/vocabBookContext";
+import React, { useContext, useState, useEffect, useRef, useMemo } from "react";
 import {
   doc,
   arrayUnion,
@@ -199,6 +199,42 @@ interface Log {
 
 type AddFunction = (msg: string) => void;
 
+const options = {
+  enableTooltip: true,
+  deterministic: true,
+  fontFamily: "Poppins",
+  fontSizes: [30, 50],
+  fontStyle: "normal",
+  fontWeight: "normal",
+  padding: 1,
+  rotations: 2,
+  rotationAngles: [0, 0],
+  scale: "sqrt",
+  spiral: "archimedean",
+  transitionDuration: 1000,
+} as Optional<Options>;
+
+const size = [600, 600] as [number, number];
+
+function getAllWords(vocabBooks: VocabBooks) {
+  let allWords: {
+    vocab: string;
+    audioLink: string;
+    partOfSpeech: string;
+    definition: string;
+    isCorrect?: boolean | undefined;
+    correctRate: number;
+    log: Log[];
+  }[] = [];
+  const wordsByBook = Object.keys(vocabBooks)?.map((key) => {
+    allWords = allWords.concat(vocabBooks[key]);
+    return allWords;
+  });
+  return wordsByBook[wordsByBook.length - 1]?.filter(
+    (vocab) => vocab.correctRate < 0.5 && vocab.log.length >= 5
+  );
+}
+
 export default function VocabBook() {
   const navigate = useNavigate();
   const { viewingBook, setViewingBook } = useViewingBook();
@@ -210,37 +246,38 @@ export default function VocabBook() {
   const [bookCorrectRate, setBookCorrectRate] = useState<number>();
   const ref = useRef<null | AddFunction>(null);
   const newBookRef = useRef<HTMLInputElement>(null);
-  const topWrongWords = getAllWords()
-    ?.slice(0, 10)
-    .map(({ vocab, correctRate, definition }) => ({
-      text: vocab,
-      value: Math.floor(correctRate * 100),
-      definition: definition,
-    }));
+  const topWrongWords = useMemo(() => {
+    return getAllWords(vocabBooks)
+      ?.slice(0, 10)
+      .map(({ vocab, correctRate, definition }) => ({
+        text: vocab,
+        value: Math.floor(correctRate * 100),
+        definition: definition,
+      }));
+  }, [vocabBooks]);
+  // const topWrongWords = getAllWords()
+  //   ?.slice(0, 10)
+  //   .map(({ vocab, correctRate, definition }) => ({
+  //     text: vocab,
+  //     value: Math.floor(correctRate * 100),
+  //     definition: definition,
+  //   }));
 
-  const callbacks = {
-    onWordClick: (word: any) => {
-      setKeyword(word.text);
-    },
-    getWordTooltip: (word: any) => `${word.text}(${word.value}%)`,
-  };
+  const callbacks = useMemo(() => {
+    return {
+      onWordClick: (word: any) => {
+        setKeyword(word.text);
+      },
+      getWordTooltip: (word: any) => `${word.text}(${word.value}%)`,
+    };
+  }, [setKeyword]);
 
-  const options = {
-    enableTooltip: true,
-    deterministic: false,
-    fontFamily: "Poppins",
-    fontSizes: [30, 50],
-    fontStyle: "normal",
-    fontWeight: "normal",
-    padding: 1,
-    rotations: 2,
-    rotationAngles: [0, 0],
-    scale: "sqrt",
-    spiral: "archimedean",
-    transitionDuration: 1000,
-  } as Optional<Options>;
-
-  const size = [600, 600] as [number, number];
+  // const callbacks = {
+  //   onWordClick: (word: any) => {
+  //     setKeyword(word.text);
+  //   },
+  //   getWordTooltip: (word: any) => `${word.text}(${word.value}%)`,
+  // };
 
   useEffect(() => {
     if (Object.keys(vocabBooks).length === 0) {
@@ -258,25 +295,6 @@ export default function VocabBook() {
       setWrongWordsDoc();
     }
   }, [topWrongWords, userId]);
-
-  function getAllWords() {
-    let allWords: {
-      vocab: string;
-      audioLink: string;
-      partOfSpeech: string;
-      definition: string;
-      isCorrect?: boolean | undefined;
-      correctRate: number;
-      log: Log[];
-    }[] = [];
-    const wordsByBook = Object.keys(vocabBooks)?.map((key) => {
-      allWords = allWords.concat(vocabBooks[key]);
-      return allWords;
-    });
-    return wordsByBook[wordsByBook.length - 1]?.filter(
-      (vocab) => vocab.correctRate < 0.5 && vocab.log.length >= 5
-    );
-  }
 
   const correctRateOfBooksArr = getCorrectRateOfBooks().map((logOfBook) => {
     const correctCount = logOfBook.reduce((acc, item) => {
