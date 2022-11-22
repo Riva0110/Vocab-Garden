@@ -199,7 +199,10 @@ const PlantBorder = styled.div`
 const PlantImg = styled.img`
   width: 100%;
   height: 85%;
-  margin-bottom: 20px;
+  margin-bottom: 5px;
+  @media screen and (max-width: 601px) {
+    margin-bottom: 15px;
+  }
 `;
 
 const PlantName = styled.div``;

@@ -198,9 +198,6 @@ interface Log {
 }
 
 type AddFunction = (msg: string) => void;
-interface TopWrongWords extends Word {
-  def: string;
-}
 
 export default function VocabBook() {
   const navigate = useNavigate();
