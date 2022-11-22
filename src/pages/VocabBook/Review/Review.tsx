@@ -152,6 +152,8 @@ const BtnDiv = styled.div`
   display: ${(props: Props) => (props.showBtn ? "flex" : "none")};
   margin-top: 20px;
   justify-content: flex-end;
+  position: relative;
+  z-index: 2;
 `;
 
 const Message = styled.div`
@@ -234,7 +236,7 @@ export default function Review() {
 
   const { viewingBook } = useViewingBook();
   const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
-  const [updateLogInVeiwingBook, setUpdateLogInVeiwingBook] = useState<
+  const [updateLogInViewingBook, setUpdateLogInViewingBook] = useState<
     Answer[]
   >(vocabBooks?.[viewingBook]);
 
@@ -322,7 +324,7 @@ export default function Review() {
     const updateLog = async () => {
       const userRef = doc(db, "vocabBooks", userId);
       await updateDoc(userRef, {
-        [viewingBook]: updateLogInVeiwingBook,
+        [viewingBook]: updateLogInViewingBook,
       });
     };
     updateLog();
@@ -366,7 +368,7 @@ export default function Review() {
                   );
                   setShowAnswerArr(answerStatus);
 
-                  let newUpdateLogInVeiwingBook;
+                  let newUpdateLogInViewingBook;
 
                   if (clickedVocab === correctVocab?.vocab) {
                     setAnswerCount((prev) => ({
@@ -374,7 +376,7 @@ export default function Review() {
                       correct: prev.correct + 1,
                     }));
 
-                    newUpdateLogInVeiwingBook = [...updateLogInVeiwingBook].map(
+                    newUpdateLogInViewingBook = [...updateLogInViewingBook].map(
                       ({
                         vocab,
                         audioLink,
@@ -433,7 +435,7 @@ export default function Review() {
                       ...prev,
                       wrong: prev.wrong + 1,
                     }));
-                    newUpdateLogInVeiwingBook = [...updateLogInVeiwingBook].map(
+                    newUpdateLogInViewingBook = [...updateLogInViewingBook].map(
                       ({
                         vocab,
                         audioLink,
@@ -484,7 +486,7 @@ export default function Review() {
                       }
                     );
                   }
-                  setUpdateLogInVeiwingBook(newUpdateLogInVeiwingBook);
+                  setUpdateLogInViewingBook(newUpdateLogInViewingBook);
                 }
               }}
             >
@@ -572,7 +574,7 @@ export default function Review() {
               <LabelDiv>Wrong vocab</LabelDiv>{" "}
               {reviewingQuestions.map(
                 ({ vocab, audioLink, partOfSpeech, definition }) => {
-                  const answer = updateLogInVeiwingBook.find((answer) => {
+                  const answer = updateLogInViewingBook.find((answer) => {
                     return answer.vocab === vocab;
                   });
                   const lastAnswerLog = answer?.log.at(-1);
@@ -592,7 +594,7 @@ export default function Review() {
               <LabelDiv>Correct vocab</LabelDiv>{" "}
               {reviewingQuestions.map(
                 ({ vocab, audioLink, partOfSpeech, definition }) => {
-                  const answer = updateLogInVeiwingBook.find((answer) => {
+                  const answer = updateLogInViewingBook.find((answer) => {
                     return answer.vocab === vocab;
                   });
                   const lastAnswerLog = answer?.log.at(-1);
