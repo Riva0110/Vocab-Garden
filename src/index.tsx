@@ -47,7 +47,7 @@ root.render(
               </Route>
               <Route path="friends" element={<Friends />} />
               <Route path="profile" element={<Profile />} />
-              <Route path="*" element={<NoPage />} />
+              <Route path="*" element={<Home />} />
             </Route>
           </Routes>
         </BrowserRouter>
