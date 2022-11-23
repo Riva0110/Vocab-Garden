@@ -41,7 +41,7 @@ const Img = styled.img`
   right: 0px;
   bottom: 0px;
   width: 500px;
-  opacity: 0.5;
+  opacity: 0.6;
 `;
 
 const Nav = styled.nav`
