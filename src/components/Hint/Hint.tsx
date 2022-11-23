@@ -17,8 +17,8 @@ const Wrapper = styled.div`
 
 const Message = styled.div`
   position: absolute;
-  top: 20%;
-  left: 20%;
+  top: 30px;
+  width: 350px;
   z-index: 10;
   border: 1px solid #607973;
   border-radius: 10px;
@@ -41,9 +41,8 @@ function Hint({ children }: { children: string }) {
         onMouseOver={() => setIsShown(true)}
         onMouseLeave={() => setIsShown(false)}
       >
-        ?
+        ?<Message isShown={isShown}>{children}</Message>
       </Wrapper>
-      <Message isShown={isShown}>{children}</Message>
     </>
   );
 }

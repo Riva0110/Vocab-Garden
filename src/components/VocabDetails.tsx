@@ -20,6 +20,7 @@ import spinner from "./spinner.gif";
 import Alert from "./Alert/Alert";
 import Button from "./Button/Button";
 import { X } from "react-feather";
+import Hint from "../components/Hint/Hint";
 
 interface Props {
   isPopuping?: boolean;
@@ -452,11 +453,11 @@ export default function VocabDetails() {
                   </div>
                 </Buttons>
               </SavePopup>
+              <Hint>Intro</Hint>
             </Title>
             <XDiv
               size={16}
               onClick={() => {
-                console.log("closeeeee");
                 setShowVocabInMobile(false);
               }}
             />

@@ -7,6 +7,7 @@ import { plantImgsObj } from "./plantImgs";
 import Button from "../../components/Button/Button";
 import plant from "./banner.webp";
 import garden from "./garden.webp";
+import Hint from "../../components/Hint/Hint";
 
 interface Props {
   insideColor?: boolean;
@@ -150,6 +151,12 @@ const UserInfoWrapper = styled.div`
   }
 `;
 
+const ProfileTitle = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+
 const GrowingPlantImg = styled.img`
   width: 250px;
   height: 300px;
@@ -291,6 +298,7 @@ export default function Profile() {
       const plantsRef = doc(db, "plantsList", userId);
       const plantsSnap = await getDoc(plantsRef);
       const plantData = plantsSnap.data()?.plants as PlantsListInterface[];
+      console.log({ plantsSnap, plantData });
       setPlantsList(plantData);
 
       const userRef = doc(db, "users", userId);
@@ -418,11 +426,20 @@ export default function Profile() {
     );
   };
 
+  console.log({ plantsList });
+
+  // console.log("plantsList?.length !== 0", plantsList.length !== 0);
+
+  console.log("plantsList length", plantsList?.length);
+
   function renderProfile() {
     return (
       <Wrapper>
         <UserInfoWrapper>
-          <p>{name}’s Vocab Garden</p>
+          <ProfileTitle>
+            <p>{name}’s Vocab Garden</p>
+            <Hint>Intro</Hint>
+          </ProfileTitle>
           <GrowingPlantImg
             src={plantImgsObj[currentPlant]?.[plantPhase]}
             alt="plants"
