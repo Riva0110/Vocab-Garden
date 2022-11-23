@@ -44,10 +44,10 @@ const Title = styled.div`
   color: black;
 `;
 
-const Author = styled.span`
-  font-size: 20px;
-  font-weight: 200;
-`;
+// const Author = styled.span`
+//   font-size: 20px;
+//   font-weight: 200;
+// `;
 
 const IntroWrapper = styled.div`
   color: #292727;
