@@ -497,7 +497,7 @@ export default function VocabBook() {
             )
           ) : (
             <>
-              {vocabBooks && vocabBooks[viewingBook].length ? (
+              {vocabBooks?.[viewingBook]?.length ? (
                 vocabBooks[viewingBook]?.map(
                   (
                     { vocab, audioLink, partOfSpeech, definition, correctRate },

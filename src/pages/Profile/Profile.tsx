@@ -94,7 +94,12 @@ const Select = styled.select`
     outline: none;
   }
   cursor: pointer;
+  height: 30px;
+  font-size: 16px;
+  background-color: rgb(255, 255, 255, 0.1);
 `;
+
+const Option = styled.option``;
 
 const ScoreBarWrapper = styled.div`
   width: 200px;
@@ -448,9 +453,9 @@ export default function Profile() {
                 }}
               >
                 {Object.keys(plantImgsObj)?.map((plant, index) => (
-                  <option key={plant} value={plant}>
+                  <Option key={plant} value={plant}>
                     {displayPlantName(plant)}
-                  </option>
+                  </Option>
                 ))}
               </Select>
 
@@ -471,7 +476,7 @@ export default function Profile() {
         </UserInfoWrapper>
         <PlantsWrapper>
           <Plants>
-            {plantsList.length !== 0 ? (
+            {plantsList?.length !== 0 ? (
               plantsList?.map(({ plantName, time }, index) => {
                 const newDate = new Date(time.seconds * 1000);
                 return (
