@@ -6,6 +6,7 @@ import { db } from "../../firebase/firebase";
 import { plantImgsObj } from "./plantImgs";
 import Button from "../../components/Button/Button";
 import plant from "./banner.webp";
+import garden from "./garden.webp";
 
 interface Props {
   insideColor?: boolean;
@@ -15,7 +16,8 @@ interface Props {
 const Wrapper = styled.div`
   padding: 80px 20px 20px 20px;
   display: flex;
-  @media screen and (max-width: 801px) {
+  gap: 30px;
+  @media screen and (max-width: 1001px) {
     flex-direction: column;
   }
 `;
@@ -55,6 +57,11 @@ const BackgroundImg = styled.div`
   background-image: url(${plant});
   background-size: cover;
   opacity: 0.5;
+`;
+
+const GardenImg = styled(BackgroundImg)`
+  background-image: url(${garden});
+  opacity: 0.4;
 `;
 
 const WelcomeMsg = styled.div`
@@ -117,6 +124,11 @@ const ScoreDiv = styled.div`
 `;
 
 const UserInfoWrapper = styled.div`
+  background-color: rgb(255, 255, 255, 0.9);
+  padding: 30px 0;
+  border-radius: 30px;
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -129,14 +141,7 @@ const UserInfoWrapper = styled.div`
     width: 35%;
   }
   @media screen and (max-width: 1025px) {
-    width: 50%;
-  }
-  @media screen and (max-width: 880px) {
-    width: 40%;
-  }
-  @media screen and (max-width: 801px) {
     width: 100%;
-    padding: 0 10px;
   }
 `;
 
@@ -149,13 +154,16 @@ const GrowingPlantImg = styled.img`
   }
 `;
 
-const Plants = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  margin-top: 30px;
+const PlantsWrapper = styled.div`
   width: 70%;
-  gap: 20px;
-  align-content: flex-start;
+  background-color: rgb(255, 255, 255, 0.9);
+  position: relative;
+  z-index: 1;
+  border-radius: 30px;
+  padding: 30px;
+  display: flex;
+  justify-content: center;
+
   @media screen and (max-width: 1269px) {
     width: 60%;
   }
@@ -163,17 +171,31 @@ const Plants = styled.div`
     width: 65%;
   }
   @media screen and (max-width: 1025px) {
-    width: 50%;
-  }
-  @media screen and (max-width: 880px) {
-    width: 60%;
-  }
-  @media screen and (max-width: 801px) {
     width: 100%;
   }
-  @media screen and (max-width: 601px) {
-    width: 100%;
-    justify-content: center;
+`;
+
+const Plants = styled.div`
+  display: grid;
+  grid-template-columns: auto auto auto auto auto;
+  gap: 20px;
+  @media screen and (max-width: 1701px) {
+    grid-template-columns: auto auto auto auto;
+  }
+  @media screen and (max-width: 1401px) {
+    grid-template-columns: auto auto auto;
+  }
+  @media screen and (max-width: 1201px) {
+    grid-template-columns: auto auto;
+  }
+  @media screen and (max-width: 1025px) {
+    grid-template-columns: auto auto auto;
+  }
+  @media screen and (max-width: 731px) {
+    grid-template-columns: auto auto;
+  }
+  @media screen and (max-width: 501px) {
+    grid-template-columns: auto;
   }
 `;
 
@@ -186,14 +208,6 @@ const PlantBorder = styled.div`
   width: 200px;
   height: 260px;
   padding: 30px;
-  @media screen and (max-width: 801px) {
-    width: calc((100vw - 100px) / 3);
-    height: calc((100vw - 64px) / 3 * 1.3);
-  }
-  @media screen and (max-width: 601px) {
-    width: calc((100vw - 160px));
-    height: calc((100vw - 160px) * 1.3);
-  }
 `;
 
 const PlantImg = styled.img`
@@ -210,6 +224,14 @@ const PlantName = styled.div``;
 const Time = styled.div`
   color: gray;
   font-size: 12px;
+`;
+
+const FewPlants = styled.div`
+  display: flex;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
 `;
 
 interface PlantsListInterface {
@@ -447,22 +469,33 @@ export default function Profile() {
             <Button btnType={"secondary"}>Log out</Button>
           </div>
         </UserInfoWrapper>
-        <Plants>
-          {plantsList?.map(({ plantName, time }, index) => {
-            const newDate = new Date(time.seconds * 1000);
-            return (
-              <PlantBorder key={time + plantName}>
-                <PlantImg
-                  src={plantImgsObj[getCamelCasePlantName(plantName)]["5"]}
-                  alt="plants"
-                  key={plantName + index}
-                />
-                <PlantName>{plantName}</PlantName>
-                <Time>{newDate.toLocaleString()}</Time>
-              </PlantBorder>
-            );
-          })}
-        </Plants>
+        <PlantsWrapper>
+          <Plants>
+            {plantsList.length !== 0 ? (
+              plantsList?.map(({ plantName, time }, index) => {
+                const newDate = new Date(time.seconds * 1000);
+                return (
+                  <PlantBorder key={time + plantName}>
+                    <PlantImg
+                      src={plantImgsObj[getCamelCasePlantName(plantName)]["5"]}
+                      alt="plants"
+                      key={plantName + index}
+                    />
+                    <PlantName>{plantName}</PlantName>
+                    <Time>{newDate.toLocaleString()}</Time>
+                  </PlantBorder>
+                );
+              })
+            ) : (
+              <FewPlants>
+                You haven't got any plants in your garden.
+                <br />
+                Start a challenge TODAY!
+              </FewPlants>
+            )}
+          </Plants>
+        </PlantsWrapper>
+        <GardenImg />
       </Wrapper>
     );
   }
