@@ -316,14 +316,16 @@ export default function Profile() {
         } else if (score <= 4) {
           setPlantPhase("3");
           setMessages("你好棒喔！植物長出新葉片了！");
-        } else if (score === 5) {
-          setIsChallenging(false);
-          setPlantPhase("5");
-          setMessages("挑戰成功，植物長大了！趕快收藏到花園吧");
         }
 
         if (score === 3 || score === 4) setPlantPhase("3");
       }
+    }
+
+    if (score === 5) {
+      setIsChallenging(false);
+      setPlantPhase("5");
+      setMessages("挑戰成功，植物長大了！趕快收藏到花園吧");
     }
 
     const updateUserInfo = async () => {
