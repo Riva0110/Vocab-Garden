@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { useOnClickOutside } from "./components/useOnClickOutside";
 import styled, { createGlobalStyle } from "styled-components";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { keywordContext } from "./context/keywordContext";
 import { authContext } from "./context/authContext";
 import logo from "./logoName.png";
@@ -170,7 +170,7 @@ const HomeLink = styled(Link)`
   text-decoration: none;
 `;
 
-const NavLink = styled(Link)`
+const StyledNavLink = styled(NavLink)`
   display: flex;
   align-items: center;
   gap: 10px;
@@ -227,9 +227,7 @@ const Notification = styled.div`
   }
 `;
 
-const Invitation = styled.div`
-  /* border-bottom: 1px lightgray solid; */
-`;
+const Invitation = styled.div``;
 
 const InvitationA = styled(Link)`
   cursor: pointer;
@@ -246,6 +244,7 @@ interface Props {
   length?: number;
   isScrolling?: boolean;
   showNav?: boolean;
+  // activeClassName?: string;
 }
 
 interface BattleInvitation {
@@ -265,6 +264,12 @@ function App() {
   const [battleInvitation, setBattleInvitation] =
     useState<BattleInvitation[]>();
   const [showInvitation, setShowInvitation] = useState<boolean>(false);
+  const [isHover, setIsHover] = useState<boolean[]>([
+    false,
+    false,
+    false,
+    false,
+  ]);
   const [showNav, setShowNav] = useState<boolean>(false);
   const pathName = window.location.pathname;
   const notificationRef = useRef(null);
@@ -299,20 +304,98 @@ function App() {
   };
 
   function renderNav() {
+    let activeStyle = {
+      display: "flex",
+      alignItems: "center",
+      gap: "10px",
+      // marginLeft: "20px",
+      color: "#607973",
+      textDecoration: "underline",
+      fontWeight: "bold",
+    };
+
+    let notActiveStyle = {
+      display: "flex",
+      alignItems: "center",
+      gap: "10px",
+      // marginLeft: "20px",
+      color: "#4f4f4f",
+      textDecoration: "none",
+      // &:hover {
+      //   backgroundColor: "white",
+      //   padding: "0 10px",
+      // }
+      // @media screen and (max-width: 601px) {
+      //   color: white;
+      //   &:hover {
+      //     background-color: white;
+      //     padding: 0 10px;
+      //     color: #4f4f4f;
+      //   }
+      // }
+    };
+
+    let hoverStyle = {
+      display: "flex",
+      alignItems: "center",
+      gap: "10px",
+      // marginLeft: "20px",
+      color: "#4f4f4f",
+      textDecoration: "none",
+      backgroundColor: "white",
+      padding: "0 10px",
+    };
+
     return (
       <>
         <XDiv size={16} />
         <NavDiv length={"Article".length}>
-          <NavLink to={isLogin ? "/articles" : "/profile"}>Article</NavLink>
+          <NavLink
+            to={isLogin ? "/articles" : "/profile"}
+            style={({ isActive }) =>
+              isActive ? activeStyle : isHover[0] ? hoverStyle : notActiveStyle
+            }
+            onMouseEnter={() => setIsHover([true, false, false, false])}
+            onMouseLeave={() => setIsHover([false, false, false, false])}
+          >
+            Article
+          </NavLink>
         </NavDiv>
         <NavDiv length={"VocabBook".length}>
-          <NavLink to={isLogin ? "/vocabbook" : "/profile"}>VocabBook</NavLink>
+          <NavLink
+            to={isLogin ? "/vocabbook" : "/profile"}
+            style={({ isActive }) =>
+              isActive ? activeStyle : isHover[1] ? hoverStyle : notActiveStyle
+            }
+            onMouseEnter={() => setIsHover([false, true, false, false])}
+            onMouseLeave={() => setIsHover([false, false, false, false])}
+          >
+            VocabBook
+          </NavLink>
         </NavDiv>
         <NavDiv length={"Friend".length}>
-          <NavLink to={isLogin ? "/friends" : "/profile"}>Friend</NavLink>
+          <NavLink
+            to={isLogin ? "/friends" : "/profile"}
+            style={({ isActive }) =>
+              isActive ? activeStyle : isHover[2] ? hoverStyle : notActiveStyle
+            }
+            onMouseEnter={() => setIsHover([false, false, true, false])}
+            onMouseLeave={() => setIsHover([false, false, false, false])}
+          >
+            Friend
+          </NavLink>
         </NavDiv>
         <NavDiv length={"Profile".length}>
-          <NavLink to={isLogin ? "/profile" : "/profile"}>Profile</NavLink>
+          <NavLink
+            to={"/profile"}
+            style={({ isActive }) =>
+              isActive ? activeStyle : isHover[3] ? hoverStyle : notActiveStyle
+            }
+            onMouseEnter={() => setIsHover([false, false, false, true])}
+            onMouseLeave={() => setIsHover([false, false, false, false])}
+          >
+            Profile
+          </NavLink>
         </NavDiv>
       </>
     );
