@@ -536,7 +536,7 @@ export default function Profile() {
                   }
                 }}
               >
-                <Button btnType="primary">Signup</Button>
+                <Button btnType="primary">Sign up</Button>
               </div>
               <Toggle onClick={() => setIsMember(true)}>
                 already a member?

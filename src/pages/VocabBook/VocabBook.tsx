@@ -136,6 +136,14 @@ const CardWrapper = styled.div`
   }
 `;
 
+const NoCards = styled.div`
+  display: flex;
+  height: 100%;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+`;
+
 const Card = styled.div`
   display: flex;
   flex-direction: column;
@@ -483,7 +491,7 @@ export default function VocabBook() {
             )
           ) : (
             <>
-              {vocabBooks &&
+              {vocabBooks && vocabBooks[viewingBook].length ? (
                 vocabBooks[viewingBook]?.map(
                   (
                     { vocab, audioLink, partOfSpeech, definition, correctRate },
@@ -528,7 +536,10 @@ export default function VocabBook() {
                       </Card>
                     </Fragment>
                   )
-                )}
+                )
+              ) : (
+                <NoCards>Save words and start reviewing!</NoCards>
+              )}
             </>
           )}
         </CardWrapper>
