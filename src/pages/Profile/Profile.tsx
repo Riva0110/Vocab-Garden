@@ -220,6 +220,29 @@ interface PlantsListInterface {
   };
 }
 
+function displayPlantName(currentPlant: string) {
+  return (
+    (currentPlant === "begonia" && "Begonia") ||
+    (currentPlant === "mirrorGrass" && "Mirror Grass") ||
+    (currentPlant === "travelerBanana" && "Traveler Banana") ||
+    (currentPlant === "philodendron" && "Philodendron") ||
+    (currentPlant === "ceriman" && "Ceriman") ||
+    (currentPlant === "birdOfParadise" && "Bird of Paradise")
+  );
+}
+
+function getCamelCasePlantName(plantName: string) {
+  return (
+    (plantName === "Begonia" && "begonia") ||
+    (plantName === "Mirror Grass" && "mirrorGrass") ||
+    (plantName === "Traveler Banana" && "travelerBanana") ||
+    (plantName === "Philodendron" && "philodendron") ||
+    (plantName === "Ceriman" && "ceriman") ||
+    (plantName === "Bird of Paradise" && "birdOfParadise") ||
+    "begonia"
+  );
+}
+
 export default function Profile() {
   const { isLogin, login, logout, signup, userId } = useContext(authContext);
   const [errorMsg, setErrorMsg] = useState<string>("");
@@ -228,7 +251,7 @@ export default function Profile() {
   const [password, setPassword] = useState<string>("");
   const [isMember, setIsMember] = useState<boolean>(true);
   const [score, setScore] = useState<number>(0);
-  const [isChallenging, setIsChallenging] = useState<boolean>();
+  const [isChallenging, setIsChallenging] = useState<boolean>(false);
   const [messages, setMessages] =
     useState<string>("選擇喜歡的植物，開始新的挑戰吧！");
   const [currentPlant, setCurrentPlant] = useState("begonia");
@@ -337,7 +360,7 @@ export default function Profile() {
     const plantsRef = doc(db, "plantsList", userId);
     await updateDoc(plantsRef, {
       plants: arrayUnion({
-        plantName: currentPlant,
+        plantName: displayPlantName(currentPlant),
         time: new Date(),
       }),
     });
@@ -366,7 +389,7 @@ export default function Profile() {
     );
   };
 
-  function renderProile() {
+  function renderProfile() {
     return (
       <Wrapper>
         <UserInfoWrapper>
@@ -388,6 +411,7 @@ export default function Profile() {
           ) : score !== 5 ? (
             <>
               <Select
+                value={currentPlant}
                 onChange={async (e: any) => {
                   setCurrentPlant(e.target.value);
                   setIsDying(false);
@@ -400,8 +424,8 @@ export default function Profile() {
                 }}
               >
                 {Object.keys(plantImgsObj)?.map((plant, index) => (
-                  <option key={plant} selected={plant === currentPlant}>
-                    {plant}
+                  <option key={plant} value={plant}>
+                    {displayPlantName(plant)}
                   </option>
                 ))}
               </Select>
@@ -427,7 +451,7 @@ export default function Profile() {
             return (
               <PlantBorder key={time + plantName}>
                 <PlantImg
-                  src={plantImgsObj[plantName]["5"]}
+                  src={plantImgsObj[getCamelCasePlantName(plantName)]["5"]}
                   alt="plants"
                   key={plantName + index}
                 />
@@ -522,5 +546,5 @@ export default function Profile() {
     );
   }
 
-  return isLogin ? renderProile() : renderLoginPage();
+  return isLogin ? renderProfile() : renderLoginPage();
 }
