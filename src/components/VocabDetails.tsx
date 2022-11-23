@@ -333,28 +333,31 @@ export default function VocabDetails() {
 
   useEffect(() => {
     async function fetchVocabDetails(resourceUrl: string) {
-      const response = await fetch(resourceUrl);
-      const data = await response.json();
-      setIsLoading(false);
-      setShowVocabInMobile(true);
-
-      if (response.status === 200) {
-        if (vocabDetails && vocabDetails.word !== data[0].word) {
-          setVocabDetails(data[0]);
-        } else if (!vocabDetails) {
-          setVocabDetails(data[0]);
+      try {
+        if (!keyword) {
+          throw new Error("No Keyword");
         }
-      } else if (data.title === "No Definitions Found") {
-        if (vocabDetails && vocabDetails.word !== undefined)
-          setKeyword(vocabDetails.word);
-        ref.current?.("Sorry......No result.");
-      } else {
-        setKeyword("error");
-        ref.current?.(`Error: ${response.status.toString()}`);
+        const response = await fetch(resourceUrl);
+        const data = await response.json();
+
+        if (response.status === 200) {
+          setVocabDetails(data[0]);
+          setShowVocabInMobile(true);
+        } else if (data.title === "No Definitions Found") {
+          if (vocabDetails && vocabDetails.word !== undefined)
+            setKeyword(vocabDetails.word);
+          ref.current?.("Sorry......No result.");
+        }
+      } catch (err) {
+        if (err instanceof Error) ref.current?.(`Error: ${err.message}`);
+      } finally {
+        setIsLoading(false);
       }
     }
 
-    fetchVocabDetails(resourceUrl);
+    if (keyword?.trim()?.toLowerCase() !== vocabDetails?.word) {
+      fetchVocabDetails(resourceUrl);
+    }
   }, [keyword, resourceUrl, setKeyword, vocabDetails]);
 
   useEffect(() => {
@@ -378,139 +381,147 @@ export default function VocabDetails() {
       <SpinnerImg src={spinner} alt="spinner" />
     </p>
   ) : (
-    <Wrapper showVocabInMobile={showVocabInMobile}>
+    <>
       <Alert
         children={(add: AddFunction) => {
           ref.current = add;
         }}
       />
-      <VocabWrapper>
-        <TitleContainer>
-          <Title>
-            <Vocab>{vocabDetails?.word}</Vocab>
-            <Phonetic>{vocabDetails?.phonetic}</Phonetic>
-            {vocabDetails?.phonetics?.[0]?.audio && (
-              <AudioImg src={audio} alt="audio" onClick={handlePlayAudio} />
-            )}
-            <SaveVocabImg
-              src={isSaved ? saved : save}
-              alt="save"
-              onClick={() =>
-                isSaved ? handleDeleteVocabFromBook() : setIsPopuping(true)
-              }
-            />
-            <SavePopup isPopuping={isPopuping} ref={popupRef}>
-              <label>Save to Book:</label>
-              <Select
-                value={selectedvocabBook}
-                onChange={(e: any) => {
-                  setSelectedvocabBook(e.target.value);
-                }}
-              >
-                {vocabBooks &&
-                  Object.keys(vocabBooks)?.map((vocabBook, index) => (
-                    <option key={vocabBook + index}>
-                      {vocabBook.toLocaleLowerCase()}
-                    </option>
-                  ))}
-              </Select>
-              <div>
-                <Input
-                  ref={inputRef}
-                  onChange={(e) => setNewBook(e.target.value)}
-                  placeholder="Add a book"
-                />
-                <AddButton
-                  onClick={async () => {
-                    await handleAddBook();
-                    if (newBook) setSelectedvocabBook(newBook);
-                    if (inputRef.current) inputRef.current.value = "";
+      <Wrapper showVocabInMobile={showVocabInMobile}>
+        <VocabWrapper>
+          <TitleContainer>
+            <Title>
+              <Vocab>{vocabDetails?.word}</Vocab>
+              <Phonetic>{vocabDetails?.phonetic}</Phonetic>
+              {vocabDetails?.phonetics?.[0]?.audio && (
+                <AudioImg src={audio} alt="audio" onClick={handlePlayAudio} />
+              )}
+              <SaveVocabImg
+                src={isSaved ? saved : save}
+                alt="save"
+                onClick={() =>
+                  isSaved ? handleDeleteVocabFromBook() : setIsPopuping(true)
+                }
+              />
+              <SavePopup isPopuping={isPopuping} ref={popupRef}>
+                <label>Save to Book:</label>
+                <Select
+                  value={selectedvocabBook}
+                  onChange={(e: any) => {
+                    setSelectedvocabBook(e.target.value);
                   }}
                 >
-                  +
-                </AddButton>
-              </div>
-              <Buttons>
-                <div onClick={() => setIsPopuping(false)}>
-                  <Button btnType="secondary">Cancel</Button>
-                </div>
-                <div
-                  onClick={() => {
-                    if (selectedvocabBook) {
-                      handleSaveVocab(selectedvocabBook);
-                      getVocabBooks(userId);
-                      setIsPopuping(false);
-                      ref.current?.(`"${keyword}" saved successfully!`);
-                    }
-                  }}
-                >
-                  <Button btnType="primary">Done</Button>
-                </div>
-              </Buttons>
-            </SavePopup>
-          </Title>
-          <XDiv size={16} onClick={() => setShowVocabInMobile(false)} />
-        </TitleContainer>
-        <Meanings>
-          {vocabDetails?.meanings?.map(
-            ({ partOfSpeech, definitions, synonyms }, index) => (
-              <Fragment key={index}>
-                <PartOfSpeech onClick={() => getSelectedText()}>
-                  {partOfSpeech}
-                </PartOfSpeech>
-                <SubTitle onClick={() => getSelectedText()}>
-                  Definitions
-                </SubTitle>
-                <ul>
-                  {definitions?.map(
-                    ({ definition, example }, index: number) => (
-                      <DefinitionWrapper key={index}>
-                        <Definition
-                          key={definition}
-                          onClick={() => getSelectedText()}
-                        >
-                          {definition}
-                        </Definition>
-                        {example && (
-                          <Example onClick={() => getSelectedText()}>
-                            "{example}"
-                          </Example>
-                        )}
-                      </DefinitionWrapper>
-                    )
-                  )}
-                </ul>
-                {synonyms?.length !== 0 && (
-                  <>
-                    <SubTitle onClick={() => getSelectedText()}>
-                      Synonyms
-                    </SubTitle>
-                    {synonyms?.map((synonym: string, index: number) => (
-                      <Synonyms
-                        key={index}
-                        onClick={() => {
-                          synonym !== "" && setKeyword(synonym);
-                          setIsPopuping(false);
-                        }}
-                      >
-                        {synonym}
-                      </Synonyms>
+                  {vocabBooks &&
+                    Object.keys(vocabBooks)?.map((vocabBook, index) => (
+                      <option key={vocabBook + index}>
+                        {vocabBook.toLocaleLowerCase()}
+                      </option>
                     ))}
-                  </>
-                )}
-              </Fragment>
-            )
-          )}
-          {keyword === "" && (
-            <>
-              <br />
-              <div style={{ color: "gray" }}>
-                Select or double click any words to get more information!
-              </div>
-            </>
-          )}
-        </Meanings>
-      </VocabWrapper>
-    </Wrapper>
+                </Select>
+                <div>
+                  <Input
+                    ref={inputRef}
+                    onChange={(e) => setNewBook(e.target.value)}
+                    placeholder="Add a book"
+                  />
+                  <AddButton
+                    onClick={async () => {
+                      await handleAddBook();
+                      if (newBook) setSelectedvocabBook(newBook);
+                      if (inputRef.current) inputRef.current.value = "";
+                    }}
+                  >
+                    +
+                  </AddButton>
+                </div>
+                <Buttons>
+                  <div onClick={() => setIsPopuping(false)}>
+                    <Button btnType="secondary">Cancel</Button>
+                  </div>
+                  <div
+                    onClick={() => {
+                      if (selectedvocabBook) {
+                        handleSaveVocab(selectedvocabBook);
+                        getVocabBooks(userId);
+                        setIsPopuping(false);
+                        ref.current?.(`"${keyword}" saved successfully!`);
+                      }
+                    }}
+                  >
+                    <Button btnType="primary">Done</Button>
+                  </div>
+                </Buttons>
+              </SavePopup>
+            </Title>
+            <XDiv
+              size={16}
+              onClick={() => {
+                console.log("closeeeee");
+                setShowVocabInMobile(false);
+              }}
+            />
+          </TitleContainer>
+          <Meanings>
+            {vocabDetails?.meanings?.map(
+              ({ partOfSpeech, definitions, synonyms }, index) => (
+                <Fragment key={index}>
+                  <PartOfSpeech onClick={() => getSelectedText()}>
+                    {partOfSpeech}
+                  </PartOfSpeech>
+                  <SubTitle onClick={() => getSelectedText()}>
+                    Definitions
+                  </SubTitle>
+                  <ul>
+                    {definitions?.map(
+                      ({ definition, example }, index: number) => (
+                        <DefinitionWrapper key={index}>
+                          <Definition
+                            key={definition}
+                            onClick={() => getSelectedText()}
+                          >
+                            {definition}
+                          </Definition>
+                          {example && (
+                            <Example onClick={() => getSelectedText()}>
+                              "{example}"
+                            </Example>
+                          )}
+                        </DefinitionWrapper>
+                      )
+                    )}
+                  </ul>
+                  {synonyms?.length !== 0 && (
+                    <>
+                      <SubTitle onClick={() => getSelectedText()}>
+                        Synonyms
+                      </SubTitle>
+                      {synonyms?.map((synonym: string, index: number) => (
+                        <Synonyms
+                          key={index}
+                          onClick={() => {
+                            synonym !== "" && setKeyword(synonym);
+                            setIsPopuping(false);
+                          }}
+                        >
+                          {synonym}
+                        </Synonyms>
+                      ))}
+                    </>
+                  )}
+                </Fragment>
+              )
+            )}
+            {keyword === "" && (
+              <>
+                <br />
+                <div style={{ color: "gray" }}>
+                  Select or double click any words to get more information!
+                </div>
+              </>
+            )}
+          </Meanings>
+        </VocabWrapper>
+      </Wrapper>
+    </>
   );
 }
