@@ -9,7 +9,7 @@ interface Props {
 }
 
 const Editor = styled(ReactQuill)`
-  height: calc(100vh - 308px);
+  height: calc(100vh - 356px);
 `;
 
 export default function QuillEditor({ content, setContent }: Props) {
