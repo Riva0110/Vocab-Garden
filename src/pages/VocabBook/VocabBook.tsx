@@ -254,13 +254,15 @@ export default function VocabBook() {
   const ref = useRef<null | AddFunction>(null);
   const newBookRef = useRef<HTMLInputElement>(null);
   const topWrongWords = useMemo(() => {
-    return getAllWords(vocabBooks)
-      ?.slice(0, 10)
-      .map(({ vocab, correctRate, definition }) => ({
-        text: vocab,
-        value: Math.floor(correctRate * 100),
-        definition: definition,
-      }));
+    if (vocabBooks) {
+      return getAllWords(vocabBooks)
+        ?.slice(0, 10)
+        .map(({ vocab, correctRate, definition }) => ({
+          text: vocab,
+          value: Math.floor(correctRate * 100),
+          definition: definition,
+        }));
+    }
   }, [vocabBooks]);
 
   const callbacks = useMemo(() => {
@@ -273,13 +275,17 @@ export default function VocabBook() {
   }, [setKeyword]);
 
   useEffect(() => {
-    if (Object.keys(vocabBooks).length === 0) {
+    if (
+      vocabBooks &&
+      Object.keys(vocabBooks) &&
+      Object.keys(vocabBooks).length === 0
+    ) {
       getVocabBooks(userId);
     }
-  }, [getVocabBooks, userId, vocabBooks, vocabBooks.length]);
+  }, [getVocabBooks, userId, vocabBooks]);
 
   useEffect(() => {
-    if (topWrongWords?.length >= 5) {
+    if (topWrongWords && topWrongWords.length >= 5) {
       async function setWrongWordsDoc() {
         await setDoc(doc(db, "wrongWordsBook", userId), {
           topWrongWords,
@@ -289,7 +295,7 @@ export default function VocabBook() {
     }
   }, [topWrongWords, userId]);
 
-  const correctRateOfBooksArr = getCorrectRateOfBooks().map((logOfBook) => {
+  const correctRateOfBooksArr = getCorrectRateOfBooks()?.map((logOfBook) => {
     const correctCount = logOfBook.reduce((acc, item) => {
       if (item.isCorrect) {
         acc += 1;
@@ -301,6 +307,7 @@ export default function VocabBook() {
 
   function getCorrectRateOfBooks() {
     let log: any[][] = [];
+    if (!vocabBooks) return;
     Object.keys(vocabBooks).forEach((key, index) => {
       let insideLog: any[] = [];
       vocabBooks[key].map((vocab) => {
@@ -319,9 +326,11 @@ export default function VocabBook() {
     if (typeof bookCorrectRate !== "undefined") return;
     const findUnsorted = (e: string) => e === "unsorted";
     const indexOfUnsorted = Object.keys(vocabBooks).findIndex(findUnsorted);
-    setBookCorrectRate(
-      Math.round(correctRateOfBooksArr[indexOfUnsorted] * 100) || 0
-    );
+    if (correctRateOfBooksArr) {
+      setBookCorrectRate(
+        Math.round(correctRateOfBooksArr[indexOfUnsorted] * 100) || 0
+      );
+    }
   }, [bookCorrectRate, correctRateOfBooksArr, vocabBooks]);
 
   const handlePlayAudio = (audioLink: string) => {
@@ -389,21 +398,24 @@ export default function VocabBook() {
       <Img src={plant} alt="plant" />
       <VocabBookWrapper>
         <BookWrapper>
-          {Object.keys(vocabBooks).map((book: string, index) => (
-            <Fragment key={book}>
-              <Book
-                selected={viewingBook === `${book}`}
-                onClick={() => {
-                  setViewingBook(book);
-                  setBookCorrectRate(
-                    Math.round(correctRateOfBooksArr[index] * 100)
-                  );
-                }}
-              >
-                {book.toLocaleLowerCase()} ({vocabBooks?.[book]?.length})
-              </Book>
-            </Fragment>
-          ))}
+          {vocabBooks &&
+            Object.keys(vocabBooks).map((book: string, index) => (
+              <Fragment key={book}>
+                <Book
+                  selected={viewingBook === `${book}`}
+                  onClick={() => {
+                    setViewingBook(book);
+                    if (correctRateOfBooksArr) {
+                      setBookCorrectRate(
+                        Math.round(correctRateOfBooksArr[index] * 100)
+                      );
+                    }
+                  }}
+                >
+                  {book.toLocaleLowerCase()} ({vocabBooks?.[book]?.length})
+                </Book>
+              </Fragment>
+            ))}
           <Book
             selected={viewingBook === "wrong words"}
             onClick={() => {
@@ -442,7 +454,9 @@ export default function VocabBook() {
             <div
               onClick={() =>
                 vocabBooks[viewingBook]?.length >= 5 ||
-                (viewingBook === "wrong words" && topWrongWords?.length >= 5)
+                (viewingBook === "wrong words" &&
+                  topWrongWords &&
+                  topWrongWords.length >= 5)
                   ? navigate("/vocabbook/review")
                   : ref.current?.(
                       "Please save at least 5 vocab cards in this book!"
@@ -457,56 +471,62 @@ export default function VocabBook() {
         </BookInfoWrapper>
         <CardWrapper>
           {viewingBook === "wrong words" ? (
-            <ReactWordcloud
-              words={topWrongWords}
-              callbacks={callbacks}
-              options={options}
-              size={size}
-            />
+            topWrongWords && (
+              <ReactWordcloud
+                words={topWrongWords}
+                callbacks={callbacks}
+                options={options}
+                size={size}
+              />
+            )
           ) : (
             <>
-              {vocabBooks[viewingBook]?.map(
-                (
-                  { vocab, audioLink, partOfSpeech, definition, correctRate },
-                  index
-                ) => (
-                  <Fragment key={vocab}>
-                    <Card>
-                      <VocabHeader>
-                        <VocabTitle>
-                          <Vocab
-                            key={index}
-                            onClick={() => vocab !== "" && setKeyword(vocab)}
-                          >
-                            {vocab}
-                          </Vocab>
-                          {audioLink ? (
-                            <AudioImg
-                              src={audio}
-                              alt="audio"
-                              onClick={() => handlePlayAudio(audioLink)}
+              {vocabBooks &&
+                vocabBooks[viewingBook]?.map(
+                  (
+                    { vocab, audioLink, partOfSpeech, definition, correctRate },
+                    index
+                  ) => (
+                    <Fragment key={vocab}>
+                      <Card>
+                        <VocabHeader>
+                          <VocabTitle>
+                            <Vocab
+                              key={index}
+                              onClick={() => vocab !== "" && setKeyword(vocab)}
+                            >
+                              {vocab}
+                            </Vocab>
+                            {audioLink ? (
+                              <AudioImg
+                                src={audio}
+                                alt="audio"
+                                onClick={() => handlePlayAudio(audioLink)}
+                              />
+                            ) : (
+                              ""
+                            )}
+                            <ButtonImg
+                              src={saved}
+                              alt="save"
+                              onClick={() => handleDeleteVocabFromBook(vocab)}
                             />
-                          ) : (
-                            ""
-                          )}
-                          <ButtonImg
-                            src={saved}
-                            alt="save"
-                            onClick={() => handleDeleteVocabFromBook(vocab)}
-                          />
-                        </VocabTitle>
-                        <div>{Math.round(correctRate * 100)}%</div>
-                      </VocabHeader>
-                      <CardText weight={true} onClick={() => getSelectedText()}>
-                        ({partOfSpeech})
-                      </CardText>
-                      <CardText onClick={() => getSelectedText()}>
-                        {definition}
-                      </CardText>
-                    </Card>
-                  </Fragment>
-                )
-              )}
+                          </VocabTitle>
+                          <div>{Math.round(correctRate * 100)}%</div>
+                        </VocabHeader>
+                        <CardText
+                          weight={true}
+                          onClick={() => getSelectedText()}
+                        >
+                          ({partOfSpeech})
+                        </CardText>
+                        <CardText onClick={() => getSelectedText()}>
+                          {definition}
+                        </CardText>
+                      </Card>
+                    </Fragment>
+                  )
+                )}
             </>
           )}
         </CardWrapper>
