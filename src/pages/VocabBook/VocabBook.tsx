@@ -65,22 +65,24 @@ const BookWrapper = styled.div`
   display: flex;
   flex: 1;
   width: 100%;
-  height: 50px;
+  height: 40px;
   margin-bottom: 20px;
   align-items: center;
   overflow-x: scroll;
+  border-bottom: 1px solid gray;
 `;
 
 const Book = styled.div`
   text-align: center;
   min-width: 150px;
-  height: 30px;
-  line-height: 30px;
+  height: 100%;
+  line-height: 40px;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   border: ${(props: Props) => (props.selected ? "1px solid gray" : "none")};
-  border-bottom: ${(props: Props) =>
-    props.selected ? "none" : "1px solid gray"};
+  /* border-bottom: ${(props: Props) =>
+    props.selected ? "none" : "1px solid gray"}; */
+  border-bottom: none;
   color: ${(props: Props) => (props.selected ? "black" : "gray")};
   background-color: ${(props: Props) => (props.selected ? "white" : "none")};
   padding: auto;
