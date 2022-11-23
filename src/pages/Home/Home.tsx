@@ -44,11 +44,6 @@ const Title = styled.div`
   color: black;
 `;
 
-// const Author = styled.span`
-//   font-size: 20px;
-//   font-weight: 200;
-// `;
-
 const IntroWrapper = styled.div`
   color: #292727;
 `;
@@ -89,10 +84,6 @@ export default function Home() {
         <Title>
           Boost your English reading and vocabulary skills!
           <br />
-          {/* <Author>FORM NOW ON......</Author> */}
-          {/* The best way to predict the future
-          {window.innerWidth > 601 && <br />} is to create it. <br />
-          <Author>– Abraham Lincoln</Author> */}
         </Title>
         <IntroWrapper>
           <QuickStart>Quick Start</QuickStart>

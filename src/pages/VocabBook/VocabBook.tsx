@@ -29,6 +29,7 @@ import deleteBtn from "./delete.png";
 import Button from "../../components/Button/Button";
 import Alert from "../../components/Alert/Alert";
 import ReactWordcloud, { Optional, Options } from "react-wordcloud";
+import Hint from "../../components/Hint/Hint";
 
 const Wrapper = styled.div`
   display: flex;
@@ -455,6 +456,11 @@ export default function VocabBook() {
                 />
               )}
             </Delete>
+            <Hint>
+              Select any words to search word's definition! \r\n (Desktop =&gt;
+              double click) \r\n (Mobile =&gt; lond press) \r\n Save words to
+              review!
+            </Hint>
           </BookButtons>
           <Nav>
             <div>

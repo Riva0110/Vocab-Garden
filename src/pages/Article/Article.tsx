@@ -16,6 +16,7 @@ import { db } from "../../firebase/firebase";
 import QuillEditor from "./Editor/QuillEditor";
 import Button from "../../components/Button/Button";
 import Alert from "../../components/Alert/Alert";
+import Hint from "../../components/Hint/Hint";
 
 const ArticleWrapper = styled.div`
   display: flex;
@@ -60,6 +61,7 @@ const Btns = styled.div`
   gap: 10px;
   margin-bottom: 20px;
   justify-content: flex-end;
+  align-items: center;
 `;
 
 type AddFunction = (msg: string) => void;
@@ -98,6 +100,10 @@ export default function Article() {
   const renderReadMode = () => (
     <>
       <Btns>
+        <Hint>
+          Select any words to search word's definition! \r\n (Desktop =&gt;
+          double click) \r\n (Mobile =&gt; lond press)
+        </Hint>
         <div onClick={() => navigate("/articles")}>
           <Button btnType="secondary">Back</Button>
         </div>
