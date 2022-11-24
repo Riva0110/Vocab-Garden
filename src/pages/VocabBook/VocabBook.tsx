@@ -137,7 +137,7 @@ const CardWrapper = styled.div`
   ::-webkit-scrollbar {
     display: none; /* for Chrome, Safari, and Opera */
   }
-  height: calc(100vh - 277px);
+  height: calc(100vh - 268px);
   @media screen and (max-width: 1031px) {
     height: calc(100vh - 322px);
   }
