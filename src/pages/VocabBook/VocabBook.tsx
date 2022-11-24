@@ -274,6 +274,7 @@ export default function VocabBook() {
   const [bookCorrectRate, setBookCorrectRate] = useState<number>();
   const ref = useRef<null | AddFunction>(null);
   const newBookRef = useRef<HTMLInputElement>(null);
+  const bookRef = useRef<HTMLDivElement>(null);
   const topWrongWords = useMemo(() => {
     if (vocabBooks) {
       return getAllWords(vocabBooks)
@@ -409,6 +410,28 @@ export default function VocabBook() {
     }
   }
 
+  function handleMouseEnterBook() {
+    bookRef.current?.addEventListener(
+      "wheel",
+      (ev: { deltaY: any; deltaX: any }) => {
+        if (bookRef.current)
+          bookRef.current.scrollLeft += ev.deltaY + ev.deltaX;
+      }
+    );
+  }
+
+  function handleMouseLeaveBook() {
+    if (bookRef.current) {
+      bookRef.current.removeEventListener(
+        "wheel",
+        (ev: { deltaY: any; deltaX: any }) => {
+          if (bookRef.current)
+            bookRef.current.scrollLeft += ev.deltaY + ev.deltaX;
+        }
+      );
+    }
+  }
+
   return (
     <Wrapper>
       <Alert
@@ -418,7 +441,11 @@ export default function VocabBook() {
       />
       <Img src={plant} alt="plant" />
       <VocabBookWrapper>
-        <BookWrapper>
+        <BookWrapper
+          ref={bookRef}
+          onMouseEnter={handleMouseEnterBook}
+          onMouseLeave={handleMouseLeaveBook}
+        >
           {vocabBooks &&
             Object.keys(vocabBooks).map((book: string, index) => (
               <Fragment key={book}>
