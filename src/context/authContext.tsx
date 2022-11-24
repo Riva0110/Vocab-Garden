@@ -29,6 +29,8 @@ interface AuthInterface {
   setIsLogin: React.Dispatch<React.SetStateAction<boolean>>;
   isLoadingUserAuth: boolean;
   setIsLoadingUserAuth: React.Dispatch<React.SetStateAction<boolean>>;
+  userDocDone: boolean;
+  setUserDocDone: React.Dispatch<React.SetStateAction<boolean>>;
   logout(): void;
   login(email: string, password: string): Promise<string | undefined>;
   signup(
@@ -38,22 +40,13 @@ interface AuthInterface {
   ): Promise<string | undefined>;
 }
 
-export const authContext = createContext<AuthInterface>({
-  // userId: "",
-  // setUserId: () => {},
-  // isLogin: false,
-  // setIsLogin: () => {},
-  // isLoadingUserAuth: true,
-  // setIsLoadingUserAuth: () => {},
-  // logout: () => {},
-  // login: "",
-  // signup: () => {},
-} as AuthInterface);
+export const authContext = createContext<AuthInterface>({} as AuthInterface);
 
 export function AuthContextProvider({ children }: ContextProviderProps) {
   const [isLogin, setIsLogin] = useState(false);
   const [userId, setUserId] = useState("");
   const [isLoadingUserAuth, setIsLoadingUserAuth] = useState(true);
+  const [userDocDone, setUserDocDone] = useState(false);
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -103,6 +96,8 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
       );
       const user = userCredential.user;
 
+      console.log("createUserWithEmailAndPassword done");
+
       await setDoc(doc(db, "users", user.uid), {
         name,
         email,
@@ -116,14 +111,19 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
         awaitingFriendReply: [],
         battleInvitation: [],
       });
-      setIsLogin(true);
+      console.log("set users done");
+
       await setDoc(doc(db, "vocabBooks", user.uid), {
         unsorted: arrayUnion(),
       });
+
+      console.log("set vocabBooks done");
+
       await setDoc(doc(db, "plantsList", user.uid), {
         plants: [],
       });
-      // return "Sign up successfully!";
+      console.log("set plantsList done");
+      setUserDocDone(true);
     } catch (error) {
       if (error instanceof Error) return error["message"];
     }
@@ -139,7 +139,6 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
         });
       };
       updateState();
-      // return "Log in successfully!";
     } catch (error) {
       if (error instanceof Error) return error["message"];
     }
@@ -168,6 +167,8 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
         logout,
         isLoadingUserAuth,
         setIsLoadingUserAuth,
+        userDocDone,
+        setUserDocDone,
       }}
     >
       {children}

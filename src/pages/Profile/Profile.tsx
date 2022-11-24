@@ -5,9 +5,9 @@ import { arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { plantImgsObj } from "./plantImgs";
 import Button from "../../components/Button/Button";
-import plant from "./banner.webp";
 import garden from "./garden.webp";
 import Hint from "../../components/Hint/Hint";
+import LoginPage from "./Login";
 
 interface Props {
   insideColor?: boolean;
@@ -23,70 +23,15 @@ const Wrapper = styled.div`
   }
 `;
 
-const LoginWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin: auto;
-  width: 500px;
-  padding: 20px;
-  position: relative;
-  z-index: 1;
-  min-height: calc(100vh - 60px);
-  @media screen and (max-width: 601px) {
-    width: 100%;
-  }
-`;
-
-const ErrorMsg = styled.div`
-  margin-bottom: 10px;
-  color: #c28e96;
-`;
-
-const LoginDiv = styled.div`
-  display: flex;
-  justify-content: center;
-`;
-
-const BackgroundImg = styled.div`
+const GardenImg = styled.div`
   width: 100vw;
   height: 100vh;
   position: fixed;
   left: 0;
   top: 0;
-  background-image: url(${plant});
   background-size: cover;
-  opacity: 0.5;
-`;
-
-const GardenImg = styled(BackgroundImg)`
   background-image: url(${garden});
   opacity: 0.4;
-`;
-
-const WelcomeMsg = styled.div`
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 20px;
-  text-align: center;
-`;
-
-const Toggle = styled.div`
-  margin-top: 20px;
-  color: gray;
-  cursor: pointer;
-`;
-
-const Input = styled.input`
-  width: 70%;
-  margin-bottom: 10px;
-  height: 30px;
-  padding-left: 10px;
-  border: 1px solid lightgrey;
-  &:focus {
-    outline: none;
-  }
 `;
 
 const Select = styled.select`
@@ -278,12 +223,8 @@ function getCamelCasePlantName(plantName: string) {
 }
 
 export default function Profile() {
-  const { isLogin, login, logout, signup, userId } = useContext(authContext);
-  const [errorMsg, setErrorMsg] = useState<string>("");
+  const { isLogin, logout, userId, userDocDone } = useContext(authContext);
   const [name, setName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [isMember, setIsMember] = useState<boolean>(true);
   const [score, setScore] = useState<number>(0);
   const [isChallenging, setIsChallenging] = useState<boolean>(false);
   const [messages, setMessages] =
@@ -295,6 +236,8 @@ export default function Profile() {
 
   useEffect(() => {
     const getAndUpdateUserInfo = async () => {
+      console.log("getAndUpdateUserInfo", userId);
+
       const plantsRef = doc(db, "plantsList", userId);
       const plantsSnap = await getDoc(plantsRef);
       const plantData = plantsSnap.data()?.plants as PlantsListInterface[];
@@ -327,8 +270,8 @@ export default function Profile() {
       }
     };
 
-    getAndUpdateUserInfo();
-  }, [userId]);
+    if (userDocDone) getAndUpdateUserInfo();
+  }, [userDocDone, userId]);
 
   useEffect(() => {
     if (isChallenging) {
@@ -426,12 +369,6 @@ export default function Profile() {
     );
   };
 
-  console.log({ plantsList });
-
-  // console.log("plantsList?.length !== 0", plantsList.length !== 0);
-
-  console.log("plantsList length", plantsList?.length);
-
   function renderProfile() {
     return (
       <Wrapper>
@@ -510,7 +447,7 @@ export default function Profile() {
               })
             ) : (
               <FewPlants>
-                You haven't got any plants in your garden.
+                There's no any plants in your garden.
                 <br />
                 Start a challenge TODAY!
               </FewPlants>
@@ -522,86 +459,9 @@ export default function Profile() {
     );
   }
 
-  function renderLoginPage() {
-    return (
-      <Wrapper>
-        <BackgroundImg />
-        <LoginWrapper>
-          {isMember ? (
-            <>
-              <WelcomeMsg>
-                Log in or sign up to enjoy full functions!
-              </WelcomeMsg>
-              <Input
-                placeholder="email"
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <Input
-                type="password"
-                placeholder="password"
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <ErrorMsg>{errorMsg}</ErrorMsg>
-              <div>
-                <LoginDiv
-                  onClick={async () => {
-                    const loginStatus = await login(email, password);
-                    if (typeof loginStatus === "string") {
-                      const loginErrorMsg = loginStatus.slice(9) as string;
-                      setErrorMsg(loginErrorMsg);
-                    }
-                  }}
-                >
-                  <Button btnType="primary">Log in</Button>
-                </LoginDiv>
-                <Toggle onClick={() => setIsMember(false)}>
-                  not a member？
-                </Toggle>
-              </div>
-            </>
-          ) : (
-            <>
-              <WelcomeMsg>
-                Log in or sign up to enjoy full functions!
-              </WelcomeMsg>
-              <Input
-                placeholder="name"
-                onChange={(e) => setName(e.target.value)}
-              />
-              <Input
-                placeholder="email"
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <Input
-                type="password"
-                placeholder="password"
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <ErrorMsg>{errorMsg}</ErrorMsg>
-              <div
-                onClick={async () => {
-                  if (name === "") {
-                    setErrorMsg("Please fill in your name.");
-                    return;
-                  }
-                  const signupStatus = await signup(email, password, name);
-                  if (typeof signupStatus === "string") {
-                    const signupErrorMsg = signupStatus.slice(9) as string;
-                    setErrorMsg(signupErrorMsg);
-                  }
-                }}
-              >
-                <Button btnType="primary">Sign up</Button>
-              </div>
-              <Toggle onClick={() => setIsMember(true)}>
-                already a member?
-              </Toggle>
-            </>
-          )}
-        </LoginWrapper>
-      </Wrapper>
-    );
-  }
-
-  return isLogin ? renderProfile() : renderLoginPage();
+  return isLogin ? (
+    renderProfile()
+  ) : (
+    <LoginPage name={name} setName={setName} />
+  );
 }
