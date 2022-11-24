@@ -2,8 +2,15 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { keywordContext } from "../../context/keywordContext";
 import { authContext } from "../../context/authContext";
-import { vocabBookContext } from "../../context/vocabBookContext";
-import { useContext, useState, useEffect, useRef } from "react";
+import { vocabBookContext, VocabBooks } from "../../context/vocabBookContext";
+import React, {
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  Fragment,
+} from "react";
 import {
   doc,
   arrayUnion,
@@ -21,6 +28,8 @@ import plant from "./plant.webp";
 import deleteBtn from "./delete.png";
 import Button from "../../components/Button/Button";
 import Alert from "../../components/Alert/Alert";
+import ReactWordcloud, { Optional, Options } from "react-wordcloud";
+import Hint from "../../components/Hint/Hint";
 
 const Wrapper = styled.div`
   display: flex;
@@ -33,6 +42,7 @@ const Img = styled.img`
   right: 0px;
   bottom: 0px;
   width: 500px;
+  opacity: 0.6;
 `;
 
 const Nav = styled.nav`
@@ -44,39 +54,42 @@ const Nav = styled.nav`
 
 const VocabBookWrapper = styled.div`
   width: calc((100% - 30px) / 2);
+  height: calc(100vh - 160px);
   z-index: 1;
-  @media screen and (max-width: 600px) {
+  @media screen and (max-width: 601px) {
     width: calc(100vw - 40px);
     padding: 0 10px;
   }
 `;
 
-const VocabBookAndCard = styled.div``;
-
 const BookWrapper = styled.div`
   display: flex;
   flex: 1;
   width: 100%;
-  height: 50px;
+  height: 40px;
   margin-bottom: 20px;
   align-items: center;
   overflow-x: scroll;
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+  }
+  border-bottom: 1px solid gray;
 `;
 
 const Book = styled.div`
   text-align: center;
   min-width: 150px;
-  height: 30px;
-  line-height: 30px;
+  height: 100%;
+  line-height: 35px;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   border: ${(props: Props) => (props.selected ? "1px solid gray" : "none")};
-  border-bottom: ${(props: Props) =>
-    props.selected ? "none" : "1px solid gray"};
+  border-bottom: none;
   color: ${(props: Props) => (props.selected ? "black" : "gray")};
   background-color: ${(props: Props) => (props.selected ? "white" : "none")};
   padding: auto;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
 `;
@@ -98,13 +111,44 @@ const BookButtons = styled.div`
   align-items: center;
 `;
 
+const AddButton = styled.button`
+  width: 20px;
+  height: 20px;
+  margin-left: 10px;
+  background-color: #607973;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+`;
+
+const Delete = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
 const CardWrapper = styled.div`
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
   align-content: flex-start;
   overflow-y: scroll;
-  height: calc(100vh - 232px);
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+  }
+  height: calc(100vh - 268px);
+  @media screen and (max-width: 1031px) {
+    height: calc(100vh - 322px);
+  }
+`;
+
+const NoCards = styled.div`
+  display: flex;
+  height: 100%;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
 `;
 
 const Card = styled.div`
@@ -115,14 +159,16 @@ const Card = styled.div`
   width: calc((100% - 20px) / 2);
   height: 120px;
   border: 1px solid lightgray;
-  border-top: 2px #607973 solid;
+  border-top: 3px #607973 solid;
   overflow-y: scroll;
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+  }
   padding: 10px;
   background-color: rgba(255, 255, 255, 0.7);
   @media screen and (max-width: 1101px) {
     width: 100%;
-  }
-  @media screen and (max-width: 601px) {
     height: auto;
   }
 `;
@@ -142,7 +188,7 @@ const VocabTitle = styled.div`
   display: flex;
   align-items: center;
   gap: 20px;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   color: black;
   margin-bottom: 10px;
@@ -169,23 +215,53 @@ const Input = styled.input`
   padding-left: 10px;
 `;
 
-const AddButton = styled.button`
-  width: 20px;
-  height: 20px;
-  margin-left: 10px;
-  background-color: #607973;
-  color: #ffffff;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-`;
-
 interface Props {
   selected?: boolean;
   weight?: boolean;
 }
 
+interface Log {
+  isCorrect: boolean;
+  testTime: {};
+}
+
 type AddFunction = (msg: string) => void;
+
+const options = {
+  enableTooltip: true,
+  deterministic: true,
+  fontFamily: "Poppins",
+  fontSizes: [30, 50],
+  fontStyle: "normal",
+  fontWeight: "normal",
+  padding: 1,
+  rotations: 2,
+  rotationAngles: [0, 0],
+  scale: "sqrt",
+  spiral: "archimedean",
+  transitionDuration: 1000,
+} as Optional<Options>;
+
+const size = [600, 600] as [number, number];
+
+function getAllWords(vocabBooks: VocabBooks) {
+  let allWords: {
+    vocab: string;
+    audioLink: string;
+    partOfSpeech: string;
+    definition: string;
+    isCorrect?: boolean | undefined;
+    correctRate: number;
+    log: Log[];
+  }[] = [];
+  const wordsByBook = Object.keys(vocabBooks).map((key) => {
+    allWords = allWords.concat(vocabBooks[key]);
+    return allWords;
+  });
+  return wordsByBook[wordsByBook.length - 1]?.filter(
+    (vocab) => vocab.correctRate < 0.5 && vocab.log.length >= 5
+  );
+}
 
 export default function VocabBook() {
   const navigate = useNavigate();
@@ -197,16 +273,41 @@ export default function VocabBook() {
   const [newBook, setNewBook] = useState<string>();
   const [bookCorrectRate, setBookCorrectRate] = useState<number>();
   const ref = useRef<null | AddFunction>(null);
-  const topWrongWords = getAllWords()?.slice(0, 10);
+  const newBookRef = useRef<HTMLInputElement>(null);
+  const bookRef = useRef<HTMLDivElement>(null);
+  const topWrongWords = useMemo(() => {
+    if (vocabBooks) {
+      return getAllWords(vocabBooks)
+        ?.slice(0, 10)
+        .map(({ vocab, correctRate, definition }) => ({
+          text: vocab,
+          value: Math.floor(1 - correctRate * 100),
+          definition: definition,
+        }));
+    }
+  }, [vocabBooks]);
+
+  const callbacks = useMemo(() => {
+    return {
+      onWordClick: (word: any) => {
+        setKeyword(word.text);
+      },
+      getWordTooltip: (word: any) => null,
+    };
+  }, [setKeyword]);
 
   useEffect(() => {
-    if (Object.keys(vocabBooks).length === 0) {
+    if (
+      vocabBooks &&
+      Object.keys(vocabBooks) &&
+      Object.keys(vocabBooks).length === 0
+    ) {
       getVocabBooks(userId);
     }
-  }, [getVocabBooks, userId, vocabBooks, vocabBooks.length]);
+  }, [getVocabBooks, userId, vocabBooks]);
 
   useEffect(() => {
-    if (topWrongWords?.length >= 5) {
+    if (topWrongWords && topWrongWords.length >= 5) {
       async function setWrongWordsDoc() {
         await setDoc(doc(db, "wrongWordsBook", userId), {
           topWrongWords,
@@ -216,25 +317,7 @@ export default function VocabBook() {
     }
   }, [topWrongWords, userId]);
 
-  function getAllWords() {
-    let allWords: {
-      vocab: string;
-      audioLink: string;
-      partOfSpeech: string;
-      definition: string;
-      isCorrect?: boolean | undefined;
-      correctRate: number;
-    }[] = [];
-    const wordsByBook = Object.keys(vocabBooks)?.map((key) => {
-      allWords = allWords.concat(vocabBooks[key]);
-      return allWords;
-    });
-    return wordsByBook[wordsByBook.length - 1]?.filter(
-      (vocab) => vocab.correctRate < 0.5
-    );
-  }
-
-  const correctRateOfBooksArr = getCorrectRateOfBooks().map((logOfBook) => {
+  const correctRateOfBooksArr = getCorrectRateOfBooks()?.map((logOfBook) => {
     const correctCount = logOfBook.reduce((acc, item) => {
       if (item.isCorrect) {
         acc += 1;
@@ -246,6 +329,7 @@ export default function VocabBook() {
 
   function getCorrectRateOfBooks() {
     let log: any[][] = [];
+    if (!vocabBooks) return;
     Object.keys(vocabBooks).forEach((key, index) => {
       let insideLog: any[] = [];
       vocabBooks[key].map((vocab) => {
@@ -260,6 +344,17 @@ export default function VocabBook() {
     return log;
   }
 
+  useEffect(() => {
+    if (typeof bookCorrectRate !== "undefined") return;
+    const findUnsorted = (e: string) => e === "unsorted";
+    const indexOfUnsorted = Object.keys(vocabBooks).findIndex(findUnsorted);
+    if (correctRateOfBooksArr) {
+      setBookCorrectRate(
+        Math.round(correctRateOfBooksArr[indexOfUnsorted] * 100) || 0
+      );
+    }
+  }, [bookCorrectRate, correctRateOfBooksArr, vocabBooks]);
+
   const handlePlayAudio = (audioLink: string) => {
     const audio = new Audio(audioLink);
     audio.play();
@@ -272,6 +367,9 @@ export default function VocabBook() {
         [newBook]: arrayUnion(),
       });
       getVocabBooks(userId);
+      if (newBookRef.current) {
+        newBookRef.current.value = "";
+      }
     }
   };
 
@@ -308,7 +406,29 @@ export default function VocabBook() {
   function getSelectedText() {
     if (window.getSelection) {
       const txt = window.getSelection()?.toString();
-      if (typeof txt !== "undefined") setKeyword(txt);
+      if (typeof txt !== "undefined" && txt !== "") setKeyword(txt);
+    }
+  }
+
+  function handleMouseEnterBook() {
+    bookRef.current?.addEventListener(
+      "wheel",
+      (ev: { deltaY: any; deltaX: any }) => {
+        if (bookRef.current)
+          bookRef.current.scrollLeft += ev.deltaY + ev.deltaX;
+      }
+    );
+  }
+
+  function handleMouseLeaveBook() {
+    if (bookRef.current) {
+      bookRef.current.removeEventListener(
+        "wheel",
+        (ev: { deltaY: any; deltaX: any }) => {
+          if (bookRef.current)
+            bookRef.current.scrollLeft += ev.deltaY + ev.deltaX;
+        }
+      );
     }
   }
 
@@ -321,129 +441,112 @@ export default function VocabBook() {
       />
       <Img src={plant} alt="plant" />
       <VocabBookWrapper>
-        <VocabBookAndCard>
-          <BookWrapper>
-            {Object.keys(vocabBooks).map((book: string, index) => (
-              <>
+        <BookWrapper
+          ref={bookRef}
+          onMouseEnter={handleMouseEnterBook}
+          onMouseLeave={handleMouseLeaveBook}
+        >
+          {vocabBooks &&
+            Object.keys(vocabBooks).map((book: string, index) => (
+              <Fragment key={book}>
                 <Book
                   selected={viewingBook === `${book}`}
                   onClick={() => {
                     setViewingBook(book);
-                    setBookCorrectRate(
-                      Math.round(correctRateOfBooksArr[index] * 100)
-                    );
+                    if (correctRateOfBooksArr) {
+                      setBookCorrectRate(
+                        Math.round(correctRateOfBooksArr[index] * 100)
+                      );
+                    }
                   }}
                 >
                   {book.toLocaleLowerCase()} ({vocabBooks?.[book]?.length})
                 </Book>
-              </>
+              </Fragment>
             ))}
-            <Book
-              selected={viewingBook === "wrong words"}
-              onClick={() => {
-                setViewingBook("wrong words");
-              }}
-            >
-              wrong words ({topWrongWords?.length})
-              <br />
-            </Book>
-          </BookWrapper>
-          <BookInfoWrapper>
-            <BookButtons>
-              <div>
-                <Input
-                  onChange={(e) => setNewBook(e.target.value)}
-                  placeholder="Add a book"
+          <Book
+            selected={viewingBook === "wrong words"}
+            onClick={() => {
+              setViewingBook("wrong words");
+            }}
+          >
+            wrong words ({topWrongWords?.length})
+            <br />
+          </Book>
+        </BookWrapper>
+        <BookInfoWrapper>
+          <BookButtons>
+            <div>
+              <Input
+                onChange={(e) => setNewBook(e.target.value)}
+                placeholder="Add a book"
+                ref={newBookRef}
+              />
+              <AddButton onClick={handleAddBook}>+</AddButton>
+            </div>
+            <Delete>
+              {viewingBook !== "wrong words" && (
+                <ButtonImg
+                  src={deleteBtn}
+                  alt="delete"
+                  onClick={() => handleDeleteBook(viewingBook)}
                 />
-                <AddButton onClick={handleAddBook}>+</AddButton>
-              </div>
-              <div>
-                {viewingBook === "wrong words" ? null : (
-                  <ButtonImg
-                    src={deleteBtn}
-                    alt="delete"
-                    onClick={() => handleDeleteBook(viewingBook)}
-                  />
-                )}
-              </div>
-            </BookButtons>
-            <Nav>
-              <div>
-                Correct rate:{" "}
-                {viewingBook === "wrong words" ? "<50%" : `${bookCorrectRate}%`}
-              </div>
-              <div
-                onClick={() =>
-                  vocabBooks[viewingBook]?.length >= 5 ||
-                  (viewingBook === "wrong words" && topWrongWords?.length >= 5)
-                    ? navigate("/vocabbook/review")
-                    : ref.current?.(
-                        "Please save at least 5 vocab cards in this book!"
-                      )
-                }
-              >
+              )}
+            </Delete>
+            <Hint>
+              Click a card or select any words in the cards' definition! <br />
+              <br /> (Desktop =&gt; double click)
+              <br /> (Mobile =&gt; lond press)
+            </Hint>
+          </BookButtons>
+          <Nav>
+            <div>
+              Correct rate:{" "}
+              {viewingBook === "wrong words" ? "<50%" : `${bookCorrectRate}%`}
+            </div>
+            <div
+              onClick={() =>
+                vocabBooks[viewingBook]?.length >= 5 ||
+                (viewingBook === "wrong words" &&
+                  topWrongWords &&
+                  topWrongWords.length >= 5)
+                  ? navigate("/vocabbook/review")
+                  : ref.current?.(
+                      "Please save at least 5 vocab cards in this book!"
+                    )
+              }
+            >
+              {viewingBook !== "wrong words" && (
                 <Button btnType={"primary"}>Review</Button>
-              </div>
-            </Nav>
-          </BookInfoWrapper>
-          <CardWrapper>
-            {viewingBook === "wrong words" ? (
-              <>
-                {topWrongWords?.map(
+              )}
+            </div>
+          </Nav>
+        </BookInfoWrapper>
+        <CardWrapper>
+          {viewingBook === "wrong words" ? (
+            topWrongWords && (
+              <ReactWordcloud
+                words={topWrongWords}
+                callbacks={callbacks}
+                options={options}
+                size={size}
+              />
+            )
+          ) : (
+            <>
+              {vocabBooks?.[viewingBook]?.length ? (
+                vocabBooks[viewingBook]?.map(
                   (
                     { vocab, audioLink, partOfSpeech, definition, correctRate },
                     index
                   ) => (
-                    <>
+                    <Fragment key={vocab}>
                       <Card>
                         <VocabHeader>
                           <VocabTitle>
                             <Vocab
                               key={index}
-                              onClick={() => setKeyword(vocab)}
-                            >
-                              {vocab}
-                            </Vocab>
-                            {audioLink ? (
-                              <AudioImg
-                                src={audio}
-                                alt="audio"
-                                onClick={() => handlePlayAudio(audioLink)}
-                              />
-                            ) : (
-                              ""
-                            )}
-                          </VocabTitle>
-                          <div>{Math.round(correctRate * 100)}%</div>
-                        </VocabHeader>
-                        <CardText
-                          weight={true}
-                          onClick={() => getSelectedText()}
-                        >
-                          ({partOfSpeech})
-                        </CardText>
-                        <CardText onClick={() => getSelectedText()}>
-                          {definition}
-                        </CardText>
-                      </Card>
-                    </>
-                  )
-                )}
-              </>
-            ) : (
-              <>
-                {vocabBooks[viewingBook]?.map(
-                  (
-                    { vocab, audioLink, partOfSpeech, definition, correctRate },
-                    index
-                  ) => (
-                    <>
-                      <Card>
-                        <VocabHeader>
-                          <VocabTitle>
-                            <Vocab
-                              key={index}
-                              onClick={() => setKeyword(vocab)}
+                              onClick={() => vocab !== "" && setKeyword(vocab)}
                             >
                               {vocab}
                             </Vocab>
@@ -474,13 +577,15 @@ export default function VocabBook() {
                           {definition}
                         </CardText>
                       </Card>
-                    </>
+                    </Fragment>
                   )
-                )}
-              </>
-            )}
-          </CardWrapper>
-        </VocabBookAndCard>
+                )
+              ) : (
+                <NoCards>Save words and start reviewing!</NoCards>
+              )}
+            </>
+          )}
+        </CardWrapper>
       </VocabBookWrapper>
       <VocabDetails />
     </Wrapper>

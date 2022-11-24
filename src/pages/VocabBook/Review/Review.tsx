@@ -43,12 +43,8 @@ const RoundCount = styled.div`
 `;
 
 const Header = styled.div`
-  /* display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin: auto; */
+  width: auto;
   margin-top: 20px;
-  /* align-items: center; */
   text-align: center;
   position: relative;
   z-index: 1;
@@ -57,9 +53,11 @@ const Header = styled.div`
 const Div = styled.div`
   display: flex;
   justify-content: center;
-  /* @media screen and (max-width: 601px) { */
-  width: 150px;
-  /* } */
+  width: 100%;
+`;
+
+const ScoreBarDiv = styled.div`
+  width: 200px;
 `;
 
 const ScoreBar = styled.div`
@@ -70,7 +68,6 @@ const ScoreBar = styled.div`
   border-radius: 20px;
   margin-top: 10px;
   z-index: 3;
-  transform: translateX(-50%);
   ${(props: Props) =>
     props.insideColor &&
     css`
@@ -82,7 +79,6 @@ const ScoreBar = styled.div`
       margin-bottom: 20px;
     `}
   @media screen and (max-width: 601px) {
-    width: 150px;
     ${(props: Props) =>
       props.insideColor &&
       css`
@@ -156,6 +152,8 @@ const BtnDiv = styled.div`
   display: ${(props: Props) => (props.showBtn ? "flex" : "none")};
   margin-top: 20px;
   justify-content: flex-end;
+  position: relative;
+  z-index: 2;
 `;
 
 const Message = styled.div`
@@ -190,7 +188,9 @@ const VocabDiv = styled.div`
   align-items: center;
   gap: 10px;
   font-weight: 600;
+  font-size: 16px;
   margin-bottom: 10px;
+  color: #607973;
 `;
 
 const LabelDiv = styled.div`
@@ -205,7 +205,8 @@ const LabelDiv = styled.div`
 `;
 
 const VocabList = styled.div`
-  margin-bottom: 10px;
+  margin-bottom: 30px;
+  font-size: 14px;
 `;
 
 interface Log {
@@ -235,7 +236,7 @@ export default function Review() {
 
   const { viewingBook } = useViewingBook();
   const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
-  const [updateLogInVeiwingBook, setUpdateLogInVeiwingBook] = useState<
+  const [updateLogInViewingBook, setUpdateLogInViewingBook] = useState<
     Answer[]
   >(vocabBooks?.[viewingBook]);
 
@@ -260,7 +261,6 @@ export default function Review() {
   ]);
 
   useEffect(() => {
-    console.log("singleMode");
     getVocabBooks(userId);
 
     const getUserInfo = async (userId: string) => {
@@ -324,7 +324,7 @@ export default function Review() {
     const updateLog = async () => {
       const userRef = doc(db, "vocabBooks", userId);
       await updateDoc(userRef, {
-        [viewingBook]: updateLogInVeiwingBook,
+        [viewingBook]: updateLogInViewingBook,
       });
     };
     updateLog();
@@ -368,7 +368,7 @@ export default function Review() {
                   );
                   setShowAnswerArr(answerStatus);
 
-                  let newUpdateLogInVeiwingBook;
+                  let newUpdateLogInViewingBook;
 
                   if (clickedVocab === correctVocab?.vocab) {
                     setAnswerCount((prev) => ({
@@ -376,7 +376,7 @@ export default function Review() {
                       correct: prev.correct + 1,
                     }));
 
-                    newUpdateLogInVeiwingBook = [...updateLogInVeiwingBook].map(
+                    newUpdateLogInViewingBook = [...updateLogInViewingBook].map(
                       ({
                         vocab,
                         audioLink,
@@ -396,7 +396,6 @@ export default function Review() {
                               },
                               0
                             );
-                            console.log("correct correctRate: ...log");
                             return {
                               vocab,
                               audioLink,
@@ -410,7 +409,6 @@ export default function Review() {
                                 (correctCount + 1) / (log.length + 1),
                             };
                           } else {
-                            console.log("correct correctRate: 1");
                             return {
                               vocab,
                               audioLink,
@@ -437,7 +435,7 @@ export default function Review() {
                       ...prev,
                       wrong: prev.wrong + 1,
                     }));
-                    newUpdateLogInVeiwingBook = [...updateLogInVeiwingBook].map(
+                    newUpdateLogInViewingBook = [...updateLogInViewingBook].map(
                       ({
                         vocab,
                         audioLink,
@@ -448,16 +446,12 @@ export default function Review() {
                       }) => {
                         if (vocab === correctVocab?.vocab) {
                           if (log && log?.length > 0) {
-                            const correctCount = log?.reduce(
-                              (acc: any, item) => {
-                                if (item.isCorrect) {
-                                  acc += 1;
-                                }
-                                return acc;
-                              },
-                              0
-                            );
-                            console.log("wrong correctRate: ...log");
+                            const correctCount = log?.reduce((acc, item) => {
+                              if (item.isCorrect) {
+                                acc += 1;
+                              }
+                              return acc;
+                            }, 0);
                             return {
                               vocab,
                               audioLink,
@@ -470,7 +464,6 @@ export default function Review() {
                               correctRate: correctCount / (log.length + 1),
                             };
                           } else {
-                            console.log("wrong correctRate: 0");
                             return {
                               vocab,
                               audioLink,
@@ -493,8 +486,7 @@ export default function Review() {
                       }
                     );
                   }
-                  setUpdateLogInVeiwingBook(newUpdateLogInVeiwingBook);
-                  console.log("clickOptions", { newUpdateLogInVeiwingBook });
+                  setUpdateLogInViewingBook(newUpdateLogInViewingBook);
                 }
               }}
             >
@@ -536,7 +528,7 @@ export default function Review() {
     return (
       <VocabList key={vocab + partOfSpeech}>
         <VocabDiv>
-          {vocab}{" "}
+          ▶ {vocab}{" "}
           {audioLink && (
             <AudioImg
               src={audio}
@@ -582,7 +574,7 @@ export default function Review() {
               <LabelDiv>Wrong vocab</LabelDiv>{" "}
               {reviewingQuestions.map(
                 ({ vocab, audioLink, partOfSpeech, definition }) => {
-                  const answer = updateLogInVeiwingBook.find((answer) => {
+                  const answer = updateLogInViewingBook.find((answer) => {
                     return answer.vocab === vocab;
                   });
                   const lastAnswerLog = answer?.log.at(-1);
@@ -602,7 +594,7 @@ export default function Review() {
               <LabelDiv>Correct vocab</LabelDiv>{" "}
               {reviewingQuestions.map(
                 ({ vocab, audioLink, partOfSpeech, definition }) => {
-                  const answer = updateLogInVeiwingBook.find((answer) => {
+                  const answer = updateLogInViewingBook.find((answer) => {
                     return answer.vocab === vocab;
                   });
                   const lastAnswerLog = answer?.log.at(-1);
@@ -634,11 +626,13 @@ export default function Review() {
           {questionsNumber}
         </div>
         <Div>
-          <ScoreBar insideColor={true} score={answerCount.correct}>
-            <ScoreBar>
-              {Math.ceil((answerCount.correct / questionsNumber) * 100)}%
+          <ScoreBarDiv>
+            <ScoreBar insideColor={true} score={answerCount.correct}>
+              <ScoreBar>
+                {Math.ceil((answerCount.correct / questionsNumber) * 100)}%
+              </ScoreBar>
             </ScoreBar>
-          </ScoreBar>
+          </ScoreBarDiv>
         </Div>
       </Header>
       {gameOver ? renderOutcome() : renderTest()}

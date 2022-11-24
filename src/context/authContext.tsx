@@ -38,17 +38,7 @@ interface AuthInterface {
   ): Promise<string | undefined>;
 }
 
-export const authContext = createContext<AuthInterface>({
-  // userId: "",
-  // setUserId: () => {},
-  // isLogin: false,
-  // setIsLogin: () => {},
-  // isLoadingUserAuth: true,
-  // setIsLoadingUserAuth: () => {},
-  // logout: () => {},
-  // login: "",
-  // signup: () => {},
-} as AuthInterface);
+export const authContext = createContext<AuthInterface>({} as AuthInterface);
 
 export function AuthContextProvider({ children }: ContextProviderProps) {
   const [isLogin, setIsLogin] = useState(false);
@@ -116,14 +106,15 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
         awaitingFriendReply: [],
         battleInvitation: [],
       });
-      setIsLogin(true);
+
       await setDoc(doc(db, "vocabBooks", user.uid), {
         unsorted: arrayUnion(),
       });
+
       await setDoc(doc(db, "plantsList", user.uid), {
         plants: [],
       });
-      // return "Sign up successfully!";
+      return user.uid;
     } catch (error) {
       if (error instanceof Error) return error["message"];
     }
@@ -139,7 +130,6 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
         });
       };
       updateState();
-      // return "Log in successfully!";
     } catch (error) {
       if (error instanceof Error) return error["message"];
     }

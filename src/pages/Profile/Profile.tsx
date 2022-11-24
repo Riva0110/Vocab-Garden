@@ -1,11 +1,14 @@
 import styled, { css } from "styled-components";
 import { authContext } from "../../context/authContext";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useCallback } from "react";
 import { arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { plantImgsObj } from "./plantImgs";
 import Button from "../../components/Button/Button";
-import plant from "./banner.webp";
+import garden from "./garden.webp";
+import Hint from "../../components/Hint/Hint";
+import LoginPage from "./Login";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   insideColor?: boolean;
@@ -15,70 +18,21 @@ interface Props {
 const Wrapper = styled.div`
   padding: 80px 20px 20px 20px;
   display: flex;
-  @media screen and (max-width: 801px) {
+  gap: 30px;
+  @media screen and (max-width: 1001px) {
     flex-direction: column;
   }
 `;
 
-const LoginWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin: auto;
-  width: 500px;
-  padding: 20px;
-  position: relative;
-  z-index: 1;
-  min-height: calc(100vh - 60px);
-  @media screen and (max-width: 601px) {
-    width: 100%;
-  }
-`;
-
-const ErrorMsg = styled.div`
-  margin-bottom: 10px;
-  color: #c28e96;
-`;
-
-const LoginDiv = styled.div`
-  display: flex;
-  justify-content: center;
-`;
-
-const BackgroundImg = styled.div`
+const GardenImg = styled.div`
   width: 100vw;
   height: 100vh;
   position: fixed;
   left: 0;
   top: 0;
-  background-image: url(${plant});
   background-size: cover;
-  opacity: 0.5;
-`;
-
-const WelcomeMsg = styled.div`
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 20px;
-  text-align: center;
-`;
-
-const Toggle = styled.div`
-  margin-top: 20px;
-  color: gray;
-  cursor: pointer;
-`;
-
-const Input = styled.input`
-  width: 70%;
-  margin-bottom: 10px;
-  height: 30px;
-  padding-left: 10px;
-  border: 1px solid lightgrey;
-  &:focus {
-    outline: none;
-  }
+  background-image: url(${garden});
+  opacity: 0.4;
 `;
 
 const Select = styled.select`
@@ -87,7 +41,12 @@ const Select = styled.select`
     outline: none;
   }
   cursor: pointer;
+  height: 30px;
+  font-size: 16px;
+  background-color: rgb(255, 255, 255, 0.1);
 `;
+
+const Option = styled.option``;
 
 const ScoreBarWrapper = styled.div`
   width: 200px;
@@ -117,6 +76,11 @@ const ScoreDiv = styled.div`
 `;
 
 const UserInfoWrapper = styled.div`
+  background-color: rgb(255, 255, 255, 0.9);
+  padding: 30px 0;
+  border-radius: 30px;
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -129,15 +93,14 @@ const UserInfoWrapper = styled.div`
     width: 35%;
   }
   @media screen and (max-width: 1025px) {
-    width: 50%;
-  }
-  @media screen and (max-width: 880px) {
-    width: 40%;
-  }
-  @media screen and (max-width: 801px) {
     width: 100%;
-    padding: 0 10px;
   }
+`;
+
+const ProfileTitle = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
 `;
 
 const GrowingPlantImg = styled.img`
@@ -149,13 +112,16 @@ const GrowingPlantImg = styled.img`
   }
 `;
 
-const Plants = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  margin-top: 30px;
+const PlantsWrapper = styled.div`
   width: 70%;
-  gap: 20px;
-  align-content: flex-start;
+  background-color: rgb(255, 255, 255, 0.9);
+  position: relative;
+  z-index: 1;
+  border-radius: 30px;
+  padding: 30px;
+  display: flex;
+  justify-content: center;
+
   @media screen and (max-width: 1269px) {
     width: 60%;
   }
@@ -163,17 +129,31 @@ const Plants = styled.div`
     width: 65%;
   }
   @media screen and (max-width: 1025px) {
-    width: 50%;
-  }
-  @media screen and (max-width: 880px) {
-    width: 60%;
-  }
-  @media screen and (max-width: 801px) {
     width: 100%;
   }
-  @media screen and (max-width: 601px) {
-    width: 100%;
-    justify-content: center;
+`;
+
+const Plants = styled.div`
+  display: grid;
+  grid-template-columns: auto auto auto auto auto;
+  gap: 20px;
+  @media screen and (max-width: 1701px) {
+    grid-template-columns: auto auto auto auto;
+  }
+  @media screen and (max-width: 1401px) {
+    grid-template-columns: auto auto auto;
+  }
+  @media screen and (max-width: 1201px) {
+    grid-template-columns: auto auto;
+  }
+  @media screen and (max-width: 1025px) {
+    grid-template-columns: auto auto auto;
+  }
+  @media screen and (max-width: 731px) {
+    grid-template-columns: auto auto;
+  }
+  @media screen and (max-width: 501px) {
+    grid-template-columns: auto;
   }
 `;
 
@@ -186,20 +166,15 @@ const PlantBorder = styled.div`
   width: 200px;
   height: 260px;
   padding: 30px;
-  @media screen and (max-width: 801px) {
-    width: calc((100vw - 100px) / 3);
-    height: calc((100vw - 64px) / 3 * 1.3);
-  }
-  @media screen and (max-width: 601px) {
-    width: calc((100vw - 160px));
-    height: calc((100vw - 160px) * 1.3);
-  }
 `;
 
 const PlantImg = styled.img`
   width: 100%;
   height: 85%;
-  margin-bottom: 20px;
+  margin-bottom: 5px;
+  @media screen and (max-width: 601px) {
+    margin-bottom: 15px;
+  }
 `;
 
 const PlantName = styled.div``;
@@ -207,6 +182,14 @@ const PlantName = styled.div``;
 const Time = styled.div`
   color: gray;
   font-size: 12px;
+`;
+
+const FewPlants = styled.div`
+  display: flex;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
 `;
 
 interface PlantsListInterface {
@@ -217,15 +200,35 @@ interface PlantsListInterface {
   };
 }
 
+function displayPlantName(currentPlant: string) {
+  return (
+    (currentPlant === "begonia" && "Begonia") ||
+    (currentPlant === "mirrorGrass" && "Mirror Grass") ||
+    (currentPlant === "travelerBanana" && "Traveler Banana") ||
+    (currentPlant === "philodendron" && "Philodendron") ||
+    (currentPlant === "ceriman" && "Ceriman") ||
+    (currentPlant === "birdOfParadise" && "Bird of Paradise")
+  );
+}
+
+function getCamelCasePlantName(plantName: string) {
+  return (
+    (plantName === "Begonia" && "begonia") ||
+    (plantName === "Mirror Grass" && "mirrorGrass") ||
+    (plantName === "Traveler Banana" && "travelerBanana") ||
+    (plantName === "Philodendron" && "philodendron") ||
+    (plantName === "Ceriman" && "ceriman") ||
+    (plantName === "Bird of Paradise" && "birdOfParadise") ||
+    "begonia"
+  );
+}
+
 export default function Profile() {
-  const { isLogin, login, logout, signup, userId } = useContext(authContext);
-  const [errorMsg, setErrorMsg] = useState<string>("");
+  const navigate = useNavigate();
+  const { isLogin, logout, userId, signup } = useContext(authContext);
   const [name, setName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [isMember, setIsMember] = useState<boolean>(true);
   const [score, setScore] = useState<number>(0);
-  const [isChallenging, setIsChallenging] = useState<boolean>();
+  const [isChallenging, setIsChallenging] = useState<boolean>(false);
   const [messages, setMessages] =
     useState<string>("選擇喜歡的植物，開始新的挑戰吧！");
   const [currentPlant, setCurrentPlant] = useState("begonia");
@@ -233,41 +236,53 @@ export default function Profile() {
   const [isDying, setIsDying] = useState<boolean>(false);
   const [plantsList, setPlantsList] = useState<PlantsListInterface[]>([]);
 
+  const getAndUpdateUserInfo = useCallback(async (userId: string) => {
+    const plantsRef = doc(db, "plantsList", userId);
+    const plantsSnap = await getDoc(plantsRef);
+    const plantData = plantsSnap.data()?.plants as PlantsListInterface[];
+    setPlantsList(plantData);
+
+    const userRef = doc(db, "users", userId);
+    const userDocSnap = await getDoc(userRef);
+    const data = userDocSnap.data();
+    setName(data?.name);
+    setIsChallenging(data?.isChallenging);
+    setIsDying(data?.isDying);
+    setCurrentPlant(data?.currentPlant);
+    setScore(data?.currentScore);
+
+    const timeDifference =
+      Date.now() - data?.lastTimeUpdateScore.seconds * 1000;
+    const deduction = Math.floor(timeDifference / (300000 * 576));
+
+    if (data?.isChallenging && deduction > 0) {
+      setIsDying(true);
+      setScore((prev) => Math.max(prev - deduction, 0));
+
+      await updateDoc(userRef, {
+        currentScore: Math.max(data?.currentScore - deduction, 0),
+        lastTimeUpdateScore: new Date(),
+        isDying: true,
+      });
+    }
+  }, []);
+
+  const signupAndUpdateState = async (
+    email: string,
+    password: string,
+    name: string
+  ) => {
+    const newUserId = await signup(email, password, name);
+    if (typeof newUserId === "string") {
+      getAndUpdateUserInfo(newUserId);
+    }
+  };
+
   useEffect(() => {
-    const getAndUpdateUserInfo = async () => {
-      const plantsRef = doc(db, "plantsList", userId);
-      const plantsSnap = await getDoc(plantsRef);
-      const plantData = plantsSnap.data()?.plants as PlantsListInterface[];
-      setPlantsList(plantData);
-
-      const userRef = doc(db, "users", userId);
-      const userDocSnap = await getDoc(userRef);
-      const data = userDocSnap.data();
-      setName(data?.name);
-      setIsChallenging(data?.isChallenging);
-      setIsDying(data?.isDying);
-      setCurrentPlant(data?.currentPlant);
-      setScore(data?.currentScore);
-
-      const timeDifference =
-        Date.now() - data?.lastTimeUpdateScore.seconds * 1000;
-      const deduction = Math.floor(timeDifference / 300000);
-
-      if (data?.isChallenging && deduction > 0) {
-        setIsDying(true);
-        setScore((prev) => Math.max(prev - deduction, 0));
-
-        const userRef = doc(db, "users", userId);
-        await updateDoc(userRef, {
-          currentScore: Math.max(data?.currentScore - deduction, 0),
-          lastTimeUpdateScore: new Date(),
-          isDying: true,
-        });
-      }
-    };
-
-    getAndUpdateUserInfo();
-  }, [userId]);
+    if (userId) {
+      getAndUpdateUserInfo(userId);
+    }
+  }, [userId, getAndUpdateUserInfo]);
 
   useEffect(() => {
     if (isChallenging) {
@@ -290,14 +305,16 @@ export default function Profile() {
         } else if (score <= 4) {
           setPlantPhase("3");
           setMessages("你好棒喔！植物長出新葉片了！");
-        } else if (score === 5) {
-          setIsChallenging(false);
-          setPlantPhase("5");
-          setMessages("挑戰成功，植物長大了！趕快收藏到花園吧");
         }
 
         if (score === 3 || score === 4) setPlantPhase("3");
       }
+    }
+
+    if (score === 5) {
+      setIsChallenging(false);
+      setPlantPhase("5");
+      setMessages("挑戰成功，植物長大了！趕快收藏到花園吧");
     }
 
     const updateUserInfo = async () => {
@@ -334,7 +351,7 @@ export default function Profile() {
     const plantsRef = doc(db, "plantsList", userId);
     await updateDoc(plantsRef, {
       plants: arrayUnion({
-        plantName: currentPlant,
+        plantName: displayPlantName(currentPlant),
         time: new Date(),
       }),
     });
@@ -355,19 +372,49 @@ export default function Profile() {
           {
             plantName: currentPlant,
             time: {
-              seconds: new Date().getSeconds,
-              nanoseconds: new Date().getSeconds,
+              seconds: Date.now() / 1000,
+              nanoseconds: Date.now() / 1000,
             },
           },
         ] as PlantsListInterface[]
     );
   };
 
-  function renderProile() {
+  const renderProfile = () => {
     return (
       <Wrapper>
         <UserInfoWrapper>
-          <p>{name}’s Vocab Garden</p>
+          <ProfileTitle>
+            <p>{name}’s Vocab Garden</p>
+            <Hint>
+              Start a challenge, and enrich your Vocab Garden!
+              <br />
+              <br />
+              When you are in a challenge, you can get 1 point by two ways:
+              <br />
+              <br />
+              1. [Single Mode] <br />
+              ．correct rate &gt;= 80%
+              <br />
+              <br />
+              2. [Battle Mode] <br />
+              ．Invite your friends to battle <br />
+              ．Win the battle!
+              <br />
+              ．correct rate &gt;= 80%
+              <br />
+              <br />
+              Choose a book to review right now!
+              <br />
+              <div
+                onClick={() => {
+                  navigate("/vocabbook");
+                }}
+              >
+                &gt;&gt;&gt; Click me &gt;&gt;&gt;
+              </div>
+            </Hint>
+          </ProfileTitle>
           <GrowingPlantImg
             src={plantImgsObj[currentPlant]?.[plantPhase]}
             alt="plants"
@@ -385,6 +432,7 @@ export default function Profile() {
           ) : score !== 5 ? (
             <>
               <Select
+                value={currentPlant}
                 onChange={async (e: any) => {
                   setCurrentPlant(e.target.value);
                   setIsDying(false);
@@ -397,9 +445,9 @@ export default function Profile() {
                 }}
               >
                 {Object.keys(plantImgsObj)?.map((plant, index) => (
-                  <option key={plant} selected={plant === currentPlant}>
-                    {plant}
-                  </option>
+                  <Option key={plant} value={plant}>
+                    {displayPlantName(plant)}
+                  </Option>
                 ))}
               </Select>
 
@@ -418,106 +466,39 @@ export default function Profile() {
             <Button btnType={"secondary"}>Log out</Button>
           </div>
         </UserInfoWrapper>
-        <Plants>
-          {plantsList?.map(({ plantName, time }, index) => {
-            const newDate = new Date(time.seconds * 1000);
-            return (
-              <PlantBorder>
-                <PlantImg
-                  src={plantImgsObj[plantName]["5"]}
-                  alt="plants"
-                  key={plantName + index}
-                />
-                <PlantName>{plantName}</PlantName>
-                <Time>{newDate.toLocaleString()}</Time>
-              </PlantBorder>
-            );
-          })}
-        </Plants>
+        <PlantsWrapper>
+          <Plants>
+            {plantsList?.length !== 0 ? (
+              plantsList?.map(({ plantName, time }, index) => {
+                const newDate = new Date(time.seconds * 1000);
+                return (
+                  <PlantBorder key={time + plantName}>
+                    <PlantImg
+                      src={plantImgsObj[getCamelCasePlantName(plantName)]["5"]}
+                      alt="plants"
+                      key={plantName + index}
+                    />
+                    <PlantName>{plantName}</PlantName>
+                    <Time>{newDate.toLocaleString()}</Time>
+                  </PlantBorder>
+                );
+              })
+            ) : (
+              <FewPlants>
+                There's no any plants in your garden.
+                <br />
+                Start a challenge TODAY!
+              </FewPlants>
+            )}
+          </Plants>
+        </PlantsWrapper>
+        <GardenImg />
       </Wrapper>
     );
-  }
+  };
 
-  function renderLoginPage() {
-    return (
-      <Wrapper>
-        <BackgroundImg />
-        <LoginWrapper>
-          {isMember ? (
-            <>
-              <WelcomeMsg>
-                Log in or sign up to enjoy full functions!
-              </WelcomeMsg>
-              <Input
-                placeholder="email"
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <Input
-                type="password"
-                placeholder="password"
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <ErrorMsg>{errorMsg}</ErrorMsg>
-              <div>
-                <LoginDiv
-                  onClick={async () => {
-                    const loginStatus = await login(email, password);
-                    if (typeof loginStatus === "string") {
-                      const loginErrorMsg = loginStatus.slice(9) as string;
-                      setErrorMsg(loginErrorMsg);
-                    }
-                  }}
-                >
-                  <Button btnType="primary">Log in</Button>
-                </LoginDiv>
-                <Toggle onClick={() => setIsMember(false)}>
-                  not a member？
-                </Toggle>
-              </div>
-            </>
-          ) : (
-            <>
-              <WelcomeMsg>
-                Log in or sign up to enjoy full functions!
-              </WelcomeMsg>
-              <Input
-                placeholder="name"
-                onChange={(e) => setName(e.target.value)}
-              />
-              <Input
-                placeholder="email"
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <Input
-                type="password"
-                placeholder="password"
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <ErrorMsg>{errorMsg}</ErrorMsg>
-              <div
-                onClick={async () => {
-                  if (name === "") {
-                    setErrorMsg("Please fill in your name.");
-                    return;
-                  }
-                  const signupStatus = await signup(email, password, name);
-                  if (typeof signupStatus === "string") {
-                    const signupErrorMsg = signupStatus.slice(9) as string;
-                    setErrorMsg(signupErrorMsg);
-                  }
-                }}
-              >
-                <Button btnType="primary">Signup</Button>
-              </div>
-              <Toggle onClick={() => setIsMember(true)}>
-                already a member?
-              </Toggle>
-            </>
-          )}
-        </LoginWrapper>
-      </Wrapper>
-    );
-  }
-
-  return isLogin ? renderProile() : renderLoginPage();
+  if (isLogin) return renderProfile();
+  return (
+    <LoginPage name={name} setName={setName} signup={signupAndUpdateState} />
+  );
 }

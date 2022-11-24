@@ -11,19 +11,21 @@ interface Log {
   testTime: {};
 }
 
+export interface VocabBooks {
+  [key: string]: [
+    {
+      vocab: string;
+      audioLink: string;
+      partOfSpeech: string;
+      definition: string;
+      log: Log[];
+      correctRate: number;
+    }
+  ];
+}
+
 interface BooksInterface {
-  vocabBooks: {
-    [key: string]: [
-      {
-        vocab: string;
-        audioLink: string;
-        partOfSpeech: string;
-        definition: string;
-        log: Log[];
-        correctRate: number;
-      }
-    ];
-  };
+  vocabBooks: VocabBooks;
   setVocabBooks: React.Dispatch<React.SetStateAction<string>>;
   getVocabBooks(userId: string): void;
   isSaved: boolean;

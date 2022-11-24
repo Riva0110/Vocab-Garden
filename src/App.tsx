@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { useOnClickOutside } from "./components/useOnClickOutside";
-import styled, { createGlobalStyle, css } from "styled-components";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import styled, { createGlobalStyle } from "styled-components";
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { keywordContext } from "./context/keywordContext";
 import { authContext } from "./context/authContext";
 import logo from "./logoName.png";
@@ -16,11 +16,22 @@ const GlobalStyle = createGlobalStyle`
   * {
     box-sizing: border-box;
   }
+  
   body {
     margin: 0;
     padding: 0;
     color: #4f4f4f;
+    font-family: "Poppins";
   }
+
+  p {
+    margin: 0px;
+  }
+
+  button {
+    font-family: "Poppins";
+  }
+
 `;
 
 const Wrapper = styled.div`
@@ -134,12 +145,13 @@ const Main = styled.main`
 `;
 
 const NavDiv = styled.div`
-  width: ${(props: Props) => (props.length ? `${props.length * 10}px` : ``)};
+  width: ${(props: Props) => (props.length ? `${props.length * 12}px` : ``)};
   display: flex;
   justify-content: center;
   @media screen and (max-width: 601px) {
     justify-content: flex-start;
     margin-top: 20px;
+    padding-left: 20px;
   }
 `;
 
@@ -159,27 +171,6 @@ const HomeLink = styled(Link)`
   text-decoration: none;
 `;
 
-const NavLink = styled(Link)`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-left: 20px;
-  color: #4f4f4f;
-  text-decoration: none;
-  &:hover {
-    background-color: white;
-    padding: 0 10px;
-  }
-  @media screen and (max-width: 601px) {
-    color: white;
-    &:hover {
-      background-color: white;
-      padding: 0 10px;
-      color: #4f4f4f;
-    }
-  }
-`;
-
 const Input = styled.input`
   width: 180px;
   height: 30px;
@@ -197,8 +188,8 @@ const Input = styled.input`
 
 const Notification = styled.div`
   display: ${(props: Props) => (props.showInvitation ? "flex" : "none")};
+  flex-direction: column;
   min-height: 50px;
-  line-height: 50px;
   border: 1px solid gray;
   border-radius: 10px;
   z-index: 1000;
@@ -208,8 +199,8 @@ const Notification = styled.div`
   background-color: #607973;
   color: white;
   text-align: center;
-  padding: 0 10px 0 0;
-  padding: 0 10px;
+  padding: 20px;
+  gap: 20px;
   box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
   @media screen and (max-width: 601px) {
     right: 50px;
@@ -217,6 +208,16 @@ const Notification = styled.div`
 `;
 
 const Invitation = styled.div``;
+
+const InvitationA = styled(Link)`
+  cursor: pointer;
+  color: white;
+  text-decoration: none;
+`;
+
+const Time = styled.div`
+  font-size: 12px;
+`;
 
 interface Props {
   showInvitation?: boolean;
@@ -228,6 +229,10 @@ interface Props {
 interface BattleInvitation {
   ownerName: string;
   pin: string;
+  time: {
+    seconds: number;
+    nanoseconds: number;
+  };
 }
 
 function App() {
@@ -238,6 +243,12 @@ function App() {
   const [battleInvitation, setBattleInvitation] =
     useState<BattleInvitation[]>();
   const [showInvitation, setShowInvitation] = useState<boolean>(false);
+  const [isHover, setIsHover] = useState<boolean[]>([
+    false,
+    false,
+    false,
+    false,
+  ]);
   const [showNav, setShowNav] = useState<boolean>(false);
   const pathName = window.location.pathname;
   const notificationRef = useRef(null);
@@ -259,31 +270,125 @@ function App() {
   const handleClearInvitation = async ({
     ownerName,
     pin,
+    time,
   }: BattleInvitation) => {
     const userRef = doc(db, "users", userId);
     await updateDoc(userRef, {
       battleInvitation: arrayRemove({
         ownerName,
         pin,
+        time,
       }),
     });
   };
 
   function renderNav() {
+    const shareStyle = {
+      display: "flex",
+      alignItems: "center",
+      gap: "10px",
+      textDecoration: "none",
+    };
+
+    const activeStyle = {
+      ...shareStyle,
+      color: "#607973",
+      textDecoration: "underline",
+      fontWeight: "bold",
+    };
+
+    const notActiveStyle = {
+      ...shareStyle,
+      color: "#4f4f4f",
+    };
+
+    const hoverStyle = {
+      ...shareStyle,
+      color: "#4f4f4f",
+      backgroundColor: "white",
+      padding: "0 10px",
+    };
+
+    const mobileActiveStyle = {
+      ...shareStyle,
+      color: "white",
+      fontWeight: "bold",
+    };
+
+    const mobileHoverStyle = {
+      ...shareStyle,
+      color: "#4f4f4f",
+      backgroundColor: "white",
+      padding: "0 10px",
+    };
+
+    const mobileNotActiveStyle = {
+      ...shareStyle,
+      color: "lightgray",
+    };
+
+    function renderNavLink(isActive: boolean, index: number) {
+      if (window.screen.width < 601) {
+        if (isActive) {
+          return mobileActiveStyle;
+        } else if (isHover[index]) {
+          return mobileHoverStyle;
+        } else {
+          return mobileNotActiveStyle;
+        }
+      } else {
+        if (isActive) {
+          return activeStyle;
+        } else if (isHover[index]) {
+          return hoverStyle;
+        } else {
+          return notActiveStyle;
+        }
+      }
+    }
+
     return (
       <>
         <XDiv size={16} />
         <NavDiv length={"Article".length}>
-          <NavLink to={isLogin ? "/articles" : "/profile"}>Article</NavLink>
+          <NavLink
+            to={"/articles"}
+            style={({ isActive }) => renderNavLink(isActive, 0)}
+            onMouseEnter={() => setIsHover([true, false, false, false])}
+            onMouseLeave={() => setIsHover([false, false, false, false])}
+          >
+            Article
+          </NavLink>
         </NavDiv>
         <NavDiv length={"VocabBook".length}>
-          <NavLink to={isLogin ? "/vocabbook" : "/profile"}>VocabBook</NavLink>
+          <NavLink
+            to={"/vocabbook"}
+            style={({ isActive }) => renderNavLink(isActive, 1)}
+            onMouseEnter={() => setIsHover([false, true, false, false])}
+            onMouseLeave={() => setIsHover([false, false, false, false])}
+          >
+            VocabBook
+          </NavLink>
         </NavDiv>
         <NavDiv length={"Friend".length}>
-          <NavLink to={isLogin ? "/friends" : "/profile"}>Friend</NavLink>
+          <NavLink
+            to={"/friends"}
+            style={({ isActive }) => renderNavLink(isActive, 2)}
+            onMouseEnter={() => setIsHover([false, false, true, false])}
+            onMouseLeave={() => setIsHover([false, false, false, false])}
+          >
+            Friend
+          </NavLink>
         </NavDiv>
         <NavDiv length={"Profile".length}>
-          <NavLink to={isLogin ? "/profile" : "/profile"}>Profile</NavLink>
+          <NavLink
+            to={"/profile"}
+            style={({ isActive }) => renderNavLink(isActive, 3)}
+            onMouseEnter={() => setIsHover([false, false, false, true])}
+            onMouseLeave={() => setIsHover([false, false, false, false])}
+          >
+            Profile
+          </NavLink>
         </NavDiv>
       </>
     );
@@ -307,7 +412,7 @@ function App() {
                 setInputVocab(e.target.value);
               }}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && inputVocab) {
+                if (e.key === "Enter" && inputVocab && inputVocab !== "") {
                   setKeyword(inputVocab);
                   const target = e.target as HTMLInputElement;
                   target.value = "";
@@ -337,24 +442,29 @@ function App() {
           {renderNav()}
         </MobileNav>
       )}
-
       <Main>
         <Notification showInvitation={showInvitation} ref={notificationRef}>
           {battleInvitation?.length !== 0 ? (
-            battleInvitation?.map(({ ownerName, pin }: BattleInvitation) => (
-              <Invitation>
-                <NavLink
-                  style={{ marginLeft: 0 }}
-                  to={`/vocabbook/review/${pin}`}
-                  onClick={() => {
-                    setShowInvitation(false);
-                    handleClearInvitation({ ownerName, pin });
-                  }}
-                >
-                  {ownerName} invites you to battle! ▶
-                </NavLink>
-              </Invitation>
-            ))
+            battleInvitation?.map(
+              ({ ownerName, pin, time }: BattleInvitation) => {
+                const newTime = new Date(time.seconds * 1000);
+                return (
+                  <Invitation key={pin}>
+                    <InvitationA
+                      style={{ marginLeft: 0 }}
+                      to={`/vocabbook/review/${pin}`}
+                      onClick={() => {
+                        setShowInvitation(false);
+                        handleClearInvitation({ ownerName, pin, time });
+                      }}
+                    >
+                      {ownerName} invites you to battle! ▶
+                    </InvitationA>
+                    <Time>{newTime.toLocaleString()}</Time>
+                  </Invitation>
+                );
+              }
+            )
           ) : (
             <div>There's no invitation.</div>
           )}

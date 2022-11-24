@@ -16,16 +16,13 @@ import { db } from "../../firebase/firebase";
 import QuillEditor from "./Editor/QuillEditor";
 import Button from "../../components/Button/Button";
 import Alert from "../../components/Alert/Alert";
-
-const Wrapper = styled.div`
-  display: flex;
-`;
+import Hint from "../../components/Hint/Hint";
 
 const ArticleWrapper = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  background-color: rgba(255, 255, 255, 0.9);
+  height: 100%;
 `;
 
 const TitleLabel = styled.label`
@@ -47,7 +44,7 @@ const ContentLabel = styled(TitleLabel)`
 `;
 
 const Title = styled.div`
-  line-height: 100%;
+  line-height: 150%;
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 10px;
@@ -57,7 +54,10 @@ const Title = styled.div`
 const Content = styled.div`
   font-size: 16px;
   overflow-y: scroll;
-  height: calc(100vh - 240px);
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+  }
 `;
 
 const Btns = styled.div`
@@ -65,12 +65,7 @@ const Btns = styled.div`
   gap: 10px;
   margin-bottom: 20px;
   justify-content: flex-end;
-`;
-
-const ButtonDiv = styled.div`
-  margin-top: 50px;
-  display: flex;
-  justify-content: flex-end;
+  align-items: center;
 `;
 
 type AddFunction = (msg: string) => void;
@@ -109,6 +104,10 @@ export default function Article() {
   const renderReadMode = () => (
     <>
       <Btns>
+        <Hint>
+          Try to select any words in the article! <br />
+          <br /> (Desktop =&gt; double click) <br /> (Mobile =&gt; long press)
+        </Hint>
         <div onClick={() => navigate("/articles")}>
           <Button btnType="secondary">Back</Button>
         </div>
@@ -132,6 +131,44 @@ export default function Article() {
   const renderEditMode = () => {
     return (
       <>
+        <Btns>
+          <div onClick={() => navigate("/articles")}>
+            <Button btnType="secondary">Back</Button>
+          </div>
+          <div
+            onClick={async () => {
+              if (title && content && userId && articlePathName !== "add") {
+                setIsEditing(false);
+                const docRef = doc(
+                  db,
+                  "users",
+                  userId,
+                  "articles",
+                  articlePathName
+                );
+                await updateDoc(docRef, {
+                  title,
+                  content,
+                });
+              } else if (title && content) {
+                setIsEditing(false);
+                const docRef = doc(collection(db, "users", userId, "articles"));
+                await setDoc(docRef, {
+                  id: docRef.id,
+                  title,
+                  content,
+                  time: new Date(),
+                });
+                navigate(`/articles/${docRef.id}?title=${title}`);
+              } else {
+                ref.current?.("Title and content cannot be blank!");
+              }
+            }}
+          >
+            <Button btnType="primary">Done</Button>
+          </div>
+        </Btns>
+
         <TitleLabel>Title</TitleLabel>
         <TitleInput
           type="text"
@@ -140,44 +177,12 @@ export default function Article() {
         />
         <ContentLabel>Content</ContentLabel>
         <QuillEditor content={content} setContent={setContent} />
-        <ButtonDiv
-          onClick={async () => {
-            if (title && content && userId && articlePathName !== "add") {
-              setIsEditing(false);
-              const docRef = doc(
-                db,
-                "users",
-                userId,
-                "articles",
-                articlePathName
-              );
-              await updateDoc(docRef, {
-                title,
-                content,
-              });
-            } else if (title && content) {
-              setIsEditing(false);
-              const docRef = doc(collection(db, "users", userId, "articles"));
-              await setDoc(docRef, {
-                id: docRef.id,
-                title,
-                content,
-                time: new Date(),
-              });
-              navigate(`/articles/${docRef.id}?title=${title}`);
-            } else {
-              ref.current?.("Title and content cannot be blank!");
-            }
-          }}
-        >
-          <Button btnType="primary">Done</Button>
-        </ButtonDiv>
       </>
     );
   };
 
   return (
-    <Wrapper>
+    <>
       <Alert
         children={(add: AddFunction) => {
           ref.current = add;
@@ -186,6 +191,6 @@ export default function Article() {
       <ArticleWrapper>
         {isEditing ? renderEditMode() : renderReadMode()}
       </ArticleWrapper>
-    </Wrapper>
+    </>
   );
 }

@@ -1,4 +1,4 @@
-import styled, { css } from "styled-components";
+import styled from "styled-components";
 import { Outlet, useOutletContext } from "react-router-dom";
 import { vocabBookContext } from "../../../context/vocabBookContext";
 import { authContext } from "../../../context/authContext";
@@ -7,6 +7,7 @@ import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
+import Hint from "../../../components/Hint/Hint";
 
 interface Props {
   correct?: boolean;
@@ -25,15 +26,22 @@ const Wrapper = styled.div`
   padding: 80px 20px 20px 20px;
 `;
 
-const ModeBtns = styled.div`
+const ModeBtnsWrapper = styled.div`
   display: flex;
-  gap: 20px;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
   position: relative;
   z-index: 100;
 `;
 
+const ModeBtns = styled.div`
+  display: flex;
+  gap: 20px;
+`;
+
 const ModeBtn = styled.button`
-  width: 100px;
+  width: 150px;
   height: 25px;
   line-height: 25px;
   padding-left: 10px;
@@ -45,7 +53,7 @@ const ModeBtn = styled.button`
   color: ${(props: Props) => (props.isBattle ? "#3e4e4a" : "#607973")};
   font-size: 14px;
   border-radius: 5px;
-  border: none;
+  border: 1px lightgray solid;
 `;
 
 type ContextType = {
@@ -104,27 +112,54 @@ export default function ReviewLayout() {
 
   return (
     <Wrapper>
-      <ModeBtns>
-        <ModeBtn
-          isBattle={!isBattle}
-          onClick={() => {
-            setIsBattle(false);
-            navigate("/vocabbook/review");
-          }}
-        >
-          Single Mode
-        </ModeBtn>
-        <ModeBtn
-          isBattle={isBattle}
-          onClick={() => {
-            handleSetBattleRoom();
-            setIsBattle(true);
-            navigate(`/vocabbook/review/${userId + roomId}`);
-          }}
-        >
-          Battle Mode
-        </ModeBtn>
-      </ModeBtns>
+      <ModeBtnsWrapper>
+        <div />
+        <ModeBtns>
+          <ModeBtn
+            isBattle={!isBattle}
+            onClick={() => {
+              setIsBattle(false);
+              navigate("/vocabbook/review");
+            }}
+          >
+            Single Mode
+          </ModeBtn>
+          <ModeBtn
+            isBattle={isBattle}
+            onClick={() => {
+              handleSetBattleRoom();
+              setIsBattle(true);
+              navigate(`/vocabbook/review/${userId + roomId}`);
+            }}
+          >
+            Battle Mode
+          </ModeBtn>
+        </ModeBtns>
+        <Hint>
+          If you are in a challenge, you can get 1 point by two ways:
+          <br />
+          <br />
+          1. [Single Mode] <br />
+          ．correct rate &gt;= 80%
+          <br />
+          <br />
+          2. [Battle Mode] <br />
+          ．Invite your friends to battle <br />
+          ．Win the battle!
+          <br />
+          ．correct rate &gt;= 80%
+          <br />
+          <br />
+          Haven't started a challenge?
+          <div
+            onClick={() => {
+              navigate("/profile");
+            }}
+          >
+            &gt;&gt;&gt; Click me &gt;&gt;&gt;
+          </div>
+        </Hint>
+      </ModeBtnsWrapper>
       <Outlet
         context={{ viewingBook, questionsNumber, isBattle, setIsBattle }}
       />

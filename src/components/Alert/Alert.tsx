@@ -1,6 +1,6 @@
-import React, { useRef, useState, useMemo, useEffect, MouseEvent } from "react";
+import React, { useState, useMemo, useEffect, MouseEvent } from "react";
 import { useTransition } from "@react-spring/web";
-import { Main, Container, Message, Button, Content, Life } from "./styles";
+import { Container, Message, Button, Content, Life } from "./styles";
 import { X } from "react-feather";
 
 let id = 0;

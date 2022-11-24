@@ -7,7 +7,6 @@ import ArticlesLayout from "./pages/Article/ArticlesLayout";
 import Article from "./pages/Article/Article";
 import VocabBookLayout from "./pages/VocabBook/VocabBookLayout";
 import Home from "./pages/Home/Home";
-import NoPage from "./pages/NoPage/NoPage";
 import Profile from "./pages/Profile/Profile";
 import ReviewLayout from "./pages/VocabBook/Review/ReviewLayout";
 import Review from "./pages/VocabBook/Review/Review";
@@ -47,7 +46,7 @@ root.render(
               </Route>
               <Route path="friends" element={<Friends />} />
               <Route path="profile" element={<Profile />} />
-              <Route path="*" element={<NoPage />} />
+              <Route path="*" element={<Home />} />
             </Route>
           </Routes>
         </BrowserRouter>

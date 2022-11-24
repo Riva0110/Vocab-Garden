@@ -39,6 +39,13 @@ const Wrapper = styled.div`
   z-index: 1;
 `;
 
+const HasStarted = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 70vh;
+`;
+
 const Img = styled.img`
   width: 300px;
   position: fixed;
@@ -123,6 +130,7 @@ const WaitingRoomWrapper = styled.div`
 
 const Pin = styled.div`
   text-align: center;
+  margin-bottom: 20px;
 `;
 
 const WaitingMessage = styled.div`
@@ -132,11 +140,6 @@ const WaitingMessage = styled.div`
   @media screen and (max-width: 601px) {
     font-size: 16px;
   }
-`;
-
-const StartGame = styled.button`
-  width: 300px;
-  margin-top: 20px;
 `;
 
 const VocabWrapper = styled.div`
@@ -208,7 +211,7 @@ const Message = styled.div`
 `;
 
 const OutcomeWrapper = styled.div`
-  width: 50vw;
+  width: 100%;
   margin: 50px auto;
 `;
 
@@ -234,7 +237,8 @@ const LabelDiv = styled.div`
 `;
 
 const VocabList = styled.div`
-  margin-bottom: 10px;
+  margin-bottom: 30px;
+  font-size: 14px;
 `;
 
 const VocabDiv = styled.div`
@@ -243,6 +247,8 @@ const VocabDiv = styled.div`
   gap: 10px;
   font-weight: 600;
   margin-bottom: 10px;
+  color: #607973;
+  font-size: 16px;
 `;
 
 const Title = styled.div`
@@ -317,9 +323,13 @@ interface RoomInfo {
 
 type AddFunction = (msg: string) => void;
 
-export default function BattleReview() {
-  const navigate = useNavigate();
+export default function BattleReviewWrapper() {
   const { pin } = useParams();
+  return <BattleReview pin={pin ?? ""} key={pin} />;
+}
+
+function BattleReview({ pin }: { pin: string }) {
+  const navigate = useNavigate();
   const { isLogin, userId } = useContext(authContext);
   const { questionsNumber, setIsBattle } = useReviewLayout();
   const [isWaiting, setIsWaiting] = useState<boolean>(true);
@@ -339,6 +349,7 @@ export default function BattleReview() {
   const [isVisitor, setIsVisitor] = useState<boolean>(false);
   const [isCompetitorIn, setIsCompetitorIn] = useState<boolean>(false);
   const [isAnswered, setIsAnswered] = useState<boolean>(false);
+  const [addScore, setAddScore] = useState<boolean>(false);
   const [answerCount, setAnswerCount] = useState({
     owner: { correct: 0, wrong: 0 },
     competitor: { correct: 0, wrong: 0 },
@@ -420,7 +431,6 @@ export default function BattleReview() {
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((friendDoc) => {
           newFriendState = [...newFriendState, friendDoc.data().state];
-          console.log("newFriendState", newFriendState);
         });
         setFriendState(newFriendState);
       }
@@ -466,7 +476,6 @@ export default function BattleReview() {
 
     if (pin) {
       unsub = onSnapshot(doc(db, "battleRooms", pin), (doc) => {
-        console.log("onSnapshot Current data: ", doc.data());
         const data = doc.data() as RoomInfo;
         const ownerAnswerCount =
           data?.answerCount.owner.correct + data?.answerCount.owner.wrong;
@@ -510,7 +519,6 @@ export default function BattleReview() {
     let countDownTimer: string | number | NodeJS.Timeout | undefined;
     if (countDown > 0 && !isWaiting) {
       countDownTimer = setTimeout(() => setCountDown((prev) => prev - 1), 1000);
-      console.log("countDown", countDown);
     }
     return () => clearTimeout(countDownTimer);
   }, [countDown, isWaiting]);
@@ -522,20 +530,20 @@ export default function BattleReview() {
         competitor: { ...answerCount.competitor },
       };
 
-      const vocabListAfterTimeup = [...outcomeVocabList];
+      const vocabListAfterTimeout = [...outcomeVocabList];
 
       if (answerCount.owner.correct + answerCount.owner.wrong < round + 1)
         answerCountAfterClick.owner.wrong += 1;
-      vocabListAfterTimeup[round].isCorrect = false;
+      vocabListAfterTimeout[round].isCorrect = false;
       if (
         answerCount.competitor.correct + answerCount.competitor.wrong <
         round + 1
       )
         answerCountAfterClick.competitor.wrong += 1;
-      vocabListAfterTimeup[round].isCorrect = false;
+      vocabListAfterTimeout[round].isCorrect = false;
 
       handleSyncScore(answerCountAfterClick);
-      setOutcomeVocabList(vocabListAfterTimeup);
+      setOutcomeVocabList(vocabListAfterTimeout);
     }
 
     if (countDown === 0 && round + 1 < questionsNumber) {
@@ -547,7 +555,7 @@ export default function BattleReview() {
       }, 500);
     }
 
-    if (countDown === 0 && round + 1 === questionsNumber) {
+    if (!gameOver && countDown === 0 && round + 1 === questionsNumber) {
       setGameOver(true);
       setIsAnswered(true);
       setShowBtn(true);
@@ -568,6 +576,7 @@ export default function BattleReview() {
 
         const score = docSnap.data().currentScore;
         const isChallenging = docSnap.data().isChallenging;
+        console.log({ score });
 
         if (isChallenging) {
           if (typeof score === "number" && score < 5) {
@@ -576,6 +585,7 @@ export default function BattleReview() {
               lastTimeUpdateScore: new Date(),
               isDying: false,
             });
+            setAddScore(true);
           }
         }
       };
@@ -598,6 +608,7 @@ export default function BattleReview() {
     answerCount.competitor,
     answerCount.owner,
     countDown,
+    gameOver,
     handleSyncScore,
     isAnswered,
     isOwner,
@@ -653,6 +664,7 @@ export default function BattleReview() {
           battleInvitation: arrayUnion({
             ownerName,
             pin: pin,
+            time: new Date(),
           }),
         });
       };
@@ -667,7 +679,9 @@ export default function BattleReview() {
           <Pin>PIN Code: {pin}</Pin>
           {isOwner ? (
             isCompetitorIn ? (
-              <StartGame onClick={handleStartBattle}>Start</StartGame>
+              <div onClick={handleStartBattle}>
+                <Button btnType="primary">Start</Button>
+              </div>
             ) : (
               <>
                 <WaitingMessage>
@@ -675,8 +689,8 @@ export default function BattleReview() {
                 </WaitingMessage>
                 <Title>Friend List</Title>
                 {friendList?.map((friendEmail, index) => (
-                  <InviteWrapper>
-                    <Email key={friendEmail}>{friendEmail}</Email>
+                  <InviteWrapper key={friendEmail}>
+                    <Email>{friendEmail}</Email>
                     <FriendStateWrapper stateColor={friendState[index]}>
                       {friendState[index]}
                       <FriendState stateColor={friendState[index]} />
@@ -702,9 +716,9 @@ export default function BattleReview() {
               Waiting for the owner starting the battle
             </WaitingMessage>
           ) : (
-            <StartGame onClick={handleCompetitorJoinBattle}>
-              Join the battle!
-            </StartGame>
+            <div onClick={handleCompetitorJoinBattle}>
+              <Button btnType="primary">Join the battle!</Button>
+            </div>
           )}
         </WaitingRoomWrapper>
       </Main>
@@ -762,8 +776,6 @@ export default function BattleReview() {
 
                     const vocabListAfterClick = [...outcomeVocabList];
 
-                    console.log("vocabListAfterClick []", vocabListAfterClick);
-
                     if (clickedVocab === correctVocab?.vocab) {
                       if (isOwner) answerCountAfterClick.owner.correct += 1;
                       else answerCountAfterClick.competitor.correct += 1;
@@ -776,13 +788,8 @@ export default function BattleReview() {
                       vocabListAfterClick[round].isCorrect = false;
                     }
 
-                    console.log(
-                      "vocabListAfterClick [after]",
-                      vocabListAfterClick
-                    );
                     handleSyncScore(answerCountAfterClick);
                     setOutcomeVocabList(vocabListAfterClick);
-                    console.log("vocabListAfterClick", vocabListAfterClick);
                   }
                 }
               }}
@@ -804,7 +811,7 @@ export default function BattleReview() {
     return (
       <VocabList key={vocab + partOfSpeech}>
         <VocabDiv>
-          {vocab}{" "}
+          ▶ {vocab}{" "}
           {audioLink && (
             <AudioImg
               src={audio}
@@ -831,6 +838,8 @@ export default function BattleReview() {
               : (answerCount.competitor.correct / questionsNumber) * 100 >= 80
               ? "You're amazing! Keep up the good work."
               : "Keep fighting, Keep pushing!"}
+            <br />
+            {addScore && "You've got 1 point!"}
           </Message>
           <Btns>
             <BtnDiv showBtn={showBtn} onClick={() => navigate("/vocabbook")}>
@@ -839,7 +848,9 @@ export default function BattleReview() {
           </Btns>
           <ReviewVocabs>
             <WrongVocabs>
-              <LabelDiv>Wrong vocab</LabelDiv>{" "}
+              {outcomeVocabList?.find((vocab) => !vocab.isCorrect) && (
+                <LabelDiv>Wrong vocab</LabelDiv>
+              )}{" "}
               {outcomeVocabList?.map(
                 ({ vocab, audioLink, partOfSpeech, definition, isCorrect }) => {
                   return (
@@ -855,7 +866,9 @@ export default function BattleReview() {
               )}
             </WrongVocabs>
             <CorrectVocabs>
-              <LabelDiv>Correct vocab</LabelDiv>{" "}
+              {outcomeVocabList?.find((vocab) => vocab.isCorrect) && (
+                <LabelDiv>Correct vocab</LabelDiv>
+              )}{" "}
               {outcomeVocabList?.map(
                 ({ vocab, audioLink, partOfSpeech, definition, isCorrect }) => {
                   return (
@@ -942,7 +955,7 @@ export default function BattleReview() {
     </>
   ) : (
     <Wrapper>
-      <p>The game has started.</p>
+      <HasStarted>The battle was finished.</HasStarted>
     </Wrapper>
   );
 }

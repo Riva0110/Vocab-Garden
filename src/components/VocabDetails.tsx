@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, useRef } from "react";
+import { useEffect, useState, useContext, useRef, Fragment } from "react";
 import { useOnClickOutside } from "./useOnClickOutside";
 import styled, { css } from "styled-components";
 import { keywordContext } from "../context/keywordContext";
@@ -20,6 +20,7 @@ import spinner from "./spinner.gif";
 import Alert from "./Alert/Alert";
 import Button from "./Button/Button";
 import { X } from "react-feather";
+import Hint from "../components/Hint/Hint";
 
 interface Props {
   isPopuping?: boolean;
@@ -29,8 +30,8 @@ interface Props {
 const Wrapper = styled.div`
   font-size: 16px;
   width: calc((100% - 30px) / 2);
-  padding: 20px;
   height: calc(100vh - 160px);
+  padding: 20px;
   background-color: rgba(255, 255, 255, 0.7);
   border: 1px solid lightgray;
   z-index: 1;
@@ -154,6 +155,10 @@ const AddButton = styled.button`
 
 const Meanings = styled.div`
   overflow-y: scroll;
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+  }
   height: calc(100% - 20px);
 `;
 
@@ -224,23 +229,6 @@ export default function VocabDetails() {
   const [showVocabInMobile, setShowVocabInMobile] = useState(false);
   useOnClickOutside(popupRef, () => setIsPopuping(false));
 
-  // function useOnClickOutside(ref: RefObject<HTMLDivElement>, handler: any) {
-  //   useEffect(() => {
-  //     const listener = (event: any) => {
-  //       if (!ref.current || ref.current.contains(event.target)) {
-  //         return;
-  //       }
-  //       handler(event);
-  //     };
-  //     document.addEventListener("mousedown", listener);
-  //     document.addEventListener("touchstart", listener);
-  //     return () => {
-  //       document.removeEventListener("mousedown", listener);
-  //       document.removeEventListener("touchstart", listener);
-  //     };
-  //   }, [ref, handler]);
-  // }
-
   const handlePlayAudio = () => {
     const audio = new Audio(vocabDetails?.phonetics?.[0].audio);
     audio.play();
@@ -305,7 +293,7 @@ export default function VocabDetails() {
     }
   };
 
-  function check() {
+  function checkDevice() {
     const userAgentInfo = navigator.userAgent;
     const Agents = [
       "Android",
@@ -326,57 +314,60 @@ export default function VocabDetails() {
   }
 
   function getSelectedText() {
-    if (check() === "mobile") return;
-    if (window.getSelection) {
-      const txt = window.getSelection()?.toString();
-      if (typeof txt !== "undefined") setKeyword(txt);
+    if (checkDevice() === "desktop") {
+      if (window.getSelection) {
+        const txt = window.getSelection()?.toString();
+        if (typeof txt !== "undefined") setKeyword(txt);
+      }
     }
   }
 
   useEffect(() => {
-    if (check() === "desktop") return;
-    const mobileSlection = document.addEventListener("selectionchange", () => {
-      const value = document.getSelection()?.toString();
-      if (value) setKeyword(value);
-    });
-    return mobileSlection;
+    let mobileSelection;
+    if (checkDevice() === "mobile") {
+      mobileSelection = document.addEventListener("selectionchange", (e) => {
+        const value = document.getSelection()?.toString();
+        if (value) {
+          setKeyword(value);
+          document.getSelection()?.empty();
+        }
+      });
+    }
+    return mobileSelection;
   }, [setKeyword]);
 
   useEffect(() => {
     async function fetchVocabDetails(resourceUrl: string) {
-      const response = await fetch(resourceUrl);
-      const data = await response.json();
-      if (data.title === "No Definitions Found")
-        return ref.current?.("Sorry......No result.");
-      setVocabDetails(data[0]);
-      setIsLoading(false);
-      setShowVocabInMobile(true);
+      try {
+        if (!keyword) {
+          throw new Error("No Keyword");
+        }
+        const response = await fetch(resourceUrl);
+        const data = await response.json();
+
+        if (response.status === 200) {
+          setVocabDetails(data[0]);
+          setShowVocabInMobile(true);
+        } else if (data.title === "No Definitions Found") {
+          if (vocabDetails && vocabDetails.word !== undefined)
+            setKeyword(vocabDetails.word);
+          ref.current?.("Sorry......No result.");
+        }
+      } catch (err) {
+        if (err instanceof Error) ref.current?.(`Error: ${err.message}`);
+      } finally {
+        setIsLoading(false);
+      }
     }
-    fetchVocabDetails(resourceUrl);
-  }, [resourceUrl]);
 
-  // const handleClickElement = useCallback(
-  //   (e: any) => {
-  //     if (isPopuping && popupRef.current && !popupRef.current.contains(e.target)) {
-  //       console.log(2);
-  //       setIsPopuping(false);
-  //       console.log({ isPopuping });
-  //     }
+    if (keyword?.trim()?.toLowerCase() !== vocabDetails?.word) {
+      fetchVocabDetails(resourceUrl);
+    }
+  }, [keyword, resourceUrl, setKeyword, vocabDetails]);
 
-  //     console.log(popupRef?.current?.contains(e.target));
-  //   },
-  //   [isPopuping]
-  // );
-
-  // useEffect(() => {
-  //   getVocabBooks(userId);
-  //   if (isPopuping) {
-  //     document.addEventListener("click", handleClickElement, false);
-  //   }
-  //   return () => {
-  //     document.removeEventListener("click", handleClickElement, false);
-  //   };
-  // }, [getVocabBooks, handleClickElement, isPopuping, userId]);
+  useEffect(() => {
+    getVocabBooks(userId);
+  }, [getVocabBooks, userId]);
 
   useEffect(() => {
     setIsSaved(false);
@@ -395,135 +386,151 @@ export default function VocabDetails() {
       <SpinnerImg src={spinner} alt="spinner" />
     </p>
   ) : (
-    <Wrapper showVocabInMobile={showVocabInMobile}>
+    <>
       <Alert
         children={(add: AddFunction) => {
           ref.current = add;
         }}
       />
-      <VocabWrapper>
-        <TitleContainer>
-          <Title>
-            <Vocab>{vocabDetails?.word}</Vocab>
-            <Phonetic>{vocabDetails?.phonetic}</Phonetic>
-            {vocabDetails?.phonetics?.[0]?.audio && (
-              <AudioImg src={audio} alt="audio" onClick={handlePlayAudio} />
-            )}
-            <SaveVocabImg
-              src={isSaved ? saved : save}
-              alt="save"
-              onClick={() =>
-                isSaved ? handleDeleteVocabFromBook() : setIsPopuping(true)
-              }
-            />
-            <SavePopup isPopuping={isPopuping} ref={popupRef}>
-              <label>Save to Book:</label>
-              <Select
-                value={selectedvocabBook}
-                onChange={(e: any) => {
-                  setSelectedvocabBook(e.target.value);
-                }}
-              >
-                {Object.keys(vocabBooks)?.map((vocabBook, index) => (
-                  <option key={vocabBook + index}>
-                    {vocabBook.toLocaleLowerCase()}
-                  </option>
-                ))}
-              </Select>
-              <div>
-                <Input
-                  ref={inputRef}
-                  onChange={(e) => setNewBook(e.target.value)}
-                  placeholder="Add a book"
-                />
-                <AddButton
-                  onClick={async () => {
-                    await handleAddBook();
-                    if (newBook) setSelectedvocabBook(newBook);
-                    if (inputRef.current) inputRef.current.value = "";
+      <Wrapper showVocabInMobile={showVocabInMobile}>
+        <VocabWrapper>
+          <TitleContainer>
+            <Title>
+              <Vocab>{vocabDetails?.word}</Vocab>
+              <Phonetic>{vocabDetails?.phonetic}</Phonetic>
+              {vocabDetails?.phonetics?.[0]?.audio && (
+                <AudioImg src={audio} alt="audio" onClick={handlePlayAudio} />
+              )}
+              <SaveVocabImg
+                src={isSaved ? saved : save}
+                alt="save"
+                onClick={() =>
+                  isSaved ? handleDeleteVocabFromBook() : setIsPopuping(true)
+                }
+              />
+              <SavePopup isPopuping={isPopuping} ref={popupRef}>
+                <label>Save to Book:</label>
+                <Select
+                  value={selectedvocabBook}
+                  onChange={(e: any) => {
+                    setSelectedvocabBook(e.target.value);
                   }}
                 >
-                  +
-                </AddButton>
-              </div>
-              <Buttons>
-                <div onClick={() => setIsPopuping(false)}>
-                  <Button btnType="secondary">Cancel</Button>
-                </div>
-                <div
-                  onClick={() => {
-                    if (selectedvocabBook) {
-                      handleSaveVocab(selectedvocabBook);
-                      getVocabBooks(userId);
-                      setIsPopuping(false);
-                      ref.current?.(`"${keyword}" saved successfully!`);
-                    }
-                  }}
-                >
-                  <Button btnType="primary">Done</Button>
-                </div>
-              </Buttons>
-            </SavePopup>
-          </Title>
-          <XDiv size={16} onClick={() => setShowVocabInMobile(false)} />
-        </TitleContainer>
-        <Meanings>
-          {vocabDetails?.meanings?.map(
-            ({ partOfSpeech, definitions, synonyms }) => (
-              <>
-                <PartOfSpeech
-                  key={partOfSpeech}
-                  onClick={() => getSelectedText()}
-                >
-                  {partOfSpeech}
-                </PartOfSpeech>
-                <SubTitle onClick={() => getSelectedText()}>
-                  Definitions
-                </SubTitle>
-                <ul>
-                  {definitions?.map(
-                    ({ definition, example }, index: number) => (
-                      <DefinitionWrapper key={index}>
-                        <Definition
-                          key={definition}
-                          onClick={() => getSelectedText()}
-                        >
-                          {definition}
-                        </Definition>
-                        {example && (
-                          <Example onClick={() => getSelectedText()}>
-                            "{example}"
-                          </Example>
-                        )}
-                      </DefinitionWrapper>
-                    )
-                  )}
-                </ul>
-                {synonyms?.length !== 0 ? (
-                  <>
-                    <SubTitle onClick={() => getSelectedText()}>
-                      Synonyms
-                    </SubTitle>
-                    {synonyms?.map((synonym: string, index: number) => (
-                      <Synonyms
-                        key={index}
-                        onClick={() => {
-                          setKeyword(synonym);
-                          setIsPopuping(false);
-                        }}
-                      >
-                        {synonym}
-                      </Synonyms>
+                  {vocabBooks &&
+                    Object.keys(vocabBooks)?.map((vocabBook, index) => (
+                      <option key={vocabBook + index}>
+                        {vocabBook.toLocaleLowerCase()}
+                      </option>
                     ))}
-                  </>
-                ) : (
-                  ""
-                )}
+                </Select>
+                <div>
+                  <Input
+                    ref={inputRef}
+                    onChange={(e) => setNewBook(e.target.value)}
+                    placeholder="Add a book"
+                  />
+                  <AddButton
+                    onClick={async () => {
+                      await handleAddBook();
+                      if (newBook) setSelectedvocabBook(newBook);
+                      if (inputRef.current) inputRef.current.value = "";
+                    }}
+                  >
+                    +
+                  </AddButton>
+                </div>
+                <Buttons>
+                  <div onClick={() => setIsPopuping(false)}>
+                    <Button btnType="secondary">Cancel</Button>
+                  </div>
+                  <div
+                    onClick={() => {
+                      if (selectedvocabBook) {
+                        handleSaveVocab(selectedvocabBook);
+                        getVocabBooks(userId);
+                        setIsPopuping(false);
+                        ref.current?.(`"${keyword}" saved successfully!`);
+                      }
+                    }}
+                  >
+                    <Button btnType="primary">Done</Button>
+                  </div>
+                </Buttons>
+              </SavePopup>
+              <Hint>
+                Select any words to search word's definition! <br />
+                <br /> (Desktop =&gt; double click) <br /> (Mobile =&gt; long
+                press)
+              </Hint>
+            </Title>
+            <XDiv
+              size={16}
+              onClick={() => {
+                setShowVocabInMobile(false);
+              }}
+            />
+          </TitleContainer>
+          <Meanings>
+            {vocabDetails?.meanings?.map(
+              ({ partOfSpeech, definitions, synonyms }, index) => (
+                <Fragment key={index}>
+                  <PartOfSpeech onClick={() => getSelectedText()}>
+                    {partOfSpeech}
+                  </PartOfSpeech>
+                  <SubTitle onClick={() => getSelectedText()}>
+                    Definitions
+                  </SubTitle>
+                  <ul>
+                    {definitions?.map(
+                      ({ definition, example }, index: number) => (
+                        <DefinitionWrapper key={index}>
+                          <Definition
+                            key={definition}
+                            onClick={() => getSelectedText()}
+                          >
+                            {definition}
+                          </Definition>
+                          {example && (
+                            <Example onClick={() => getSelectedText()}>
+                              "{example}"
+                            </Example>
+                          )}
+                        </DefinitionWrapper>
+                      )
+                    )}
+                  </ul>
+                  {synonyms?.length !== 0 && (
+                    <>
+                      <SubTitle onClick={() => getSelectedText()}>
+                        Synonyms
+                      </SubTitle>
+                      {synonyms?.map((synonym: string, index: number) => (
+                        <Synonyms
+                          key={index}
+                          onClick={() => {
+                            synonym !== "" && setKeyword(synonym);
+                            setIsPopuping(false);
+                          }}
+                        >
+                          {synonym}
+                        </Synonyms>
+                      ))}
+                    </>
+                  )}
+                </Fragment>
+              )
+            )}
+            {keyword === "" && (
+              <>
+                <br />
+                <div style={{ color: "gray" }}>
+                  Select or double click any words to get more information!
+                </div>
               </>
-            )
-          )}
-        </Meanings>
-      </VocabWrapper>
-    </Wrapper>
+            )}
+          </Meanings>
+        </VocabWrapper>
+      </Wrapper>
+    </>
   );
 }
