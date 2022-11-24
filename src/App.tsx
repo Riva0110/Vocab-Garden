@@ -308,7 +308,6 @@ function App() {
       display: "flex",
       alignItems: "center",
       gap: "10px",
-      // marginLeft: "20px",
       color: "#607973",
       textDecoration: "underline",
       fontWeight: "bold",
@@ -318,13 +317,8 @@ function App() {
       display: "flex",
       alignItems: "center",
       gap: "10px",
-      // marginLeft: "20px",
       color: "#4f4f4f",
       textDecoration: "none",
-      // &:hover {
-      //   backgroundColor: "white",
-      //   padding: "0 10px",
-      // }
       // @media screen and (max-width: 601px) {
       //   color: white;
       //   &:hover {
@@ -339,7 +333,6 @@ function App() {
       display: "flex",
       alignItems: "center",
       gap: "10px",
-      // marginLeft: "20px",
       color: "#4f4f4f",
       textDecoration: "none",
       backgroundColor: "white",
@@ -351,7 +344,7 @@ function App() {
         <XDiv size={16} />
         <NavDiv length={"Article".length}>
           <NavLink
-            to={isLogin ? "/articles" : "/profile"}
+            to={"/articles"}
             style={({ isActive }) =>
               isActive ? activeStyle : isHover[0] ? hoverStyle : notActiveStyle
             }
@@ -363,7 +356,7 @@ function App() {
         </NavDiv>
         <NavDiv length={"VocabBook".length}>
           <NavLink
-            to={isLogin ? "/vocabbook" : "/profile"}
+            to={"/vocabbook"}
             style={({ isActive }) =>
               isActive ? activeStyle : isHover[1] ? hoverStyle : notActiveStyle
             }
@@ -375,7 +368,7 @@ function App() {
         </NavDiv>
         <NavDiv length={"Friend".length}>
           <NavLink
-            to={isLogin ? "/friends" : "/profile"}
+            to={"/friends"}
             style={({ isActive }) =>
               isActive ? activeStyle : isHover[2] ? hoverStyle : notActiveStyle
             }
