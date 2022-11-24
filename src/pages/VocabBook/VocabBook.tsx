@@ -81,12 +81,10 @@ const Book = styled.div`
   text-align: center;
   min-width: 150px;
   height: 100%;
-  line-height: 40px;
+  line-height: 35px;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   border: ${(props: Props) => (props.selected ? "1px solid gray" : "none")};
-  /* border-bottom: ${(props: Props) =>
-    props.selected ? "none" : "1px solid gray"}; */
   border-bottom: none;
   color: ${(props: Props) => (props.selected ? "black" : "gray")};
   background-color: ${(props: Props) => (props.selected ? "white" : "none")};
@@ -282,7 +280,7 @@ export default function VocabBook() {
         ?.slice(0, 10)
         .map(({ vocab, correctRate, definition }) => ({
           text: vocab,
-          value: Math.floor(correctRate * 100),
+          value: Math.floor(1 - correctRate * 100),
           definition: definition,
         }));
     }
