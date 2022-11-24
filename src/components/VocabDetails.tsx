@@ -457,7 +457,11 @@ export default function VocabDetails() {
                   </div>
                 </Buttons>
               </SavePopup>
-              <Hint>Intro</Hint>
+              <Hint>
+                Select any words to search word's definition! <br />
+                <br /> (Desktop =&gt; double click) <br /> (Mobile =&gt; long
+                press)
+              </Hint>
             </Title>
             <XDiv
               size={16}

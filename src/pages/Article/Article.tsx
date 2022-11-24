@@ -105,8 +105,8 @@ export default function Article() {
     <>
       <Btns>
         <Hint>
-          Select any words to search word's definition! \r\n (Desktop =&gt;
-          double click) \r\n (Mobile =&gt; lond press)
+          Try to select any words in the article! <br />
+          <br /> (Desktop =&gt; double click) <br /> (Mobile =&gt; long press)
         </Hint>
         <div onClick={() => navigate("/articles")}>
           <Button btnType="secondary">Back</Button>

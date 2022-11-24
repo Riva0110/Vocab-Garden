@@ -494,9 +494,9 @@ export default function VocabBook() {
               )}
             </Delete>
             <Hint>
-              Select any words to search word's definition! \r\n (Desktop =&gt;
-              double click) \r\n (Mobile =&gt; lond press) \r\n Save words to
-              review!
+              Click a card or select any words in the cards' definition! <br />
+              <br /> (Desktop =&gt; double click)
+              <br /> (Mobile =&gt; lond press)
             </Hint>
           </BookButtons>
           <Nav>

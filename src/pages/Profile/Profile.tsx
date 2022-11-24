@@ -8,6 +8,7 @@ import Button from "../../components/Button/Button";
 import garden from "./garden.webp";
 import Hint from "../../components/Hint/Hint";
 import LoginPage from "./Login";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   insideColor?: boolean;
@@ -223,6 +224,7 @@ function getCamelCasePlantName(plantName: string) {
 }
 
 export default function Profile() {
+  const navigate = useNavigate();
   const { isLogin, logout, userId, signup } = useContext(authContext);
   const [name, setName] = useState<string>("");
   const [score, setScore] = useState<number>(0);
@@ -384,7 +386,34 @@ export default function Profile() {
         <UserInfoWrapper>
           <ProfileTitle>
             <p>{name}’s Vocab Garden</p>
-            <Hint>Intro</Hint>
+            <Hint>
+              Start a challenge, and enrich your Vocab Garden!
+              <br />
+              <br />
+              When you are in a challenge, you can get 1 point by two ways:
+              <br />
+              <br />
+              1. [Single Mode] <br />
+              ．correct rate &gt;= 80%
+              <br />
+              <br />
+              2. [Battle Mode] <br />
+              ．Invite your friends to battle <br />
+              ．Win the battle!
+              <br />
+              ．correct rate &gt;= 80%
+              <br />
+              <br />
+              Choose a book to review right now!
+              <br />
+              <div
+                onClick={() => {
+                  navigate("/vocabbook");
+                }}
+              >
+                &gt;&gt;&gt; Click me &gt;&gt;&gt;
+              </div>
+            </Hint>
           </ProfileTitle>
           <GrowingPlantImg
             src={plantImgsObj[currentPlant]?.[plantPhase]}
