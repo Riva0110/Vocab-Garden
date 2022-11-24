@@ -1,6 +1,6 @@
 import styled, { css } from "styled-components";
 import { authContext } from "../../context/authContext";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useCallback } from "react";
 import { arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { plantImgsObj } from "./plantImgs";
@@ -223,7 +223,7 @@ function getCamelCasePlantName(plantName: string) {
 }
 
 export default function Profile() {
-  const { isLogin, logout, userId, userDocDone } = useContext(authContext);
+  const { isLogin, logout, userId, signup } = useContext(authContext);
   const [name, setName] = useState<string>("");
   const [score, setScore] = useState<number>(0);
   const [isChallenging, setIsChallenging] = useState<boolean>(false);
@@ -234,44 +234,53 @@ export default function Profile() {
   const [isDying, setIsDying] = useState<boolean>(false);
   const [plantsList, setPlantsList] = useState<PlantsListInterface[]>([]);
 
+  const getAndUpdateUserInfo = useCallback(async (userId: string) => {
+    const plantsRef = doc(db, "plantsList", userId);
+    const plantsSnap = await getDoc(plantsRef);
+    const plantData = plantsSnap.data()?.plants as PlantsListInterface[];
+    setPlantsList(plantData);
+
+    const userRef = doc(db, "users", userId);
+    const userDocSnap = await getDoc(userRef);
+    const data = userDocSnap.data();
+    setName(data?.name);
+    setIsChallenging(data?.isChallenging);
+    setIsDying(data?.isDying);
+    setCurrentPlant(data?.currentPlant);
+    setScore(data?.currentScore);
+
+    const timeDifference =
+      Date.now() - data?.lastTimeUpdateScore.seconds * 1000;
+    const deduction = Math.floor(timeDifference / (300000 * 576));
+
+    if (data?.isChallenging && deduction > 0) {
+      setIsDying(true);
+      setScore((prev) => Math.max(prev - deduction, 0));
+
+      await updateDoc(userRef, {
+        currentScore: Math.max(data?.currentScore - deduction, 0),
+        lastTimeUpdateScore: new Date(),
+        isDying: true,
+      });
+    }
+  }, []);
+
+  const signupAndUpdateState = async (
+    email: string,
+    password: string,
+    name: string
+  ) => {
+    const newUserId = await signup(email, password, name);
+    if (typeof newUserId === "string") {
+      getAndUpdateUserInfo(newUserId);
+    }
+  };
+
   useEffect(() => {
-    const getAndUpdateUserInfo = async () => {
-      console.log("getAndUpdateUserInfo", userId);
-
-      const plantsRef = doc(db, "plantsList", userId);
-      const plantsSnap = await getDoc(plantsRef);
-      const plantData = plantsSnap.data()?.plants as PlantsListInterface[];
-      console.log({ plantsSnap, plantData });
-      setPlantsList(plantData);
-
-      const userRef = doc(db, "users", userId);
-      const userDocSnap = await getDoc(userRef);
-      const data = userDocSnap.data();
-      setName(data?.name);
-      setIsChallenging(data?.isChallenging);
-      setIsDying(data?.isDying);
-      setCurrentPlant(data?.currentPlant);
-      setScore(data?.currentScore);
-
-      const timeDifference =
-        Date.now() - data?.lastTimeUpdateScore.seconds * 1000;
-      const deduction = Math.floor(timeDifference / (300000 * 576));
-
-      if (data?.isChallenging && deduction > 0) {
-        setIsDying(true);
-        setScore((prev) => Math.max(prev - deduction, 0));
-
-        const userRef = doc(db, "users", userId);
-        await updateDoc(userRef, {
-          currentScore: Math.max(data?.currentScore - deduction, 0),
-          lastTimeUpdateScore: new Date(),
-          isDying: true,
-        });
-      }
-    };
-
-    if (userDocDone) getAndUpdateUserInfo();
-  }, [userDocDone, userId]);
+    if (userId) {
+      getAndUpdateUserInfo(userId);
+    }
+  }, [userId, getAndUpdateUserInfo]);
 
   useEffect(() => {
     if (isChallenging) {
@@ -369,7 +378,7 @@ export default function Profile() {
     );
   };
 
-  function renderProfile() {
+  const renderProfile = () => {
     return (
       <Wrapper>
         <UserInfoWrapper>
@@ -457,11 +466,10 @@ export default function Profile() {
         <GardenImg />
       </Wrapper>
     );
-  }
+  };
 
-  return isLogin ? (
-    renderProfile()
-  ) : (
-    <LoginPage name={name} setName={setName} />
+  if (isLogin) return renderProfile();
+  return (
+    <LoginPage name={name} setName={setName} signup={signupAndUpdateState} />
   );
 }

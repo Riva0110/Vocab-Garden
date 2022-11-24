@@ -77,10 +77,11 @@ const Input = styled.input`
 interface Props {
   name: string;
   setName: React.Dispatch<React.SetStateAction<string>>;
+  signup: Function;
 }
 
-export default function LoginPage({ name, setName }: Props) {
-  const { login, signup } = useContext(authContext);
+export default function LoginPage({ name, setName, signup }: Props) {
+  const { login } = useContext(authContext);
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");

@@ -29,8 +29,6 @@ interface AuthInterface {
   setIsLogin: React.Dispatch<React.SetStateAction<boolean>>;
   isLoadingUserAuth: boolean;
   setIsLoadingUserAuth: React.Dispatch<React.SetStateAction<boolean>>;
-  userDocDone: boolean;
-  setUserDocDone: React.Dispatch<React.SetStateAction<boolean>>;
   logout(): void;
   login(email: string, password: string): Promise<string | undefined>;
   signup(
@@ -46,7 +44,6 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
   const [isLogin, setIsLogin] = useState(false);
   const [userId, setUserId] = useState("");
   const [isLoadingUserAuth, setIsLoadingUserAuth] = useState(true);
-  const [userDocDone, setUserDocDone] = useState(false);
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -96,8 +93,6 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
       );
       const user = userCredential.user;
 
-      console.log("createUserWithEmailAndPassword done");
-
       await setDoc(doc(db, "users", user.uid), {
         name,
         email,
@@ -111,19 +106,15 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
         awaitingFriendReply: [],
         battleInvitation: [],
       });
-      console.log("set users done");
 
       await setDoc(doc(db, "vocabBooks", user.uid), {
         unsorted: arrayUnion(),
       });
 
-      console.log("set vocabBooks done");
-
       await setDoc(doc(db, "plantsList", user.uid), {
         plants: [],
       });
-      console.log("set plantsList done");
-      setUserDocDone(true);
+      return user.uid;
     } catch (error) {
       if (error instanceof Error) return error["message"];
     }
@@ -167,8 +158,6 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
         logout,
         isLoadingUserAuth,
         setIsLoadingUserAuth,
-        userDocDone,
-        setUserDocDone,
       }}
     >
       {children}
