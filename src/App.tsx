@@ -171,25 +171,6 @@ const HomeLink = styled(Link)`
   text-decoration: none;
 `;
 
-const StyledNavLink = styled(NavLink)`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-left: 20px;
-  color: #4f4f4f;
-  text-decoration: none;
-  &:hover {
-    background-color: white;
-    padding: 0 10px;
-  }
-  @media screen and (max-width: 601px) {
-    color: white;
-    &:hover {
-      color: #4f4f4f;
-    }
-  }
-`;
-
 const Input = styled.input`
   width: 180px;
   height: 30px;
