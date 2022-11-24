@@ -151,6 +151,7 @@ const NavDiv = styled.div`
   @media screen and (max-width: 601px) {
     justify-content: flex-start;
     margin-top: 20px;
+    padding-left: 20px;
   }
 `;
 
@@ -184,8 +185,6 @@ const StyledNavLink = styled(NavLink)`
   @media screen and (max-width: 601px) {
     color: white;
     &:hover {
-      background-color: white;
-      padding: 0 10px;
       color: #4f4f4f;
     }
   }
@@ -244,7 +243,6 @@ interface Props {
   length?: number;
   isScrolling?: boolean;
   showNav?: boolean;
-  // activeClassName?: string;
 }
 
 interface BattleInvitation {
@@ -304,40 +302,69 @@ function App() {
   };
 
   function renderNav() {
-    let activeStyle = {
+    const shareStyle = {
       display: "flex",
       alignItems: "center",
       gap: "10px",
+      textDecoration: "none",
+    };
+
+    const activeStyle = {
+      ...shareStyle,
       color: "#607973",
       textDecoration: "underline",
       fontWeight: "bold",
     };
 
-    let notActiveStyle = {
-      display: "flex",
-      alignItems: "center",
-      gap: "10px",
+    const notActiveStyle = {
+      ...shareStyle,
       color: "#4f4f4f",
-      textDecoration: "none",
-      // @media screen and (max-width: 601px) {
-      //   color: white;
-      //   &:hover {
-      //     background-color: white;
-      //     padding: 0 10px;
-      //     color: #4f4f4f;
-      //   }
-      // }
     };
 
-    let hoverStyle = {
-      display: "flex",
-      alignItems: "center",
-      gap: "10px",
+    const hoverStyle = {
+      ...shareStyle,
       color: "#4f4f4f",
-      textDecoration: "none",
       backgroundColor: "white",
       padding: "0 10px",
     };
+
+    const mobileActiveStyle = {
+      ...shareStyle,
+      color: "white",
+      fontWeight: "bold",
+    };
+
+    const mobileHoverStyle = {
+      ...shareStyle,
+      color: "#4f4f4f",
+      backgroundColor: "white",
+      padding: "0 10px",
+    };
+
+    const mobileNotActiveStyle = {
+      ...shareStyle,
+      color: "lightgray",
+    };
+
+    function renderNavLink(isActive: boolean, index: number) {
+      if (window.screen.width < 601) {
+        if (isActive) {
+          return mobileActiveStyle;
+        } else if (isHover[index]) {
+          return mobileHoverStyle;
+        } else {
+          return mobileNotActiveStyle;
+        }
+      } else {
+        if (isActive) {
+          return activeStyle;
+        } else if (isHover[index]) {
+          return hoverStyle;
+        } else {
+          return notActiveStyle;
+        }
+      }
+    }
 
     return (
       <>
@@ -345,9 +372,7 @@ function App() {
         <NavDiv length={"Article".length}>
           <NavLink
             to={"/articles"}
-            style={({ isActive }) =>
-              isActive ? activeStyle : isHover[0] ? hoverStyle : notActiveStyle
-            }
+            style={({ isActive }) => renderNavLink(isActive, 0)}
             onMouseEnter={() => setIsHover([true, false, false, false])}
             onMouseLeave={() => setIsHover([false, false, false, false])}
           >
@@ -357,9 +382,7 @@ function App() {
         <NavDiv length={"VocabBook".length}>
           <NavLink
             to={"/vocabbook"}
-            style={({ isActive }) =>
-              isActive ? activeStyle : isHover[1] ? hoverStyle : notActiveStyle
-            }
+            style={({ isActive }) => renderNavLink(isActive, 1)}
             onMouseEnter={() => setIsHover([false, true, false, false])}
             onMouseLeave={() => setIsHover([false, false, false, false])}
           >
@@ -369,9 +392,7 @@ function App() {
         <NavDiv length={"Friend".length}>
           <NavLink
             to={"/friends"}
-            style={({ isActive }) =>
-              isActive ? activeStyle : isHover[2] ? hoverStyle : notActiveStyle
-            }
+            style={({ isActive }) => renderNavLink(isActive, 2)}
             onMouseEnter={() => setIsHover([false, false, true, false])}
             onMouseLeave={() => setIsHover([false, false, false, false])}
           >
@@ -381,9 +402,7 @@ function App() {
         <NavDiv length={"Profile".length}>
           <NavLink
             to={"/profile"}
-            style={({ isActive }) =>
-              isActive ? activeStyle : isHover[3] ? hoverStyle : notActiveStyle
-            }
+            style={({ isActive }) => renderNavLink(isActive, 3)}
             onMouseEnter={() => setIsHover([false, false, false, true])}
             onMouseLeave={() => setIsHover([false, false, false, false])}
           >
