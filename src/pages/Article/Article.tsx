@@ -54,6 +54,10 @@ const Title = styled.div`
 const Content = styled.div`
   font-size: 16px;
   overflow-y: scroll;
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+  }
 `;
 
 const Btns = styled.div`

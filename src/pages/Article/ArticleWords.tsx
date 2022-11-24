@@ -39,6 +39,10 @@ const Words = styled.div`
   padding: 20px;
   height: calc(100vh - 160px);
   overflow-y: scroll;
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+  }
 `;
 
 export const ArticleWords = () => {

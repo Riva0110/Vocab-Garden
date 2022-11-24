@@ -70,6 +70,10 @@ const BookWrapper = styled.div`
   margin-bottom: 20px;
   align-items: center;
   overflow-x: scroll;
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+  }
   border-bottom: 1px solid gray;
 `;
 
@@ -131,6 +135,10 @@ const CardWrapper = styled.div`
   flex-wrap: wrap;
   align-content: flex-start;
   overflow-y: scroll;
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+  }
   height: calc(100vh - 277px);
   @media screen and (max-width: 1031px) {
     height: calc(100vh - 322px);
@@ -155,6 +163,10 @@ const Card = styled.div`
   border: 1px solid lightgray;
   border-top: 3px #607973 solid;
   overflow-y: scroll;
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+  }
   padding: 10px;
   background-color: rgba(255, 255, 255, 0.7);
   @media screen and (max-width: 1101px) {
