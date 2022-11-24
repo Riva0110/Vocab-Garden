@@ -31,7 +31,6 @@ const GlobalStyle = createGlobalStyle`
   button {
     font-family: "Poppins";
   }
-
 `;
 
 const Wrapper = styled.div`
