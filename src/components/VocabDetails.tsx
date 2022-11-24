@@ -155,6 +155,10 @@ const AddButton = styled.button`
 
 const Meanings = styled.div`
   overflow-y: scroll;
+  scrollbar-width: none;
+  ::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+  }
   height: calc(100% - 20px);
 `;
 
