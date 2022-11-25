@@ -9,6 +9,7 @@ import garden from "./garden.webp";
 import Hint from "../../components/Hint/Hint";
 import LoginPage from "./Login";
 import { useNavigate } from "react-router-dom";
+import StackedBarChart from "./StackedBarChart";
 
 interface Props {
   insideColor?: boolean;
@@ -462,6 +463,7 @@ export default function Profile() {
               </Button>
             </div>
           )}
+          <StackedBarChart />
           <div onClick={() => logout()}>
             <Button btnType={"secondary"}>Log out</Button>
           </div>
