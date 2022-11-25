@@ -1,34 +1,61 @@
 import { collection, getDocs, query, where } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { db } from "../../firebase/firebase";
 
 const data = [
   {
+    docId: "1",
     userId: 1,
     time: "11/25",
     correctRate: 0.6,
     vocabBook: "unsorted",
   },
   {
+    docId: "2",
     userId: 1,
     time: "11/24",
     correctRate: 0.1,
     vocabBook: "finance",
   },
   {
+    docId: "3",
     userId: 1,
     time: "11/24",
     correctRate: 1,
     vocabBook: "technology",
   },
   {
+    docId: "4",
     userId: 1,
     time: "11/20",
     correctRate: 0.7,
     vocabBook: "unsorted",
   },
   {
+    docId: "5",
+    userId: 1,
+    time: "11/24",
+    correctRate: 0.33,
+    vocabBook: "unsorted",
+  },
+  {
+    docId: "6",
+    userId: 1,
+    time: "11/20",
+    correctRate: 0.7,
+    vocabBook: "unsorted",
+  },
+  {
+    docId: "7",
+    userId: 1,
+    time: "11/20",
+    correctRate: 0.1,
+    vocabBook: "finance",
+  },
+  {
+    docId: "8",
     userId: 1,
     time: "11/24",
     correctRate: 0.33,
@@ -57,6 +84,7 @@ const Chart = styled.div`
   min-height: 200px;
   border-left: 1px solid gray;
   border-bottom: 1px solid gray;
+  position: relative;
 `;
 
 const LabelX = styled.div`
@@ -75,28 +103,30 @@ const Bar = styled.div`
 const BarItem = styled.div`
   width: 100%;
   height: 30px;
-  background-color: #95caca;
-  border: 1px solid white;
-  position: relative;
+  background-color: ${(props: Props) =>
+    props.isHovered ? "darkgreen" : "#95caca"};
+  border-bottom: 1px solid white;
+  cursor: pointer;
 `;
 
 const Message = styled.div`
   position: absolute;
-  top: 18px;
-  right: 10px;
-  min-width: 225px;
-  z-index: 1000;
-  border: 1px solid #607973;
-  border-radius: 10px;
+  left: 0;
+  top: -20px;
+  width: 100%;
+  z-index: 100;
   padding: 20px;
-  display: ${(props: Props) => (props.isShown ? "block" : "none")};
-  background-color: #fff;
-  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
-  white-space: pre-line;
+  display: ${(props: Props) => (props.isHovered ? "flex" : "none")};
+  justify-content: space-between;
+  flex-direction: column;
+  text-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+  color: gray;
+  background-color: white;
+  opacity: 0.6;
 `;
 
 interface Props {
-  isShown: boolean;
+  isHovered: boolean;
 }
 
 function getWeekTime(n: number) {
@@ -111,8 +141,8 @@ const lastWeekDate = () => {
 };
 
 export default function StackedBarChart() {
-  const [isShown, setIsShown] = useState(false);
-  console.log(isShown);
+  const [selectedId, setSelectedId] = useState("");
+  const navigate = useNavigate();
   // async function test() {
   //   let list: any[] = [];
   //   const friendRef = collection(db, "users");
@@ -132,18 +162,26 @@ export default function StackedBarChart() {
           <Bar>
             {data
               .filter(
-                ({ vocabBook, time }) =>
+                ({ time }) =>
                   // `${new Date(time.seconds * 1000).getMonth() + 1}/${new Date(
                   //   time.seconds * 1000
                   // ).getDate()}`
                   time === date
               )
-              .map(() => (
+              .map(({ vocabBook, time, docId, correctRate }) => (
                 <BarItem
-                  onMouseEnter={(e) => setIsShown(true)}
-                  onMouseLeave={(e) => setIsShown(false)}
+                  isHovered={docId === selectedId}
+                  onMouseEnter={(e) => setSelectedId(docId)}
+                  onMouseLeave={(e) => setSelectedId("")}
+                  onClick={() => navigate("/vocabbook")}
                 >
-                  <Message isShown={isShown}>hello</Message>
+                  <Message isHovered={docId === selectedId}>
+                    <div>
+                      [VocabBook]{""}
+                      {""} {vocabBook}
+                    </div>
+                    <div>[Correct Rate] {Math.floor(correctRate * 100)}% </div>
+                  </Message>
                 </BarItem>
               ))}
           </Bar>
