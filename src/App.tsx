@@ -133,8 +133,10 @@ const XDiv = styled(X)`
   @media screen and (max-width: 601px) {
     display: flex;
     color: white;
-    width: 100%;
     margin-top: 20px;
+    margin-left: auto;
+    margin-right: 20px;
+    text-align: end;
   } ;
 `;
 
