@@ -56,6 +56,11 @@ const ModeBtn = styled.button`
   border: 1px lightgray solid;
 `;
 
+const GameRule = styled.div`
+  background-color: lightgray;
+  padding: 10px;
+`;
+
 type ContextType = {
   questionsNumber: number;
   isBattle: boolean;
@@ -136,19 +141,29 @@ export default function ReviewLayout() {
           </ModeBtn>
         </ModeBtns>
         <Hint>
-          If you are in a challenge, you can get 1 point by two ways:
-          <br />
-          <br />
-          1. [Single Mode] <br />
-          ．correct rate &gt;= 80%
-          <br />
-          <br />
-          2. [Battle Mode] <br />
-          ．Invite your friends to battle <br />
-          ．Win the battle!
-          <br />
-          ．correct rate &gt;= 80%
-          <br />
+          <GameRule>
+            If you are in a challenge, you can get 1 point by two ways:
+            <br />
+            <br />
+            1. [Single Mode] <br />
+            ．correct rate &gt;= 80%
+            <br />
+            <br />
+            2. [Battle Mode] <br />
+            ．Invite your friends to battle <br />
+            ．Win the battle!
+            <br />
+            ．correct rate &gt;= 80%
+            <br />
+            <br />
+            Reminder:
+            <br />
+            1. You need to review at least once a day, otherwise you would lose
+            1 point per day.
+            <br />
+            2. If the score was deducted to 0, the plant would die.
+            <br />
+          </GameRule>
           <br />
           Haven't started a challenge?
           <div

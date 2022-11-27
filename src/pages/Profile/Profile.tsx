@@ -194,6 +194,11 @@ const FewPlants = styled.div`
   align-items: center;
 `;
 
+const GameRule = styled.div`
+  background-color: lightgray;
+  padding: 10px;
+`;
+
 interface PlantsListInterface {
   plantName: string;
   time: {
@@ -392,19 +397,29 @@ export default function Profile() {
               Start a challenge, and enrich your Vocab Garden!
               <br />
               <br />
-              When you are in a challenge, you can get 1 point by two ways:
-              <br />
-              <br />
-              1. [Single Mode] <br />
-              ．correct rate &gt;= 80%
-              <br />
-              <br />
-              2. [Battle Mode] <br />
-              ．Invite your friends to battle <br />
-              ．Win the battle!
-              <br />
-              ．correct rate &gt;= 80%
-              <br />
+              <GameRule>
+                When you are in a challenge, you can get 1 point by two ways:
+                <br />
+                <br />
+                1. [Review - Single Mode] <br />
+                ．correct rate &gt;= 80%
+                <br />
+                <br />
+                2. [Review - Battle Mode] <br />
+                ．Invite your friends to battle <br />
+                ．Win the battle!
+                <br />
+                ．correct rate &gt;= 80%
+                <br />
+                <br />
+                Reminder:
+                <br />
+                1. You need to review at least once a day, otherwise you would
+                lose 1 point per day.
+                <br />
+                2. If the score was deducted to 0, the plant would die.
+                <br />
+              </GameRule>
               <br />
               Choose a book to review right now!
               <br />
