@@ -6,6 +6,7 @@ import { db } from "../../firebase/firebase";
 import { plantImgsObj } from "./plantImgs";
 import Button from "../../components/Button/Button";
 import garden from "./garden.webp";
+import texture from "./texture.png";
 import Hint from "../../components/Hint/Hint";
 import LoginPage from "./Login";
 import { useNavigate } from "react-router-dom";
@@ -32,7 +33,7 @@ const GardenImg = styled.div`
   left: 0;
   top: 0;
   background-size: cover;
-  background-image: url(${garden});
+  background-image: url(${texture});
   opacity: 0.4;
 `;
 
@@ -77,7 +78,7 @@ const ScoreDiv = styled.div`
 `;
 
 const UserInfoWrapper = styled.div`
-  background-color: rgb(255, 255, 255, 0.9);
+  /* background-color: rgb(255, 255, 255, 0.9); */
   padding: 30px 0;
   border-radius: 30px;
   position: relative;
@@ -115,7 +116,7 @@ const GrowingPlantImg = styled.img`
 
 const PlantsWrapper = styled.div`
   width: 70%;
-  background-color: rgb(255, 255, 255, 0.9);
+  /* background-color: rgb(255, 255, 255, 0.9); */
   position: relative;
   z-index: 1;
   border-radius: 30px;
