@@ -176,6 +176,7 @@ const Input = styled.input`
   border: 1px solid lightgray;
   border-radius: 5px;
   padding-left: 10px;
+  font-size: 16px;
   &:focus {
     outline: none;
   }
@@ -407,7 +408,7 @@ function App() {
         <HeaderNav>
           <InputWrapper>
             <Input
-              placeholder="search a word..."
+              placeholder="Search a word..."
               onChange={(e) => {
                 e.target.value = e.target.value.toLowerCase();
                 setInputVocab(e.target.value);

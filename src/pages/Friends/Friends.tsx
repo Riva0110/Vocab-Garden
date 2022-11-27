@@ -65,6 +65,7 @@ const Input = styled.input`
   width: 70%;
   height: 25px;
   border: none;
+  font-size: 16px;
   &:focus {
     outline: none;
   }
@@ -267,7 +268,7 @@ export default function Friends() {
         <FriendRequest>
           <Input
             ref={emailInput}
-            placeholder="search friends by email..."
+            placeholder="Search by emails..."
             onChange={(e) => setSearchingEmail(e.target.value)}
           />
           <div
