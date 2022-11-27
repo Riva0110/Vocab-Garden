@@ -138,6 +138,7 @@ const PlantsWrapper = styled.div`
 const Plants = styled.div`
   display: grid;
   grid-template-columns: auto auto auto auto auto;
+  grid-template-rows: 260px 260px;
   gap: 20px;
   @media screen and (max-width: 1701px) {
     grid-template-columns: auto auto auto auto;
