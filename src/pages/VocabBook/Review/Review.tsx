@@ -5,7 +5,7 @@ import { vocabBookContext } from "../../../context/vocabBookContext";
 import { authContext } from "../../../context/authContext";
 import audio from "../../../components/audio.png";
 import { useNavigate } from "react-router-dom";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
 import plant from "./reviewPlant.webp";
 import Button from "../../../components/Button/Button";
@@ -328,6 +328,19 @@ export default function Review() {
       });
     };
     updateLog();
+
+    const setReviewLog = async () => {
+      const docRef = await addDoc(collection(db, "reviewLog"), {
+        userId: userId,
+        time: new Date(),
+        correctRate: answerCount.correct / questionsNumber,
+        vocabBook: viewingBook,
+      });
+      await updateDoc(docRef, {
+        docId: docRef.id,
+      });
+    };
+    setReviewLog();
   };
 
   function renderTest() {
