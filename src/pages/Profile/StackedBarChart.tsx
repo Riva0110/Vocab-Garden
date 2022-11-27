@@ -1,67 +1,68 @@
 import { collection, getDocs, query, where } from "firebase/firestore";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { authContext } from "../../context/authContext";
 import { db } from "../../firebase/firebase";
 
-const data = [
-  {
-    docId: "1",
-    userId: 1,
-    time: "11/25",
-    correctRate: 0.6,
-    vocabBook: "unsorted",
-  },
-  {
-    docId: "2",
-    userId: 1,
-    time: "11/24",
-    correctRate: 0.1,
-    vocabBook: "finance",
-  },
-  {
-    docId: "3",
-    userId: 1,
-    time: "11/24",
-    correctRate: 1,
-    vocabBook: "technology",
-  },
-  {
-    docId: "4",
-    userId: 1,
-    time: "11/20",
-    correctRate: 0.7,
-    vocabBook: "unsorted",
-  },
-  {
-    docId: "5",
-    userId: 1,
-    time: "11/24",
-    correctRate: 0.33,
-    vocabBook: "unsorted",
-  },
-  {
-    docId: "6",
-    userId: 1,
-    time: "11/20",
-    correctRate: 0.7,
-    vocabBook: "unsorted",
-  },
-  {
-    docId: "7",
-    userId: 1,
-    time: "11/20",
-    correctRate: 0.1,
-    vocabBook: "finance",
-  },
-  {
-    docId: "8",
-    userId: 1,
-    time: "11/24",
-    correctRate: 0.33,
-    vocabBook: "unsorted",
-  },
-];
+// const data = [
+//   {
+//     docId: "1",
+//     userId: 1,
+//     time: "11/25",
+//     correctRate: 0.6,
+//     vocabBook: "unsorted",
+//   },
+//   {
+//     docId: "2",
+//     userId: 1,
+//     time: "11/24",
+//     correctRate: 0.1,
+//     vocabBook: "finance",
+//   },
+//   {
+//     docId: "3",
+//     userId: 1,
+//     time: "11/24",
+//     correctRate: 1,
+//     vocabBook: "technology",
+//   },
+//   {
+//     docId: "4",
+//     userId: 1,
+//     time: "11/20",
+//     correctRate: 0.7,
+//     vocabBook: "unsorted",
+//   },
+//   {
+//     docId: "5",
+//     userId: 1,
+//     time: "11/24",
+//     correctRate: 0.33,
+//     vocabBook: "unsorted",
+//   },
+//   {
+//     docId: "6",
+//     userId: 1,
+//     time: "11/20",
+//     correctRate: 0.7,
+//     vocabBook: "unsorted",
+//   },
+//   {
+//     docId: "7",
+//     userId: 1,
+//     time: "11/20",
+//     correctRate: 0.1,
+//     vocabBook: "finance",
+//   },
+//   {
+//     docId: "8",
+//     userId: 1,
+//     time: "11/24",
+//     correctRate: 0.33,
+//     vocabBook: "unsorted",
+//   },
+// ];
 
 const Wrapper = styled.div`
   width: 100%;
@@ -97,7 +98,7 @@ const LabelX = styled.div`
 const DateText = styled.div``;
 
 const Bar = styled.div`
-  width: 20px;
+  width: 30px;
 `;
 
 const BarItem = styled.div`
@@ -121,12 +122,22 @@ const Message = styled.div`
   flex-direction: column;
   text-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
   color: gray;
-  background-color: white;
   opacity: 0.6;
 `;
 
 interface Props {
   isHovered: boolean;
+}
+
+interface Data {
+  docId: string;
+  userId: string;
+  time: {
+    seconds: number;
+    nanoseconds: number;
+  };
+  correctRate: number;
+  vocabBook: string;
 }
 
 function getWeekTime(n: number) {
@@ -141,18 +152,26 @@ const lastWeekDate = () => {
 };
 
 export default function StackedBarChart() {
-  const [selectedId, setSelectedId] = useState("");
   const navigate = useNavigate();
-  // async function test() {
-  //   let list: any[] = [];
-  //   const friendRef = collection(db, "users");
-  //   const q = query(friendRef, where("state", "==", "offline"));
-  //   const querySnapshot = await getDocs(q);
-  //   querySnapshot.forEach((friendDoc) => {
-  //     list = [...list, friendDoc.data()];
-  //   });
-  //   console.log(list);
-  // }
+  const { userId } = useContext(authContext);
+  const [selectedId, setSelectedId] = useState("");
+  const [data, setData] = useState<Data[] | []>([]);
+
+  useEffect(() => {
+    async function getReviewLog() {
+      let resData: Data[] | [] = [];
+      const friendRef = collection(db, "reviewLog");
+      const q = query(friendRef, where("userId", "==", userId));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((reviewDoc) => {
+        resData = [...resData, reviewDoc.data() as Data];
+      });
+      console.log(resData);
+      setData(resData);
+    }
+
+    getReviewLog();
+  }, [userId]);
 
   return (
     <Wrapper>
@@ -163,12 +182,11 @@ export default function StackedBarChart() {
             {data
               .filter(
                 ({ time }) =>
-                  // `${new Date(time.seconds * 1000).getMonth() + 1}/${new Date(
-                  //   time.seconds * 1000
-                  // ).getDate()}`
-                  time === date
+                  `${new Date(time.seconds * 1000).getMonth() + 1}/${new Date(
+                    time.seconds * 1000
+                  ).getDate()}` === date
               )
-              .map(({ vocabBook, time, docId, correctRate }) => (
+              .map(({ vocabBook, docId, correctRate }) => (
                 <BarItem
                   isHovered={docId === selectedId}
                   onMouseEnter={(e) => setSelectedId(docId)}
