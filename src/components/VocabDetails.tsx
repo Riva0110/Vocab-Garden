@@ -135,6 +135,10 @@ const Buttons = styled.div`
   gap: 10px;
 `;
 
+const AddBookWrapper = styled.div`
+  display: flex;
+`;
+
 const Input = styled.input`
   outline: none;
   border: 1px solid lightgray;
@@ -142,8 +146,11 @@ const Input = styled.input`
   padding-left: 10px;
 `;
 
-const AddButton = styled.button`
+const AddButton = styled.div`
+  display: flex;
+  justify-content: center;
   width: 20px;
+  line-height: 20px;
   height: 20px;
   margin-left: 10px;
   background-color: #607973;
@@ -423,7 +430,7 @@ export default function VocabDetails() {
                       </option>
                     ))}
                 </Select>
-                <div>
+                <AddBookWrapper>
                   <Input
                     ref={inputRef}
                     onChange={(e) => setNewBook(e.target.value)}
@@ -438,7 +445,7 @@ export default function VocabDetails() {
                   >
                     +
                   </AddButton>
-                </div>
+                </AddBookWrapper>
                 <Buttons>
                   <div onClick={() => setIsPopuping(false)}>
                     <Button btnType="secondary">Cancel</Button>

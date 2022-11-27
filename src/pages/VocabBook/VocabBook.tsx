@@ -111,10 +111,12 @@ const BookButtons = styled.div`
   align-items: center;
 `;
 
-const AddButton = styled.button`
+const AddButton = styled.div`
+  display: flex;
+  justify-content: center;
+  line-height: 20px;
   width: 20px;
   height: 20px;
-  margin-left: 10px;
   background-color: #607973;
   color: #ffffff;
   border: none;
@@ -476,14 +478,12 @@ export default function VocabBook() {
         </BookWrapper>
         <BookInfoWrapper>
           <BookButtons>
-            <div>
-              <Input
-                onChange={(e) => setNewBook(e.target.value)}
-                placeholder="Add a book"
-                ref={newBookRef}
-              />
-              <AddButton onClick={handleAddBook}>+</AddButton>
-            </div>
+            <Input
+              onChange={(e) => setNewBook(e.target.value)}
+              placeholder="Add a book"
+              ref={newBookRef}
+            />
+            <AddButton onClick={handleAddBook}>+</AddButton>
             <Delete>
               {viewingBook !== "wrong words" && (
                 <ButtonImg
