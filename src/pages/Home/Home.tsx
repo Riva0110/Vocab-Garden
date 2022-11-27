@@ -42,6 +42,11 @@ const Title = styled.div`
   margin-top: 100px;
   margin-bottom: 80px;
   color: black;
+  @media screen and (max-width: 601px) {
+    margin-top: 10px;
+    margin-bottom: 30px;
+    font-size: 25px;
+  }
 `;
 
 const IntroWrapper = styled.div`
@@ -63,6 +68,7 @@ const Intro = styled(Link)`
   text-decoration: none;
   text-shadow: white 0.1em 0.1em 0.2em;
   color: #1c1b1b;
+  margin-left: -8px;
   &:hover {
     background-color: #ffffff77;
     transition: 0.6s;
@@ -88,22 +94,22 @@ export default function Home() {
         </Title>
         <IntroWrapper>
           <QuickStart>Quick Start</QuickStart>
-          <Intro to={"/"}>▶ 【Search】 double click or select any words!</Intro>
+          <Intro to={"/"}>【Search】 double click or select any words!</Intro>
           <br />
           <Intro to={"/articles"}>
-            ▶ 【Read】 look up unfamiliar words while reading!
+            【Read】 look up unfamiliar words while reading!
           </Intro>
           <br />
           <Intro to={"/vocabbook"}>
-            ▶ 【Review】 save word cards and review!
+            【Review】 save word cards and review!
           </Intro>
           <br />
           <Intro to={"/vocabbook"}>
-            ▶ 【Battle】 invite your friends to review words with you. Have fun!
+            【Battle】 invite your friends to review words with you. Have fun!
           </Intro>
           <br />
           <Intro to={"/profile"}>
-            ▶ 【Achieve】 review everyday and enrich your Vocab Garden!
+            【Achieve】 review everyday and enrich your Vocab Garden!
           </Intro>
         </IntroWrapper>
       </BannerWrapper>
