@@ -61,10 +61,11 @@ const QuickStart = styled.div`
 const Intro = styled(Link)`
   height: 30px;
   text-decoration: none;
+  text-shadow: white 0.1em 0.1em 0.2em;
   color: #1c1b1b;
-  padding-left: 10px;
   &:hover {
     background-color: #ffffff77;
+    transition: 0.6s;
   }
 `;
 

@@ -20,14 +20,17 @@
     "@types/react-router-dom": "^5.3.3",
     "@types/slate": "^0.47.11",
     "@types/styled-components": "^5.1.26",
+    "chart.js": "^4.0.1",
     "clsx": "^1.2.1",
     "draft-js": "^0.11.7",
+    "faker": "^6.6.6",
     "firebase": "^9.13.0",
     "firebase-functions": "^4.0.2",
     "lexical": "^0.6.0",
     "lorem-ipsum": "^2.0.8",
     "poppins": "^0.1.1",
     "react": "^18.2.0",
+    "react-chartjs-2": "^5.0.1",
     "react-dom": "^18.2.0",
     "react-feather": "^2.0.10",
     "react-quill": "^2.0.0",
@@ -66,6 +69,7 @@
     ]
   },
   "devDependencies": {
+    "@faker-js/faker": "^7.6.0",
     "babel-plugin-styled-components": "^2.0.7"
   }
 }

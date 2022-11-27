@@ -19,7 +19,7 @@ const Message = styled.div`
   position: absolute;
   top: 18px;
   right: 10px;
-  min-width: 225px;
+  min-width: 300px;
   z-index: 10;
   border: 1px solid #607973;
   border-radius: 10px;

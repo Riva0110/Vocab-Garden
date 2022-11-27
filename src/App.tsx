@@ -292,8 +292,8 @@ function App() {
     const activeStyle = {
       ...shareStyle,
       color: "#607973",
-      textDecoration: "underline",
       fontWeight: "bold",
+      borderBottom: "2px solid #607973",
     };
 
     const notActiveStyle = {
@@ -306,6 +306,7 @@ function App() {
       color: "#4f4f4f",
       backgroundColor: "white",
       padding: "0 10px",
+      transition: "0.3s",
     };
 
     const mobileActiveStyle = {
@@ -319,6 +320,7 @@ function App() {
       color: "#4f4f4f",
       backgroundColor: "white",
       padding: "0 10px",
+      transition: "0.3s",
     };
 
     const mobileNotActiveStyle = {

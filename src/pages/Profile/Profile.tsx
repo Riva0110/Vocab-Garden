@@ -6,9 +6,11 @@ import { db } from "../../firebase/firebase";
 import { plantImgsObj } from "./plantImgs";
 import Button from "../../components/Button/Button";
 import garden from "./garden.webp";
+import texture from "./texture.png";
 import Hint from "../../components/Hint/Hint";
 import LoginPage from "./Login";
 import { useNavigate } from "react-router-dom";
+import StackedBarChart from "./StackedBarChart";
 
 interface Props {
   insideColor?: boolean;
@@ -31,7 +33,7 @@ const GardenImg = styled.div`
   left: 0;
   top: 0;
   background-size: cover;
-  background-image: url(${garden});
+  background-image: url(${texture});
   opacity: 0.4;
 `;
 
@@ -76,7 +78,7 @@ const ScoreDiv = styled.div`
 `;
 
 const UserInfoWrapper = styled.div`
-  background-color: rgb(255, 255, 255, 0.9);
+  /* background-color: rgb(255, 255, 255, 0.9); */
   padding: 30px 0;
   border-radius: 30px;
   position: relative;
@@ -101,6 +103,7 @@ const ProfileTitle = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
+  font-size: 20px;
 `;
 
 const GrowingPlantImg = styled.img`
@@ -114,7 +117,7 @@ const GrowingPlantImg = styled.img`
 
 const PlantsWrapper = styled.div`
   width: 70%;
-  background-color: rgb(255, 255, 255, 0.9);
+  /* background-color: rgb(255, 255, 255, 0.9); */
   position: relative;
   z-index: 1;
   border-radius: 30px;
@@ -190,6 +193,11 @@ const FewPlants = styled.div`
   height: 100%;
   justify-content: center;
   align-items: center;
+`;
+
+const GameRule = styled.div`
+  background-color: lightgray;
+  padding: 10px;
 `;
 
 interface PlantsListInterface {
@@ -390,19 +398,29 @@ export default function Profile() {
               Start a challenge, and enrich your Vocab Garden!
               <br />
               <br />
-              When you are in a challenge, you can get 1 point by two ways:
-              <br />
-              <br />
-              1. [Single Mode] <br />
-              ．correct rate &gt;= 80%
-              <br />
-              <br />
-              2. [Battle Mode] <br />
-              ．Invite your friends to battle <br />
-              ．Win the battle!
-              <br />
-              ．correct rate &gt;= 80%
-              <br />
+              <GameRule>
+                When you are in a challenge, you can get 1 point by two ways:
+                <br />
+                <br />
+                1. [Review - Single Mode] <br />
+                ．correct rate &gt;= 80%
+                <br />
+                <br />
+                2. [Review - Battle Mode] <br />
+                ．Invite your friends to battle <br />
+                ．Win the battle!
+                <br />
+                ．correct rate &gt;= 80%
+                <br />
+                <br />
+                Reminder:
+                <br />
+                1. You need to review at least once a day, otherwise you would
+                lose 1 point per day.
+                <br />
+                2. If the score was deducted to 0, the plant would die.
+                <br />
+              </GameRule>
               <br />
               Choose a book to review right now!
               <br />
@@ -462,6 +480,7 @@ export default function Profile() {
               </Button>
             </div>
           )}
+          <StackedBarChart />
           <div onClick={() => logout()}>
             <Button btnType={"secondary"}>Log out</Button>
           </div>
