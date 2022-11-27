@@ -494,9 +494,25 @@ export default function VocabBook() {
               )}
             </Delete>
             <Hint>
-              Click a card or select any words in the cards' definition! <br />
-              <br /> (Desktop =&gt; double click)
-              <br /> (Mobile =&gt; lond press)
+              {viewingBook === "wrong words" ? (
+                <>
+                  <p>
+                    【Wrong words】
+                    <br /> you have reviewed more than 5 times and correct rate
+                    is under 50%.
+                  </p>
+                  <br />
+                  <p>Click any words to review the definition!</p>
+                </>
+              ) : (
+                <>
+                  <p>
+                    Click a card or select any words in the cards' definition!
+                  </p>
+                  <br /> <p>(Desktop =&gt; double click)</p>
+                  <p>(Mobile =&gt; lond press)</p>
+                </>
+              )}
             </Hint>
           </BookButtons>
           <Nav>
