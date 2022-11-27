@@ -103,6 +103,7 @@ const ProfileTitle = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
+  font-size: 20px;
 `;
 
 const GrowingPlantImg = styled.img`

@@ -75,7 +75,10 @@ const Title = styled.div`
   border-top: 1px solid lightgray;
   padding-top: 60px;
   margin-bottom: 20px;
+  font-size: 20px;
 `;
+
+const Unit = styled.div``;
 
 const Chart = styled.div`
   display: flex;
@@ -101,11 +104,16 @@ const Bar = styled.div`
   width: 30px;
 `;
 
+const ReviewCount = styled.div`
+  text-align: center;
+  color: #607973;
+`;
+
 const BarItem = styled.div`
   width: 100%;
   height: 30px;
   background-color: ${(props: Props) =>
-    props.isHovered ? "darkgreen" : "#95caca"};
+    props.isHovered ? "#607973" : "#95caca"};
   border-bottom: 1px solid white;
   cursor: pointer;
 `;
@@ -176,17 +184,21 @@ export default function StackedBarChart() {
   return (
     <Wrapper>
       <Title>Learning Record</Title>
+      <Unit>Times</Unit>
       <Chart>
-        {lastWeekDate().map((date) => (
-          <Bar>
-            {data
-              .filter(
-                ({ time }) =>
-                  `${new Date(time.seconds * 1000).getMonth() + 1}/${new Date(
-                    time.seconds * 1000
-                  ).getDate()}` === date
-              )
-              .map(({ vocabBook, docId, correctRate }) => (
+        {lastWeekDate().map((date) => {
+          const filteredData = data.filter(
+            ({ time }) =>
+              `${new Date(time.seconds * 1000).getMonth() + 1}/${new Date(
+                time.seconds * 1000
+              ).getDate()}` === date
+          );
+          return (
+            <Bar>
+              {filteredData.length !== 0 && (
+                <ReviewCount>{filteredData.length}</ReviewCount>
+              )}
+              {filteredData.map(({ vocabBook, docId, correctRate }) => (
                 <BarItem
                   isHovered={docId === selectedId}
                   onMouseEnter={(e) => setSelectedId(docId)}
@@ -202,8 +214,9 @@ export default function StackedBarChart() {
                   </Message>
                 </BarItem>
               ))}
-          </Bar>
-        ))}
+            </Bar>
+          );
+        })}
       </Chart>
       <LabelX>
         {lastWeekDate().map((date: string) => (
