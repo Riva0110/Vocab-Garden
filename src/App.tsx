@@ -82,7 +82,6 @@ const InputWrapper = styled.div`
 
 const LogoImg = styled.img`
   height: 30px;
-  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.1);
 `;
 
 const Menu = styled.img`
