@@ -811,7 +811,7 @@ function BattleReview({ pin }: { pin: string }) {
     return (
       <VocabList key={vocab + partOfSpeech}>
         <VocabDiv>
-          ▶ {vocab}{" "}
+          {vocab}{" "}
           {audioLink && (
             <AudioImg
               src={audio}

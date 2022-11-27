@@ -541,7 +541,7 @@ export default function Review() {
     return (
       <VocabList key={vocab + partOfSpeech}>
         <VocabDiv>
-          ▶ {vocab}{" "}
+          {vocab}{" "}
           {audioLink && (
             <AudioImg
               src={audio}
