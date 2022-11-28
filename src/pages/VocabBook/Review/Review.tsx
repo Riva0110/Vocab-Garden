@@ -261,6 +261,10 @@ export default function Review() {
   ]);
 
   useEffect(() => {
+    if (reviewingQuestions === undefined) setReviewingQuestions(questions);
+  }, [questions, reviewingQuestions, vocabBooks]);
+
+  useEffect(() => {
     getVocabBooks(userId);
 
     const getUserInfo = async (userId: string) => {
