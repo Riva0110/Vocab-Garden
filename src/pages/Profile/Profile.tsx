@@ -148,7 +148,7 @@ const Plants = styled.div`
   @media screen and (max-width: 1201px) {
     grid-template-columns: auto auto;
   }
-  @media screen and (max-width: 1025px) {
+  @media screen and (max-width: 1001px) {
     grid-template-columns: auto auto auto;
   }
   @media screen and (max-width: 731px) {
