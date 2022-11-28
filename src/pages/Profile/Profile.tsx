@@ -6,6 +6,8 @@ import { db } from "../../firebase/firebase";
 import { plantImgsObj } from "./plantImgs";
 import Button from "../../components/Button/Button";
 import plant from "./plant.webp";
+import growingPlants from "./growingPlants.webp";
+import dyingPlants from "./dyingPlants.webp";
 import Hint from "../../components/Hint/Hint";
 import LoginPage from "./Login";
 import { useNavigate } from "react-router-dom";
@@ -195,6 +197,10 @@ const FewPlants = styled.div`
   @media screen and (max-width: 1001px) {
     padding-top: 50px;
   }
+`;
+
+const HintImg = styled.img`
+  width: 100%;
 `;
 
 const GameRule = styled.div`
@@ -405,14 +411,16 @@ export default function Profile() {
                 <br />
                 <br />
                 1. [Review - Single Mode] <br />
-                ．correct rate &gt;= 80%
+                ．Correct rate &gt;= 80%
                 <br />
                 <br />
                 2. [Review - Battle Mode] <br />
                 ．Invite your friends to battle <br />
                 ．Win the battle!
                 <br />
-                ．correct rate &gt;= 80%
+                ．Correct rate &gt;= 80%
+                <br />
+                <HintImg src={growingPlants} alt="growingPlants" />
                 <br />
                 <br />
                 Reminder:
@@ -422,6 +430,7 @@ export default function Profile() {
                 <br />
                 2. If the score was deducted to 0, the plant would die.
                 <br />
+                <HintImg src={dyingPlants} alt="growingPlants" />
               </GameRule>
               <br />
               Choose a book to review right now!
