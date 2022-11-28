@@ -413,6 +413,9 @@ export default function VocabDetails() {
   return isError ? (
     <Wrapper showVocabInMobile={showVocabInMobile}>
       <ErrorMsg>
+        [ It should be vocabulary's definition here. ]
+        <br />
+        <br />
         Sorry, something went wrong and it's not your fault.
         <br />
         You can try the search again at later time.
