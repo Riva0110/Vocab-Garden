@@ -5,7 +5,6 @@ import { arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { plantImgsObj } from "./plantImgs";
 import Button from "../../components/Button/Button";
-import texture from "./texture.png";
 import plant from "./plant.webp";
 import Hint from "../../components/Hint/Hint";
 import LoginPage from "./Login";
