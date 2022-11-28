@@ -6,6 +6,7 @@ import { db } from "../../firebase/firebase";
 import { plantImgsObj } from "./plantImgs";
 import Button from "../../components/Button/Button";
 import texture from "./texture.png";
+import plant from "./plant.webp";
 import Hint from "../../components/Hint/Hint";
 import LoginPage from "./Login";
 import { useNavigate } from "react-router-dom";
@@ -25,15 +26,15 @@ const Wrapper = styled.div`
   }
 `;
 
-const GardenImg = styled.div`
-  width: 100vw;
-  height: 100vh;
+const Img = styled.img`
+  width: 400px;
   position: fixed;
-  left: 0;
-  top: 0;
-  background-size: cover;
-  background-image: url(${texture});
-  opacity: 0.4;
+  right: 30px;
+  bottom: 0px;
+  opacity: 0.5;
+  @media screen and (max-width: 1001px) {
+    display: none;
+  }
 `;
 
 const Select = styled.select`
@@ -77,7 +78,6 @@ const ScoreDiv = styled.div`
 `;
 
 const UserInfoWrapper = styled.div`
-  /* background-color: rgb(255, 255, 255, 0.9); */
   padding: 30px 0;
   border-radius: 30px;
   position: relative;
@@ -116,7 +116,6 @@ const GrowingPlantImg = styled.img`
 
 const PlantsWrapper = styled.div`
   width: 70%;
-  /* background-color: rgb(255, 255, 255, 0.9); */
   position: relative;
   z-index: 1;
   border-radius: 30px;
@@ -193,6 +192,10 @@ const FewPlants = styled.div`
   height: 100%;
   justify-content: center;
   align-items: center;
+  padding-top: 300px;
+  @media screen and (max-width: 1001px) {
+    padding-top: 50px;
+  }
 `;
 
 const GameRule = styled.div`
@@ -507,11 +510,11 @@ export default function Profile() {
                 There's no any plants in your garden.
                 <br />
                 Start a challenge TODAY!
+                <Img src={plant} alt="plant" />
               </FewPlants>
             )}
           </Plants>
         </PlantsWrapper>
-        <GardenImg />
       </Wrapper>
     );
   };
