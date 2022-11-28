@@ -244,7 +244,7 @@ export default function Profile() {
   const { isLogin, logout, userId, signup } = useContext(authContext);
   const [name, setName] = useState<string>("");
   const [score, setScore] = useState<number>(0);
-  const [isChallenging, setIsChallenging] = useState<boolean>(false);
+  const [isChallenging, setIsChallenging] = useState<boolean>();
   const [messages, setMessages] =
     useState<string>("選擇喜歡的植物，開始新的挑戰吧！");
   const [currentPlant, setCurrentPlant] = useState("begonia");
@@ -386,7 +386,7 @@ export default function Profile() {
         [
           ...prev,
           {
-            plantName: currentPlant,
+            plantName: displayPlantName(currentPlant),
             time: {
               seconds: Date.now() / 1000,
               nanoseconds: Date.now() / 1000,
@@ -457,7 +457,7 @@ export default function Profile() {
           </ScoreBarWrapper>
           <p>{messages}</p>
           {isChallenging ? (
-            <></>
+            <p>{displayPlantName(currentPlant)}</p>
           ) : score !== 5 ? (
             <>
               <Select
