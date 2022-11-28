@@ -56,6 +56,15 @@ const Wrapper = styled.div`
   }
 `;
 
+const ErrorMsg = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #607973;
+`;
+
 const XDiv = styled(X)`
   display: none;
   cursor: pointer;
@@ -228,6 +237,7 @@ export default function VocabDetails() {
   const [selectedvocabBook, setSelectedvocabBook] =
     useState<string>("unsorted");
   const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
   const [isPopuping, setIsPopuping] = useState(false);
   const popupRef = useRef<HTMLDivElement>(null);
   const resourceUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${keyword}`;
@@ -360,8 +370,13 @@ export default function VocabDetails() {
             setKeyword(vocabDetails.word);
           ref.current?.("Sorry......No result.");
         }
+
+        if (response.status === 500) {
+          setIsError(true);
+        }
       } catch (err) {
         if (err instanceof Error) ref.current?.(`Error: ${err.message}`);
+        setIsError(true);
       } finally {
         setIsLoading(false);
       }
@@ -388,10 +403,21 @@ export default function VocabDetails() {
     checkIfSaved();
   }, [userId, keyword, setIsSaved]);
 
-  return isLoading ? (
-    <p>
-      <SpinnerImg src={spinner} alt="spinner" />
-    </p>
+  if (isLoading)
+    return (
+      <p>
+        <SpinnerImg src={spinner} alt="spinner" />
+      </p>
+    );
+
+  return isError ? (
+    <Wrapper showVocabInMobile={showVocabInMobile}>
+      <ErrorMsg>
+        Sorry, something went wrong and it's not your fault.
+        <br />
+        You can try the search again at later time.
+      </ErrorMsg>
+    </Wrapper>
   ) : (
     <>
       <Alert
