@@ -10,9 +10,6 @@ interface Props {
 
 const Editor = styled(ReactQuill)`
   height: calc(100vh - 356px);
-  a {
-    color: #607973;
-  }
 `;
 
 export default function QuillEditor({ content, setContent }: Props) {
