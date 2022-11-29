@@ -5,7 +5,13 @@ import { authContext } from "../../../context/authContext";
 import { useViewingBook } from "../VocabBookLayout";
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  doc,
+  DocumentData,
+  DocumentSnapshot,
+  getDoc,
+  setDoc,
+} from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
 import Hint from "../../../components/Hint/Hint";
 
@@ -105,8 +111,8 @@ export default function ReviewLayout() {
   useEffect(() => {
     const getUserInfo = async () => {
       const docRef = doc(db, "users", userId);
-      const docSnap: any = await getDoc(docRef);
-      setName(docSnap.data().name);
+      const docSnap: DocumentSnapshot<DocumentData> = await getDoc(docRef);
+      setName(docSnap?.data()?.name);
     };
     getUserInfo();
   }, [userId]);

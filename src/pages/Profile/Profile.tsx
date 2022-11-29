@@ -462,7 +462,7 @@ export default function Profile() {
             <>
               <Select
                 value={currentPlant}
-                onChange={async (e: any) => {
+                onChange={async (e) => {
                   setCurrentPlant(e.target.value);
                   setIsDying(false);
                   setPlantPhase("0");

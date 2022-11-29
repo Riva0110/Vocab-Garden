@@ -448,7 +448,7 @@ export default function VocabDetails() {
                 <label>Save to Book:</label>
                 <Select
                   value={selectedvocabBook}
-                  onChange={(e: any) => {
+                  onChange={(e) => {
                     setSelectedvocabBook(e.target.value);
                   }}
                 >
@@ -463,7 +463,7 @@ export default function VocabDetails() {
                   <Input
                     ref={inputRef}
                     onChange={(e) => setNewBook(e.target.value)}
-                    placeholder="Add a book"
+                    placeholder="Add a VocabBook"
                   />
                   <AddButton
                     onClick={async () => {

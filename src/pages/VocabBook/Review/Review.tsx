@@ -5,7 +5,15 @@ import { vocabBookContext } from "../../../context/vocabBookContext";
 import { authContext } from "../../../context/authContext";
 import audio from "../../../components/audio.png";
 import { useNavigate } from "react-router-dom";
-import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  DocumentData,
+  DocumentSnapshot,
+  getDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
 import plant from "./reviewPlant.webp";
 import Button from "../../../components/Button/Button";
@@ -269,9 +277,9 @@ export default function Review() {
 
     const getUserInfo = async (userId: string) => {
       const docRef = doc(db, "users", userId);
-      const docSnap: any = await getDoc(docRef);
-      setScore(docSnap.data().currentScore);
-      setIsChallenging(docSnap.data().isChallenging);
+      const docSnap: DocumentSnapshot<DocumentData> = await getDoc(docRef);
+      setScore(docSnap?.data()?.currentScore);
+      setIsChallenging(docSnap?.data()?.isChallenging);
     };
     getUserInfo(userId);
   }, [getVocabBooks, userId]);
@@ -404,15 +412,12 @@ export default function Review() {
                       }) => {
                         if (vocab === correctVocab?.vocab) {
                           if (log && log?.length > 0) {
-                            const correctCount = log?.reduce(
-                              (acc: any, item) => {
-                                if (item.isCorrect) {
-                                  acc += 1;
-                                }
-                                return acc;
-                              },
-                              0
-                            );
+                            const correctCount = log?.reduce((acc, item) => {
+                              if (item.isCorrect) {
+                                acc += 1;
+                              }
+                              return acc;
+                            }, 0);
                             return {
                               vocab,
                               audioLink,

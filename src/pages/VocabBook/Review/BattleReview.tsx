@@ -14,6 +14,8 @@ import {
   query,
   getDocs,
   arrayUnion,
+  DocumentSnapshot,
+  DocumentData,
 } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
 import { useParams } from "react-router-dom";
@@ -423,7 +425,7 @@ function BattleReview({ pin }: { pin: string }) {
   }, [correctVocab, questionsNumber, reviewingQuestionsArr, round]);
 
   useEffect(() => {
-    let newFriendState: any = [];
+    let newFriendState: string[] = [];
     friendList?.forEach((friendEmail) => {
       async function checkState() {
         const friendRef = collection(db, "users");
@@ -452,7 +454,7 @@ function BattleReview({ pin }: { pin: string }) {
       unsub = onSnapshot(
         query(collection(db, "users"), where("email", "in", friendList)),
         (doc) => {
-          let newFriendState: any = [];
+          let newFriendState: string[] = [];
           friendList?.forEach((friendEmail) => {
             async function checkState() {
               const friendRef = collection(db, "users");
@@ -572,10 +574,10 @@ function BattleReview({ pin }: { pin: string }) {
 
       const checkUserScoreStatus = async () => {
         const docRef = doc(db, "users", userId);
-        const docSnap: any = await getDoc(docRef);
+        const docSnap: DocumentSnapshot<DocumentData> = await getDoc(docRef);
 
-        const score = docSnap.data().currentScore;
-        const isChallenging = docSnap.data().isChallenging;
+        const score = docSnap?.data()?.currentScore;
+        const isChallenging = docSnap?.data()?.isChallenging;
         console.log({ score });
 
         if (isChallenging) {
@@ -627,13 +629,13 @@ function BattleReview({ pin }: { pin: string }) {
   async function handleCompetitorJoinBattle() {
     const getUserInfo = async () => {
       const docRef = doc(db, "users", userId);
-      const docSnap: any = await getDoc(docRef);
+      const docSnap: DocumentSnapshot<DocumentData> = await getDoc(docRef);
 
       if (pin) {
         const roomRef = doc(db, "battleRooms", pin);
         await updateDoc(roomRef, {
           competitorId: userId,
-          competitorName: docSnap.data().name,
+          competitorName: docSnap?.data()?.name,
         });
       }
     };

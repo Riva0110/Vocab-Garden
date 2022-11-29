@@ -291,10 +291,10 @@ export default function VocabBook() {
 
   const callbacks = useMemo(() => {
     return {
-      onWordClick: (word: any) => {
+      onWordClick: (word: { text: string; value: number }) => {
         setKeyword(word.text);
       },
-      getWordTooltip: (word: any) => null,
+      getWordTooltip: (word: { text: string; value: number }) => null,
     };
   }, [setKeyword]);
 
@@ -330,10 +330,10 @@ export default function VocabBook() {
   });
 
   function getCorrectRateOfBooks() {
-    let log: any[][] = [];
+    let log: Log[][] = [];
     if (!vocabBooks) return;
     Object.keys(vocabBooks).forEach((key, index) => {
-      let insideLog: any[] = [];
+      let insideLog: Log[] = [];
       vocabBooks[key].map((vocab) => {
         if (vocab.log) {
           insideLog = [...insideLog, ...vocab.log];
@@ -415,7 +415,7 @@ export default function VocabBook() {
   function handleMouseEnterBook() {
     bookRef.current?.addEventListener(
       "wheel",
-      (ev: { deltaY: any; deltaX: any }) => {
+      (ev: { deltaY: number; deltaX: number }) => {
         if (bookRef.current)
           bookRef.current.scrollLeft += ev.deltaY + ev.deltaX;
       }
@@ -426,7 +426,7 @@ export default function VocabBook() {
     if (bookRef.current) {
       bookRef.current.removeEventListener(
         "wheel",
-        (ev: { deltaY: any; deltaX: any }) => {
+        (ev: { deltaY: number; deltaX: number }) => {
           if (bookRef.current)
             bookRef.current.scrollLeft += ev.deltaY + ev.deltaX;
         }
@@ -480,7 +480,7 @@ export default function VocabBook() {
           <BookButtons>
             <Input
               onChange={(e) => setNewBook(e.target.value)}
-              placeholder="Add a book"
+              placeholder="Add a VocabBook"
               ref={newBookRef}
             />
             <AddButton onClick={handleAddBook}>+</AddButton>

@@ -158,7 +158,7 @@ export default function Friends() {
       unsub = onSnapshot(
         query(collection(db, "users"), where("email", "in", friendList)),
         (doc) => {
-          let newFriendState: any = [];
+          let newFriendState: string[] = [];
           friendList?.forEach((friendEmail) => {
             async function checkState() {
               const friendRef = collection(db, "users");
@@ -178,7 +178,7 @@ export default function Friends() {
   }, [friendList, isLogin, userId]);
 
   useEffect(() => {
-    let newFriendState: any = [];
+    let newFriendState: string[] = [];
     friendList?.forEach((friendEmail) => {
       async function checkState() {
         const friendRef = collection(db, "users");
