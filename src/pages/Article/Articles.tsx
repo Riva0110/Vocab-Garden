@@ -85,13 +85,6 @@ export default function Articles() {
     <div className="App">
       <ArticlesWrapper>
         <Btns>
-          {/* <div
-            onClick={() => {
-              navigate("/articles/words");
-            }}
-          >
-            <Button btnType="secondary">Article Words</Button>
-          </div> */}
           <div
             onClick={() => {
               navigate("/articles/add");
