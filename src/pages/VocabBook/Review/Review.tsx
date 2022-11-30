@@ -172,8 +172,11 @@ const Message = styled.div`
 `;
 
 const OutcomeWrapper = styled.div`
-  width: 50vw;
+  width: 70vw;
   margin: 20px auto;
+  @media screen and (min-width: 1441px) {
+    width: 50vw;
+  }
 `;
 
 const ReviewVocabs = styled.div`

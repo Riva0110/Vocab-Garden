@@ -213,14 +213,20 @@ const Message = styled.div`
 `;
 
 const OutcomeWrapper = styled.div`
-  width: 100%;
-  margin: 50px auto;
+  width: 70vw;
+  margin: 20px auto;
+  @media screen and (min-width: 1441px) {
+    width: 50vw;
+  }
 `;
 
 const ReviewVocabs = styled.div`
   position: relative;
   background-color: rgb(255, 255, 255, 0.7);
   z-index: 100;
+  border: 1px solid gray;
+  padding: 20px;
+  margin-top: 20px;
 `;
 
 const WrongVocabs = styled.div``;
