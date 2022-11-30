@@ -1,6 +1,5 @@
 import styled from "styled-components";
 import banner from "./banner.webp";
-import bannerPng from "./banner.png";
 import next from "./next.png";
 import VocabDetails from "../../components/VocabDetails";
 import { keywordContext } from "../../context/keywordContext";
@@ -26,10 +25,6 @@ const BackgroundImg = styled.div`
   background-image: url(${banner});
   background-size: cover;
   opacity: 0.6;
-`;
-
-const BackgroundImgPng = styled(BackgroundImg)`
-  background-image: url(${bannerPng});
 `;
 
 const BannerWrapper = styled.div`
@@ -59,17 +54,6 @@ const IntroWrapper = styled.div`
   color: #292727;
 `;
 
-const QuickStart = styled.span`
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 20px;
-  text-shadow: #1c1b1b 0.1em 0.1em 0.2em;
-  border-bottom: 2px white solid;
-  padding-bottom: 10px;
-  margin-bottom: 10px;
-  color: white;
-`;
-
 const Intro = styled.div`
   min-height: 30px;
   text-decoration: none;
@@ -84,10 +68,6 @@ const BeMember = styled.div`
   text-shadow: #1c1b1b 0.1em 0.1em 0.2em;
   color: white;
   margin-left: -8px;
-`;
-
-const MainFeature = styled.span`
-  /* background-color: #ffffff77; */
 `;
 
 const IntroNav = styled(Link)`
@@ -115,17 +95,13 @@ export default function Home() {
 
   return (
     <Wrapper>
-      <picture>
-        <BackgroundImg />
-        <BackgroundImgPng />
-      </picture>
+      <BackgroundImg />
       <BannerWrapper onClick={() => getSelectedText()}>
         <Title>
           Boost your English reading and vocabulary skills!
           <br />
         </Title>
         <IntroWrapper>
-          {/* <QuickStart>Quick Start</QuickStart> */}
           <Intro>【Search】double click or select any words!</Intro>
           <br />
           <BeMember>
