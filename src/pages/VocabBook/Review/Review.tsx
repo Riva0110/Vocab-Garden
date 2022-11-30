@@ -43,6 +43,9 @@ const Img = styled.img`
   right: 0px;
   bottom: 50px;
   opacity: 0.5;
+  @media screen and (max-height: 701px) {
+    display: none;
+  }
 `;
 
 const RoundCount = styled.div`

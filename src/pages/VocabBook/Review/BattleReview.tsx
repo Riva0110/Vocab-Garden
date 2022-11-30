@@ -54,6 +54,9 @@ const Img = styled.img`
   left: 100px;
   bottom: 0;
   opacity: 0.4;
+  @media screen and (max-height: 701px) {
+    display: none;
+  }
 `;
 
 const Header = styled.div`

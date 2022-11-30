@@ -132,7 +132,11 @@ export default function ReviewLayout() {
   return (
     <Wrapper>
       <ModeBtnsWrapper>
-        <VocabBook>[VocabBook] {viewingBook}</VocabBook>
+        {window.screen.width > 401 ? (
+          <VocabBook>[VocabBook] {viewingBook}</VocabBook>
+        ) : (
+          <VocabBook></VocabBook>
+        )}
         <ModeBtns>
           <ModeBtn
             isBattle={!isBattle}
