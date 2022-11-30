@@ -376,7 +376,6 @@ export default function VocabDetails() {
         }
       } catch (err) {
         if (err instanceof Error) ref.current?.(`Error: ${err.message}`);
-        setIsError(true);
       } finally {
         setIsLoading(false);
       }
@@ -493,7 +492,7 @@ export default function VocabDetails() {
                   </div>
                 </Buttons>
               </SavePopup>
-              <Hint>
+              <Hint top={280}>
                 Select any words to search word's definition! <br />
                 <br /> (Desktop =&gt; double click) <br /> (Mobile =&gt; long
                 press)

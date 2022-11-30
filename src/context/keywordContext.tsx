@@ -22,7 +22,7 @@ export function KeywordContextProvider({ children }: ContextProviderProps) {
   const [keyword, _setKeyword] = useState("welcome");
 
   const setKeyword = (value: Value) => {
-    if (!value) return;
+    if (!value || value === " ") return;
     if (typeof value === "function") {
       _setKeyword((preKeyword) => value(preKeyword));
     }
