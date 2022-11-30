@@ -470,6 +470,7 @@ function App() {
               </Clear>
               {battleInvitation
                 ?.reverse()
+                .slice(0, 10)
                 .map(({ ownerName, pin, time }: BattleInvitation) => {
                   const newTime = new Date(time.seconds * 1000);
                   return (
