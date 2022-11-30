@@ -53,6 +53,7 @@ const Nav = styled.nav`
 `;
 
 const VocabBookWrapper = styled.div`
+  position: relative;
   width: calc((100% - 30px) / 2);
   height: calc(100vh - 160px);
   z-index: 1;
@@ -115,13 +116,14 @@ const AddButton = styled.div`
   display: flex;
   justify-content: center;
   line-height: 20px;
-  width: 20px;
+  min-width: 20px;
   height: 20px;
   background-color: #607973;
   color: #ffffff;
   border: none;
   border-radius: 10px;
   cursor: pointer;
+  margin-right: 10px;
 `;
 
 const Delete = styled.div`
@@ -211,15 +213,20 @@ const ButtonImg = styled.img`
 `;
 
 const Input = styled.input`
+  position: absolute;
+  top: 30px;
+  left: 5px;
   outline: none;
   border: 1px solid lightgray;
   height: 25px;
   padding-left: 10px;
+  display: ${(props: Props) => (props.showAddInput ? "block" : "none")};
 `;
 
 interface Props {
   selected?: boolean;
   weight?: boolean;
+  showAddInput?: boolean;
 }
 
 interface Log {
@@ -277,6 +284,7 @@ export default function VocabBook() {
   const ref = useRef<null | AddFunction>(null);
   const newBookRef = useRef<HTMLInputElement>(null);
   const bookRef = useRef<HTMLDivElement>(null);
+  const [showAddInput, setShowAddInput] = useState<boolean>();
   const topWrongWords = useMemo(() => {
     if (vocabBooks) {
       return getAllWords(vocabBooks)
@@ -443,11 +451,31 @@ export default function VocabBook() {
       />
       <Img src={plant} alt="plant" />
       <VocabBookWrapper>
+        <Input
+          onChange={(e) => setNewBook(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              setShowAddInput(false);
+              handleAddBook();
+            }
+          }}
+          placeholder="Add a VocabBook"
+          ref={newBookRef}
+          showAddInput={showAddInput}
+        />
+
         <BookWrapper
           ref={bookRef}
           onMouseEnter={handleMouseEnterBook}
           onMouseLeave={handleMouseLeaveBook}
         >
+          <AddButton
+            onClick={() => {
+              setShowAddInput(!showAddInput);
+            }}
+          >
+            +
+          </AddButton>
           {vocabBooks &&
             Object.keys(vocabBooks).map((book: string, index) => (
               <Fragment key={book}>
@@ -478,21 +506,6 @@ export default function VocabBook() {
         </BookWrapper>
         <BookInfoWrapper>
           <BookButtons>
-            <Input
-              onChange={(e) => setNewBook(e.target.value)}
-              placeholder="Add a VocabBook"
-              ref={newBookRef}
-            />
-            <AddButton onClick={handleAddBook}>+</AddButton>
-            <Delete>
-              {viewingBook !== "wrong words" && (
-                <ButtonImg
-                  src={deleteBtn}
-                  alt="delete"
-                  onClick={() => handleDeleteBook(viewingBook)}
-                />
-              )}
-            </Delete>
             <Hint>
               {viewingBook === "wrong words" ? (
                 <>
@@ -514,6 +527,15 @@ export default function VocabBook() {
                 </>
               )}
             </Hint>
+            <Delete>
+              {viewingBook !== "wrong words" && (
+                <ButtonImg
+                  src={deleteBtn}
+                  alt="delete"
+                  onClick={() => handleDeleteBook(viewingBook)}
+                />
+              )}
+            </Delete>
           </BookButtons>
           <Nav>
             <div>
