@@ -65,9 +65,10 @@ const Intro = styled.div`
 const BeMember = styled.div`
   height: 30px;
   text-decoration: none;
-  text-shadow: #1c1b1b 0.1em 0.1em 0.2em;
-  color: white;
+  text-shadow: white 0.1em 0.1em 0.3em;
+  color: #405a54;
   margin-left: -8px;
+  font-weight: 600;
 `;
 
 const IntroNav = styled(Link)`
