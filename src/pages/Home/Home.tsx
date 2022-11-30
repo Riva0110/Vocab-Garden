@@ -1,5 +1,7 @@
 import styled from "styled-components";
 import banner from "./banner.webp";
+import bannerPng from "./banner.png";
+import next from "./next.png";
 import VocabDetails from "../../components/VocabDetails";
 import { keywordContext } from "../../context/keywordContext";
 import { useContext } from "react";
@@ -24,6 +26,10 @@ const BackgroundImg = styled.div`
   background-image: url(${banner});
   background-size: cover;
   opacity: 0.6;
+`;
+
+const BackgroundImgPng = styled(BackgroundImg)`
+  background-image: url(${bannerPng});
 `;
 
 const BannerWrapper = styled.div`
@@ -53,26 +59,47 @@ const IntroWrapper = styled.div`
   color: #292727;
 `;
 
-const QuickStart = styled.div`
+const QuickStart = styled.span`
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 20px;
-  border: 1px solid lightgray;
-  width: 150px;
-  text-align: center;
-  background-color: #fff;
+  text-shadow: #1c1b1b 0.1em 0.1em 0.2em;
+  border-bottom: 2px white solid;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  color: white;
 `;
 
-const Intro = styled(Link)`
+const Intro = styled.div`
   height: 30px;
   text-decoration: none;
   text-shadow: white 0.1em 0.1em 0.2em;
   color: #1c1b1b;
   margin-left: -8px;
-  &:hover {
+`;
+
+const MainFeature = styled.span`
+  /* background-color: #ffffff77; */
+`;
+
+const IntroNav = styled(Link)`
+  height: 30px;
+  text-decoration: none;
+  text-shadow: white 0.1em 0.1em 0.2em;
+  color: #1c1b1b;
+  margin-left: -8px;
+  /* display: flex;
+  align-items: center;
+  gap: 10px; */
+  /* &:hover {
     background-color: #ffffff77;
     transition: 0.6s;
-  }
+  } */
+`;
+
+const NextImg = styled.img`
+  width: 15px;
+  height: 15px;
 `;
 
 export default function Home() {
@@ -86,30 +113,54 @@ export default function Home() {
 
   return (
     <Wrapper>
-      <BackgroundImg />
+      <picture>
+        <BackgroundImg />
+        <BackgroundImgPng />
+      </picture>
       <BannerWrapper onClick={() => getSelectedText()}>
         <Title>
           Boost your English reading and vocabulary skills!
           <br />
         </Title>
         <IntroWrapper>
-          <QuickStart>Quick Start</QuickStart>
-          <Intro to={"/"}>【Search】 double click or select any words!</Intro>
+          {/* <QuickStart>Quick Start</QuickStart> */}
+          <Intro>【Search】double click or select any words!</Intro>
           <br />
-          <Intro to={"/articles"}>
-            【Read】 look up unfamiliar words while reading!
+          <Intro>
+            &nbsp;&nbsp;Be a member and enjoy more!&nbsp;&nbsp;
+            <IntroNav to={"/profile"}>
+              &nbsp;&nbsp;
+              <NextImg src={next} alt={next} />
+            </IntroNav>
           </Intro>
-          <br />
-          <Intro to={"/vocabbook"}>
-            【Review】 save word cards and review!
+          <Intro>
+            【Read】look up unfamiliar words while reading! &nbsp;&nbsp;
+            <IntroNav to={"/articles"}>
+              &nbsp;&nbsp;
+              <NextImg src={next} alt={next} />
+            </IntroNav>
           </Intro>
-          <br />
-          <Intro to={"/vocabbook"}>
-            【Battle】 invite your friends to review words with you. Have fun!
+          <Intro>
+            【Review】save word cards and review!&nbsp;&nbsp;
+            <IntroNav to={"/vocabbook"}>
+              &nbsp;&nbsp;
+              <NextImg src={next} alt={next} />
+            </IntroNav>
           </Intro>
-          <br />
-          <Intro to={"/profile"}>
-            【Achieve】 review everyday and enrich your Vocab Garden!
+          <Intro>
+            【Battle】invite your friends to review words with you. Have
+            fun!&nbsp;&nbsp;
+            <IntroNav to={"/vocabbook"}>
+              &nbsp;&nbsp;
+              <NextImg src={next} alt={next} />
+            </IntroNav>
+          </Intro>
+          <Intro>
+            【Achieve】review everyday and enrich your Vocab Garden!&nbsp;&nbsp;
+            <IntroNav to={"/profile"}>
+              &nbsp;&nbsp;
+              <NextImg src={next} alt={next} />
+            </IntroNav>
           </Intro>
         </IntroWrapper>
       </BannerWrapper>
