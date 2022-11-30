@@ -55,8 +55,12 @@ const Content = styled.div`
   font-size: 16px;
   overflow-y: scroll;
   scrollbar-width: none;
+  background-color: rgba(255, 255, 255, 0.7);
   ::-webkit-scrollbar {
     display: none; /* for Chrome, Safari, and Opera */
+  }
+  img {
+    max-width: 100%;
   }
 `;
 
@@ -104,7 +108,7 @@ export default function Article() {
   const renderReadMode = () => (
     <>
       <Btns>
-        <Hint>
+        <Hint right={-100}>
           Try to select any words in the article! <br />
           <br /> (Desktop =&gt; double click) <br /> (Mobile =&gt; long press)
         </Hint>
