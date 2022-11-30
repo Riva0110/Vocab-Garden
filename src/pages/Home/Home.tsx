@@ -71,10 +71,18 @@ const QuickStart = styled.span`
 `;
 
 const Intro = styled.div`
-  height: 30px;
+  min-height: 30px;
   text-decoration: none;
   text-shadow: white 0.1em 0.1em 0.2em;
   color: #1c1b1b;
+  margin-left: -8px;
+`;
+
+const BeMember = styled.div`
+  height: 30px;
+  text-decoration: none;
+  text-shadow: #1c1b1b 0.1em 0.1em 0.2em;
+  color: white;
   margin-left: -8px;
 `;
 
@@ -84,17 +92,11 @@ const MainFeature = styled.span`
 
 const IntroNav = styled(Link)`
   height: 30px;
+  line-height: 30px;
   text-decoration: none;
   text-shadow: white 0.1em 0.1em 0.2em;
   color: #1c1b1b;
   margin-left: -8px;
-  /* display: flex;
-  align-items: center;
-  gap: 10px; */
-  /* &:hover {
-    background-color: #ffffff77;
-    transition: 0.6s;
-  } */
 `;
 
 const NextImg = styled.img`
@@ -126,13 +128,9 @@ export default function Home() {
           {/* <QuickStart>Quick Start</QuickStart> */}
           <Intro>【Search】double click or select any words!</Intro>
           <br />
-          <Intro>
+          <BeMember>
             &nbsp;&nbsp;Be a member and enjoy more!&nbsp;&nbsp;
-            <IntroNav to={"/profile"}>
-              &nbsp;&nbsp;
-              <NextImg src={next} alt={next} />
-            </IntroNav>
-          </Intro>
+          </BeMember>
           <Intro>
             【Read】look up unfamiliar words while reading! &nbsp;&nbsp;
             <IntroNav to={"/articles"}>
