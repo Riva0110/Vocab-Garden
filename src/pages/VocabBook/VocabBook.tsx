@@ -533,7 +533,7 @@ export default function VocabBook() {
               }
             >
               {viewingBook !== "wrong words" && (
-                <Button btnType={"primary"}>Review</Button>
+                <Button btnType={"primary"}>Quiz</Button>
               )}
             </div>
           </Nav>
