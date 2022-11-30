@@ -253,13 +253,14 @@ function App() {
   const [showNav, setShowNav] = useState<boolean>(false);
   const pathName = window.location.pathname;
   const notificationRef = useRef(null);
-  useOnClickOutside(notificationRef, () => setShowInvitation(false));
+  useOnClickOutside(notificationRef, async () => setShowInvitation(false));
 
   useEffect(() => {
     let unsub;
     if (isLogin) {
       unsub = onSnapshot(doc(db, "users", userId), (doc) => {
         setBattleInvitation(doc.data()?.battleInvitation);
+        if (doc.data()?.battleInvitation.length > 0) setShowInvitation(true);
       });
     } else {
       setBattleInvitation([]);
