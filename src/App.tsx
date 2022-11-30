@@ -203,9 +203,16 @@ const Notification = styled.div`
   padding: 20px;
   gap: 20px;
   box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+  overflow-y: scroll;
+  max-height: 270px;
   @media screen and (max-width: 601px) {
     right: 50px;
   }
+`;
+
+const Clear = styled.div`
+  border: 1px solid lightgray;
+  font-size: 12px;
 `;
 
 const Invitation = styled.div``;
@@ -218,6 +225,7 @@ const InvitationA = styled(Link)`
 
 const Time = styled.div`
   font-size: 12px;
+  color: lightgray;
 `;
 
 interface Props {
@@ -449,26 +457,38 @@ function App() {
       <Main>
         <Notification showInvitation={showInvitation} ref={notificationRef}>
           {battleInvitation?.length !== 0 ? (
-            battleInvitation?.map(
-              ({ ownerName, pin, time }: BattleInvitation) => {
-                const newTime = new Date(time.seconds * 1000);
-                return (
-                  <Invitation key={pin}>
-                    <InvitationA
-                      style={{ marginLeft: 0 }}
-                      to={`/vocabbook/review/${pin}`}
-                      onClick={() => {
-                        setShowInvitation(false);
-                        handleClearInvitation({ ownerName, pin, time });
-                      }}
-                    >
-                      {ownerName} invites you to battle! ▶
-                    </InvitationA>
-                    <Time>{newTime.toLocaleString()}</Time>
-                  </Invitation>
-                );
-              }
-            )
+            <>
+              <Clear
+                onClick={async () => {
+                  const userRef = doc(db, "users", userId);
+                  await updateDoc(userRef, {
+                    battleInvitation: [],
+                  });
+                }}
+              >
+                clear all
+              </Clear>
+              {battleInvitation
+                ?.reverse()
+                .map(({ ownerName, pin, time }: BattleInvitation) => {
+                  const newTime = new Date(time.seconds * 1000);
+                  return (
+                    <Invitation key={pin}>
+                      <InvitationA
+                        style={{ marginLeft: 0 }}
+                        to={`/vocabbook/review/${pin}`}
+                        onClick={() => {
+                          setShowInvitation(false);
+                          handleClearInvitation({ ownerName, pin, time });
+                        }}
+                      >
+                        {ownerName} invites you to battle! ▶
+                      </InvitationA>
+                      <Time>{newTime.toLocaleString()}</Time>
+                    </Invitation>
+                  );
+                })}
+            </>
           ) : (
             <div>There's no invitation.</div>
           )}
