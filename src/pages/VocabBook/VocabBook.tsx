@@ -562,13 +562,18 @@ export default function VocabBook() {
         </BookInfoWrapper>
         <CardWrapper>
           {viewingBook === "wrong words" ? (
-            topWrongWords && (
+            topWrongWords?.length ? (
               <ReactWordcloud
                 words={topWrongWords}
                 callbacks={callbacks}
                 options={options}
                 size={size}
               />
+            ) : (
+              <NoCards>
+                There's no words you have taken quiz for more than 5 times,
+                <br /> and correct rate is under 50%.
+              </NoCards>
             )
           ) : (
             <>
