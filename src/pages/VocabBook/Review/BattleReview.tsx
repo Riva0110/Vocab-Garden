@@ -321,6 +321,7 @@ interface RoomInfo {
   competitorName: string;
   status: string;
   questions: Questions[];
+  invitingList: string[];
 }
 
 type AddFunction = (msg: string) => void;
@@ -364,6 +365,7 @@ function BattleReview({ pin }: { pin: string }) {
   const [countDown, setCountDown] = useState<number>(5);
   const [showBtn, setShowBtn] = useState<boolean>(false);
   const [friendList, setFriendList] = useState<string[]>();
+  const [invitingList, setInvitingList] = useState<string[]>();
   const [hasInvited, setHasInvited] = useState<boolean[]>([]);
   const [friendState, setFriendState] = useState<string[]>(["offline"]);
   const ref = useRef<null | AddFunction>(null);
@@ -479,6 +481,7 @@ function BattleReview({ pin }: { pin: string }) {
     if (pin) {
       unsub = onSnapshot(doc(db, "battleRooms", pin), (doc) => {
         const data = doc.data() as RoomInfo;
+        setInvitingList(data.invitingList);
         const ownerAnswerCount =
           data?.answerCount.owner.correct + data?.answerCount.owner.wrong;
         const competitorAnswerCount =
@@ -656,6 +659,10 @@ function BattleReview({ pin }: { pin: string }) {
     index: number
   ) => {
     if (hasInvited[index]) return;
+
+    const battleRoomRef = doc(db, "battleRooms", pin);
+    const battleRoomInfo = await getDoc(battleRoomRef);
+
     const friendRef = collection(db, "users");
     const q = query(friendRef, where("email", "==", friendEmail));
     const querySnapshot = await getDocs(q);
@@ -669,8 +676,13 @@ function BattleReview({ pin }: { pin: string }) {
             time: new Date(),
           }),
         });
+        await updateDoc(battleRoomRef, {
+          invitingList: arrayUnion(friendEmail),
+        });
       };
-      updateFriendStatus();
+      if (!battleRoomInfo.data()?.invitingList.includes(friendEmail)) {
+        updateFriendStatus();
+      }
     });
   };
 
@@ -690,27 +702,33 @@ function BattleReview({ pin }: { pin: string }) {
                   Waiting for the competitor joining the battle
                 </WaitingMessage>
                 <Title>Friend List</Title>
-                {friendList?.map((friendEmail, index) => (
-                  <InviteWrapper key={friendEmail}>
-                    <Email>{friendEmail}</Email>
-                    <FriendStateWrapper stateColor={friendState[index]}>
-                      {friendState[index]}
-                      <FriendState stateColor={friendState[index]} />
-                      <div
-                        onClick={() => {
-                          const newHasInvited = [...hasInvited];
-                          newHasInvited[index] = true;
-                          setHasInvited(newHasInvited);
-                          handleInviteFriendBattle(friendEmail, index);
-                        }}
-                      >
-                        <Button btnType="secondary">
-                          {!hasInvited[index] ? "Invite" : "Inviting"}
-                        </Button>
-                      </div>
-                    </FriendStateWrapper>
-                  </InviteWrapper>
-                ))}
+                {friendList?.map((friendEmail, index) => {
+                  return (
+                    <InviteWrapper key={friendEmail}>
+                      <Email>{friendEmail}</Email>
+                      <FriendStateWrapper stateColor={friendState[index]}>
+                        {friendState[index]}
+                        <FriendState stateColor={friendState[index]} />
+
+                        <div
+                          onClick={() => {
+                            handleInviteFriendBattle(friendEmail, index);
+                            const newHasInvited = [...hasInvited];
+                            newHasInvited[index] = true;
+                            setHasInvited(newHasInvited);
+                          }}
+                        >
+                          <Button btnType="secondary">
+                            {hasInvited[index] ||
+                            invitingList?.includes(friendEmail)
+                              ? "Inviting"
+                              : "Invite"}
+                          </Button>
+                        </div>
+                      </FriendStateWrapper>
+                    </InviteWrapper>
+                  );
+                })}
               </>
             )
           ) : isCompetitorIn ? (

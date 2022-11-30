@@ -91,7 +91,7 @@ export default function ReviewLayout() {
   const navigate = useNavigate();
   const { userId } = useContext(authContext);
   const [isBattle, setIsBattle] = useState<boolean>(false);
-  const [roomId, setRoomId] = useState<number>();
+  const roomId = Math.floor(Math.random() * 10000);
   const { viewingBook } = useViewingBook();
   const { vocabBooks } = useContext(vocabBookContext);
   const [name, setName] = useState<string>();
@@ -102,11 +102,6 @@ export default function ReviewLayout() {
     .map((question) => ({
       ...question,
     }));
-
-  useEffect(() => {
-    const randomRoomId = Math.floor(Math.random() * 10000);
-    setRoomId(randomRoomId);
-  }, [viewingBook]);
 
   useEffect(() => {
     const getUserInfo = async () => {
@@ -130,6 +125,7 @@ export default function ReviewLayout() {
         owner: { correct: 0, wrong: 0 },
         competitor: { correct: 0, wrong: 0 },
       },
+      invitingList: [],
     });
   };
 
