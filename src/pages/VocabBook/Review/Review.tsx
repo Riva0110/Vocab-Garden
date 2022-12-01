@@ -17,6 +17,8 @@ import {
 import { db } from "../../../firebase/firebase";
 import plant from "./reviewPlant.webp";
 import Button from "../../../components/Button/Button";
+import correct from "./correct.png";
+import wrong from "./wrong.png";
 
 interface Props {
   correct?: boolean;
@@ -59,6 +61,17 @@ const Header = styled.div`
   text-align: center;
   position: relative;
   z-index: 1;
+`;
+
+const ScoreCount = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const AnsImg = styled.img`
+  width: 20px;
+  height: 20px;
 `;
 
 const Div = styled.div`
@@ -647,12 +660,17 @@ export default function Review() {
   return (
     <Wrapper>
       <Img src={plant} alt="plant" />
-      <RoundCount>Round: {gameOver ? questionsNumber : round + 1}</RoundCount>
+      <RoundCount>
+        Round: {gameOver ? questionsNumber : round + 1} / {questionsNumber}
+      </RoundCount>
       <Header>
-        <div>
-          O: {answerCount.correct} X: {answerCount.wrong} / Total:{" "}
-          {questionsNumber}
-        </div>
+        <ScoreCount>
+          <AnsImg src={correct} alt="correct" />
+          &nbsp;&nbsp;{answerCount.correct}&nbsp;&nbsp;
+          <AnsImg src={wrong} alt="wrong" />
+          &nbsp;&nbsp;
+          {answerCount.wrong}
+        </ScoreCount>
         <Div>
           <ScoreBarDiv>
             <ScoreBar insideColor={true} score={answerCount.correct}>

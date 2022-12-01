@@ -22,6 +22,8 @@ import { useParams } from "react-router-dom";
 import plant from "./battlePlant.webp";
 import Button from "../../../components/Button/Button";
 import Alert from "../../../components/Alert/Alert";
+import correct from "./correct.png";
+import wrong from "./wrong.png";
 
 interface Props {
   correct?: boolean;
@@ -62,6 +64,17 @@ const Img = styled.img`
 const Header = styled.div`
   display: flex;
   justify-content: space-between;
+`;
+
+const ScoreCount = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const AnsImg = styled.img`
+  width: 20px;
+  height: 20px;
 `;
 
 const RoundCount = styled.div`
@@ -927,17 +940,21 @@ function BattleReview({ pin }: { pin: string }) {
         }}
       />
       <Wrapper>
-        <RoundCount>Round: {round + 1}</RoundCount>
+        <RoundCount>
+          Round: {round + 1} / {questionsNumber}
+        </RoundCount>
         <Header>
           <OwnerCount>
             <div>
-              <p>
-                Owner:
-                {window.innerWidth < 601 && <br />} {ownerName}
-              </p>
-              O: {answerCount.owner.correct} X: {answerCount.owner.wrong} /
-              Total: {questionsNumber}
+              Owner:
+              {window.innerWidth < 601 && <br />} {ownerName}
             </div>
+            <ScoreCount>
+              <AnsImg src={correct} alt="correct" />
+              &nbsp;&nbsp;{answerCount.owner.correct}&nbsp;&nbsp;
+              <AnsImg src={wrong} alt="wrong" />
+              &nbsp;&nbsp;{answerCount.owner.wrong}
+            </ScoreCount>
             <Div>
               <ScoreBar insideColor={true} score={answerCount.owner.correct}>
                 <ScoreBar>
@@ -952,14 +969,17 @@ function BattleReview({ pin }: { pin: string }) {
           {isWaiting ? <></> : <p>{countDown} seconds left</p>}
           <CompetitorCount>
             <div>
-              <p>
-                Competitor:
-                {window.innerWidth < 601 && <br />}{" "}
-                {competitorName || (window.innerWidth < 601 && <br />)}
-              </p>
-              O: {answerCount.competitor.correct} X:{" "}
-              {answerCount.competitor.wrong} / Total: {questionsNumber}
+              Competitor:
+              {window.innerWidth < 601 && <br />}{" "}
+              {competitorName || (window.innerWidth < 601 && <br />)}
             </div>
+            <ScoreCount>
+              <AnsImg src={correct} alt="correct" />
+              &nbsp;&nbsp;
+              {answerCount.competitor.correct}&nbsp;&nbsp;
+              <AnsImg src={wrong} alt="wrong" />
+              &nbsp;&nbsp;{answerCount.competitor.wrong}
+            </ScoreCount>
             <Div>
               <ScoreBar
                 insideColor={true}
