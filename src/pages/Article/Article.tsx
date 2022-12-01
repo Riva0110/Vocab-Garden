@@ -108,7 +108,7 @@ export default function Article() {
   const renderReadMode = () => (
     <>
       <Btns>
-        <Hint right={-100}>
+        <Hint>
           Try to select any words in the article! <br />
           <br /> (Desktop =&gt; double click) <br /> (Mobile =&gt; long press)
         </Hint>

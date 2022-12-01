@@ -200,7 +200,7 @@ const FewPlants = styled.div`
 `;
 
 const HintImg = styled.img`
-  width: 100%;
+  width: 300px;
 `;
 
 const GameRule = styled.div`
@@ -403,11 +403,15 @@ export default function Profile() {
           <ProfileTitle>
             <p>{name}’s Vocab Garden</p>
             <Hint>
-              Start a challenge, and enrich your Vocab Garden!
+              Start a challenge,
+              <br />
+              and enrich your Vocab Garden!
               <br />
               <br />
               <GameRule>
-                When you are in a challenge, you can get 1 point by two ways:
+                When you are in a challenge,
+                <br />
+                you can get 1 point by two ways:
                 <br />
                 <br />
                 1. [Review - Single Mode] <br />
@@ -425,10 +429,13 @@ export default function Profile() {
                 <br />
                 Reminder:
                 <br />
-                1. You need to review at least once a day, otherwise you would
-                lose 1 point per day.
+                1. You need to review at least once a day,
                 <br />
-                2. If the score was deducted to 0, the plant would die.
+                &nbsp;&nbsp;&nbsp;otherwise you would lose 1 point per day.
+                <br />
+                2. If the score was deducted to 0,
+                <br />
+                &nbsp;&nbsp;&nbsp;the plant would die.
                 <br />
                 <HintImg src={dyingPlants} alt="growingPlants" />
               </GameRule>

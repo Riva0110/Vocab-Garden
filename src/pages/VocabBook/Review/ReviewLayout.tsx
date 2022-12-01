@@ -161,7 +161,8 @@ export default function ReviewLayout() {
         <HintWrapper>
           <Hint>
             <GameRule>
-              If you are in a challenge, you can get 1 point by two ways:
+              If you are in a challenge,
+              <br /> you can get 1 point by two ways:
               <br />
               <br />
               1. [Single Mode] <br />
@@ -177,10 +178,13 @@ export default function ReviewLayout() {
               <br />
               Reminder:
               <br />
-              1. You need to review at least once a day, otherwise you would
-              lose 1 point per day.
+              1. You need to review at least once a day,
               <br />
-              2. If the score was deducted to 0, the plant would die.
+              &nbsp;&nbsp;&nbsp;otherwise you would lose 1 point per day.
+              <br />
+              2. If the score was deducted to 0,
+              <br />
+              &nbsp;&nbsp;&nbsp;the plant would die.
               <br />
             </GameRule>
             <br />

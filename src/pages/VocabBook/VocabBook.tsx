@@ -511,8 +511,8 @@ export default function VocabBook() {
                 <>
                   <p>
                     【Wrong words】
-                    <br /> you have reviewed more than 5 times and correct rate
-                    is under 50%.
+                    <br /> you have reviewed more than 5 times
+                    <br /> and correct rate is under 50%.
                   </p>
                   <br />
                   <p>Click any words to review the definition!</p>
@@ -520,7 +520,8 @@ export default function VocabBook() {
               ) : (
                 <>
                   <p>
-                    Click a card or select any words in the cards' definition!
+                    Click a card or select any words
+                    <br /> in the cards' definition!
                   </p>
                   <br /> <p>(Desktop =&gt; double click)</p>
                   <p>(Mobile =&gt; lond press)</p>
