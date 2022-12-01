@@ -53,6 +53,7 @@ const Img = styled.img`
 const RoundCount = styled.div`
   margin-top: 20px;
   text-align: center;
+  margin-bottom: 10px;
 `;
 
 const Header = styled.div`

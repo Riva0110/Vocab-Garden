@@ -80,10 +80,21 @@ const AnsImg = styled.img`
 const RoundCount = styled.div`
   margin-top: 20px;
   text-align: center;
+  margin-bottom: 10px;
 `;
 
 const OwnerCount = styled.div`
   text-align: center;
+`;
+
+const CountDown = styled.div`
+  background-color: #f4e073;
+  text-align: center;
+  width: 50px;
+  height: 30px;
+  line-height: 30px;
+  padding: 0 5px;
+  border-radius: 10px;
 `;
 
 const CompetitorCount = styled.div`
@@ -233,6 +244,9 @@ const OutcomeWrapper = styled.div`
   margin: 20px auto;
   @media screen and (min-width: 1441px) {
     width: 50vw;
+  }
+  @media screen and (max-width: 601px) {
+    width: 90vw;
   }
 `;
 
@@ -966,7 +980,7 @@ function BattleReview({ pin }: { pin: string }) {
               </ScoreBar>
             </Div>
           </OwnerCount>
-          {isWaiting ? <></> : <p>{countDown} seconds left</p>}
+          {isWaiting ? <></> : <CountDown>{countDown} s</CountDown>}
           <CompetitorCount>
             <div>
               Competitor:
