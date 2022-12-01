@@ -1,6 +1,6 @@
 import { useState } from "react";
 import styled from "styled-components";
-import { useFloating, offset, flip, shift } from "@floating-ui/react-dom";
+import { useFloating, flip, shift } from "@floating-ui/react-dom";
 
 const Wrapper = styled.div``;
 
@@ -19,9 +19,6 @@ const QuestionMark = styled.div`
 `;
 
 const Message = styled.div`
-  /* position: absolute;
-  top: 18px;
-  right: 5px; */
   color: #607973;
   min-width: 300px;
   z-index: 9999;
@@ -32,36 +29,14 @@ const Message = styled.div`
   box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
   white-space: pre-line;
   font-size: 14px;
-  /* @media screen and (max-width: 601px) {
-    position: fixed;
-  } */
 `;
 
-interface Props {
-  isShown: boolean;
-  // top: number;
-  // right: number;
-}
-
-function Hint({
-  children,
-}: // top = 200,
-// right = 5,
-{
-  children: React.ReactNode;
-  // top?: number;
-  // right?: number;
-}) {
+function Hint({ children }: { children: React.ReactNode }) {
   const [isShown, setIsShown] = useState(false);
   const { x, y, reference, floating, strategy } = useFloating({
     middleware: [flip(), shift({ padding: 5 })],
   });
   console.log("hint", x, y);
-  // {
-  // placement: "right",
-  // strategy: "fixed",
-  // middleware: [offset(-2), flip(), shift({ padding: 5 })],
-  // }
   return (
     <Wrapper
       onMouseOver={() => setIsShown(true)}
@@ -70,8 +45,6 @@ function Hint({
       <QuestionMark ref={reference}>?</QuestionMark>
       {isShown && (
         <Message
-          // top={top}
-          // right={right}
           ref={floating}
           style={{
             position: strategy,
