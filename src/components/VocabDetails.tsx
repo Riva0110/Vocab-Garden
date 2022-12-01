@@ -146,13 +146,14 @@ const Buttons = styled.div`
 
 const AddBookWrapper = styled.div`
   display: flex;
+  align-items: center;
 `;
 
 const Input = styled.input`
   outline: none;
   border: 1px solid lightgray;
   height: 25px;
-  padding-left: 10px;
+  padding-left: 15px;
 `;
 
 const AddButton = styled.div`
@@ -461,13 +462,17 @@ export default function VocabDetails() {
                 <AddBookWrapper>
                   <Input
                     ref={inputRef}
-                    onChange={(e) => setNewBook(e.target.value)}
+                    onChange={(e) => {
+                      setNewBook(e.target.value);
+                    }}
                     placeholder="Add a VocabBook"
                   />
                   <AddButton
                     onClick={async () => {
-                      await handleAddBook();
-                      if (newBook) setSelectedvocabBook(newBook);
+                      if (newBook && newBook?.trim() !== "") {
+                        await handleAddBook();
+                        setSelectedvocabBook(newBook);
+                      }
                       if (inputRef.current) inputRef.current.value = "";
                     }}
                   >
@@ -492,7 +497,7 @@ export default function VocabDetails() {
                   </div>
                 </Buttons>
               </SavePopup>
-              <Hint top={280}>
+              <Hint>
                 Select any words to search word's definition! <br />
                 <br /> (Desktop =&gt; double click) <br /> (Mobile =&gt; long
                 press)
