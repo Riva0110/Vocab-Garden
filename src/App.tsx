@@ -483,7 +483,7 @@ function App() {
                           handleClearInvitation({ ownerName, pin, time });
                         }}
                       >
-                        {ownerName} invites you to battle! ▶
+                        {ownerName} invites you to battle! &gt;&gt;&gt;
                       </InvitationA>
                       <Time>{newTime.toLocaleString()}</Time>
                     </Invitation>
