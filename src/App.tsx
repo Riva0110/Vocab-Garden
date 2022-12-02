@@ -228,6 +228,15 @@ const Time = styled.div`
   color: lightgray;
 `;
 
+const ProfileMenu = styled.div`
+  width: 80px;
+  height: 80px;
+  background-color: black;
+  position: fixed;
+  right: 20px;
+  top: 40px;
+`;
+
 interface Props {
   showInvitation?: boolean;
   length?: number;
@@ -258,6 +267,7 @@ function App() {
     false,
     false,
   ]);
+  const [isProfileHovered, setIsProfileHovered] = useState<boolean>(false);
   const [showNav, setShowNav] = useState<boolean>(false);
   const pathName = window.location.pathname;
   const notificationRef = useRef(null);
@@ -396,8 +406,14 @@ function App() {
           <NavLink
             to={"/profile"}
             style={({ isActive }) => renderNavLink(isActive, 3)}
-            onMouseEnter={() => setIsHover([false, false, false, true])}
-            onMouseLeave={() => setIsHover([false, false, false, false])}
+            onMouseEnter={() => {
+              setIsHover([false, false, false, true]);
+              setIsProfileHovered(true);
+            }}
+            onMouseLeave={() => {
+              setIsHover([false, false, false, false]);
+              setIsProfileHovered(false);
+            }}
           >
             Profile
           </NavLink>
@@ -446,6 +462,7 @@ function App() {
             <Menu src={menu} alt="menu" onClick={() => setShowNav(true)} />
           </InputWrapper>
           <DesktopNav>{renderNav()}</DesktopNav>
+          {isProfileHovered && <ProfileMenu></ProfileMenu>}
         </HeaderNav>
       </Header>
       {window.innerWidth < 601 && (
