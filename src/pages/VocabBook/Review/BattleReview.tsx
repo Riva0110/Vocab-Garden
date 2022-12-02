@@ -16,6 +16,7 @@ import {
   arrayUnion,
   DocumentSnapshot,
   DocumentData,
+  increment,
 } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
 import { useParams } from "react-router-dom";
@@ -406,22 +407,14 @@ function BattleReview({ pin }: { pin: string }) {
   const [friendState, setFriendState] = useState<string[]>(["offline"]);
   const ref = useRef<null | AddFunction>(null);
 
-  const handleSyncScore = useCallback(
-    async (
-      answerCountAfterClick: AnswerCount,
-      who: string,
-      check: string,
-      score: number
-    ) => {
-      if (pin) {
-        const roomRef = doc(db, "battleRooms", pin);
-        await updateDoc(roomRef, {
-          answerCount: answerCountAfterClick,
-        });
-      }
-    },
-    [pin]
-  );
+  const handleSyncScore = async (answerCountAfterClick: AnswerCount) => {
+    if (!pin) return;
+    const roomRef = doc(db, "battleRooms", pin);
+
+    updateDoc(roomRef, {
+      answerCount: answerCountAfterClick,
+    });
+  };
 
   useEffect(() => {
     async function getRoomInfo() {
@@ -542,6 +535,7 @@ function BattleReview({ pin }: { pin: string }) {
         if (data.competitorName !== "") setCompetitorName(data.competitorName);
         if (isWaiting && data?.status === "playing") setIsWaiting(false);
         if (data.answerCount) {
+          console.log("sub", data.answerCount);
           setAnswerCount(data.answerCount);
         }
         if (
@@ -578,15 +572,9 @@ function BattleReview({ pin }: { pin: string }) {
     const roomRef = doc(db, "battleRooms", pin);
 
     const who = isOwner ? "owner" : "competitor";
-    const newAnswerCount = {
-      ...answerCount,
-      [who]: {
-        ...answerCount[who],
-        wrong: answerCount[who].wrong + 1,
-      },
-    };
+
     updateDoc(roomRef, {
-      answerCount: newAnswerCount,
+      ["answerCount." + who + ".wrong"]: increment(1),
     });
 
     setIsAnswered(true);
@@ -600,7 +588,7 @@ function BattleReview({ pin }: { pin: string }) {
         };
       });
     });
-  }, [answerCount, countDown, isAnswered, isOwner, pin, round]);
+  }, [countDown, isAnswered, isOwner, pin, round]);
 
   useEffect(() => {
     if (countDown !== 0 || gameOver || isWaiting) return;
@@ -735,6 +723,22 @@ function BattleReview({ pin }: { pin: string }) {
     });
   };
 
+  const handleCorrectAnswer = () => {
+    const roomRef = doc(db, "battleRooms", pin);
+    const who = isOwner ? "owner" : "competitor";
+    updateDoc(roomRef, {
+      ["answerCount." + who + ".correct"]: increment(1),
+    });
+  };
+
+  const handleWrongAnswer = () => {
+    const roomRef = doc(db, "battleRooms", pin);
+    const who = isOwner ? "owner" : "competitor";
+    updateDoc(roomRef, {
+      ["answerCount." + who + ".wrong"]: increment(1),
+    });
+  };
+
   function renderWaiting() {
     return (
       <Main>
@@ -837,35 +841,22 @@ function BattleReview({ pin }: { pin: string }) {
                   );
                   setShowAnswerArr(answerStatus);
 
-                  if (outcomeVocabList) {
-                    const answerCountAfterClick = {
-                      owner: { ...answerCount.owner },
-                      competitor: { ...answerCount.competitor },
-                    };
-
-                    const vocabListAfterClick = [...outcomeVocabList];
-
-                    if (clickedVocab === correctVocab?.vocab) {
-                      if (isOwner) {
-                        answerCountAfterClick.owner.correct += 1;
-                      } else {
-                        answerCountAfterClick.competitor.correct += 1;
-                      }
-
-                      vocabListAfterClick[round].isCorrect = true;
-                    } else {
-                      if (isOwner) {
-                        answerCountAfterClick.owner.wrong += 1;
-                      } else {
-                        answerCountAfterClick.competitor.wrong += 1;
-                      }
-
-                      vocabListAfterClick[round].isCorrect = false;
-                    }
-
-                    handleSyncScore(answerCountAfterClick, "who", "check", 1);
-                    setOutcomeVocabList(vocabListAfterClick);
+                  if (clickedVocab === correctVocab?.vocab) {
+                    handleCorrectAnswer();
+                  } else {
+                    handleWrongAnswer();
                   }
+
+                  setOutcomeVocabList((outcomeVocabList) => {
+                    return outcomeVocabList.map((question, index) => {
+                      if (index === round)
+                        return {
+                          ...question,
+                          isCorrect: clickedVocab === correctVocab?.vocab,
+                        };
+                      return question;
+                    });
+                  });
                 }
               }}
             >
