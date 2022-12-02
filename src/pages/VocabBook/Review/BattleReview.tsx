@@ -377,7 +377,7 @@ function BattleReview({ pin }: { pin: string }) {
 
   const [reviewingQuestionsArr, setReviewingQuestionsArr] =
     useState<Questions[]>();
-  const [outcomeVocabList, setOutcomeVocabList] = useState<Questions[]>();
+  const [outcomeVocabList, setOutcomeVocabList] = useState<Questions[]>([]);
 
   const correctVocab = reviewingQuestionsArr?.[round];
   const [currentOptions, setCurrentOptions] = useState<[string, string][]>([]);
@@ -407,7 +407,12 @@ function BattleReview({ pin }: { pin: string }) {
   const ref = useRef<null | AddFunction>(null);
 
   const handleSyncScore = useCallback(
-    async (answerCountAfterClick: AnswerCount) => {
+    async (
+      answerCountAfterClick: AnswerCount,
+      who: string,
+      check: string,
+      score: number
+    ) => {
       if (pin) {
         const roomRef = doc(db, "battleRooms", pin);
         await updateDoc(roomRef, {
@@ -536,7 +541,9 @@ function BattleReview({ pin }: { pin: string }) {
         if (data.ownerId !== userId) setIsOwner(false);
         if (data.competitorName !== "") setCompetitorName(data.competitorName);
         if (isWaiting && data?.status === "playing") setIsWaiting(false);
-        if (data.answerCount) setAnswerCount(data.answerCount);
+        if (data.answerCount) {
+          setAnswerCount(data.answerCount);
+        }
         if (
           ownerAnswerCount === competitorAnswerCount &&
           ownerAnswerCount !== 0 &&
@@ -565,38 +572,40 @@ function BattleReview({ pin }: { pin: string }) {
   }, [countDown, isWaiting]);
 
   useEffect(() => {
-    if (countDown === 0 && !isAnswered && outcomeVocabList) {
-      const answerCountAfterClick = {
-        owner: { ...answerCount.owner },
-        competitor: { ...answerCount.competitor },
-      };
+    if (countDown !== 0) return;
+    if (isAnswered) return;
 
-      const vocabListAfterTimeout = [...outcomeVocabList];
+    const roomRef = doc(db, "battleRooms", pin);
 
-      if (answerCount.owner.correct + answerCount.owner.wrong < round + 1)
-        answerCountAfterClick.owner.wrong += 1;
-      vocabListAfterTimeout[round].isCorrect = false;
-      if (
-        answerCount.competitor.correct + answerCount.competitor.wrong <
-        round + 1
-      )
-        answerCountAfterClick.competitor.wrong += 1;
-      vocabListAfterTimeout[round].isCorrect = false;
+    const who = isOwner ? "owner" : "competitor";
+    const newAnswerCount = {
+      ...answerCount,
+      [who]: {
+        ...answerCount[who],
+        wrong: answerCount[who].wrong + 1,
+      },
+    };
+    updateDoc(roomRef, {
+      answerCount: newAnswerCount,
+    });
 
-      handleSyncScore(answerCountAfterClick);
-      setOutcomeVocabList(vocabListAfterTimeout);
-    }
+    setIsAnswered(true);
 
-    if (countDown === 0 && round + 1 < questionsNumber) {
-      setTimeout(() => {
-        setRound(round + 1);
-        setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
-        setCountDown(5);
-        setIsAnswered(false);
-      }, 500);
-    }
+    setOutcomeVocabList((prev) => {
+      return prev.map((question, index) => {
+        if (index !== round) return question;
+        return {
+          ...question,
+          isCorrect: false,
+        };
+      });
+    });
+  }, [answerCount, countDown, isAnswered, isOwner, pin, round]);
 
-    if (!gameOver && countDown === 0 && round + 1 === questionsNumber) {
+  useEffect(() => {
+    if (countDown !== 0 || gameOver || isWaiting) return;
+    const isFinalRound = round + 1 === questionsNumber;
+    if (isFinalRound) {
       setGameOver(true);
       setIsAnswered(true);
       setShowBtn(true);
@@ -617,7 +626,6 @@ function BattleReview({ pin }: { pin: string }) {
 
         const score = docSnap?.data()?.currentScore;
         const isChallenging = docSnap?.data()?.isChallenging;
-        console.log({ score });
 
         if (isChallenging) {
           if (typeof score === "number" && score < 5) {
@@ -644,20 +652,25 @@ function BattleReview({ pin }: { pin: string }) {
         answerCount.owner.correct < answerCount.competitor.correct
       )
         checkUserScoreStatus();
+    } else {
+      setTimeout(() => {
+        setRound(round + 1);
+        setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
+        setCountDown(5);
+        setIsAnswered(false);
+      }, 500);
     }
   }, [
-    answerCount.competitor,
-    answerCount.owner,
+    answerCount.competitor.correct,
+    answerCount.owner.correct,
     countDown,
     gameOver,
-    handleSyncScore,
-    isAnswered,
     isOwner,
-    outcomeVocabList,
     pin,
     questionsNumber,
     round,
     userId,
+    isWaiting,
   ]);
 
   const handlePlayAudio = (audioLink: string) => {
@@ -833,18 +846,24 @@ function BattleReview({ pin }: { pin: string }) {
                     const vocabListAfterClick = [...outcomeVocabList];
 
                     if (clickedVocab === correctVocab?.vocab) {
-                      if (isOwner) answerCountAfterClick.owner.correct += 1;
-                      else answerCountAfterClick.competitor.correct += 1;
+                      if (isOwner) {
+                        answerCountAfterClick.owner.correct += 1;
+                      } else {
+                        answerCountAfterClick.competitor.correct += 1;
+                      }
 
                       vocabListAfterClick[round].isCorrect = true;
                     } else {
-                      if (isOwner) answerCountAfterClick.owner.wrong += 1;
-                      else answerCountAfterClick.competitor.wrong += 1;
+                      if (isOwner) {
+                        answerCountAfterClick.owner.wrong += 1;
+                      } else {
+                        answerCountAfterClick.competitor.wrong += 1;
+                      }
 
                       vocabListAfterClick[round].isCorrect = false;
                     }
 
-                    handleSyncScore(answerCountAfterClick);
+                    handleSyncScore(answerCountAfterClick, "who", "check", 1);
                     setOutcomeVocabList(vocabListAfterClick);
                   }
                 }
