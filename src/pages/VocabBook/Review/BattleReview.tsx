@@ -969,10 +969,7 @@ function BattleReview({ pin }: { pin: string }) {
         </RoundCount>
         <Header>
           <OwnerCount>
-            <div>
-              Owner:
-              {window.innerWidth < 601 && <br />} {ownerName}
-            </div>
+            <div>{ownerName}</div>
             <ScoreCount>
               <AnsImg src={correct} alt="correct" />
               &nbsp;&nbsp;{answerCount.owner.correct}&nbsp;&nbsp;
@@ -992,11 +989,7 @@ function BattleReview({ pin }: { pin: string }) {
           </OwnerCount>
           {isWaiting ? <></> : <CountDown>{countDown} s</CountDown>}
           <CompetitorCount>
-            <div>
-              Competitor:
-              {window.innerWidth < 601 && <br />}{" "}
-              {competitorName || (window.innerWidth < 601 && <br />)}
-            </div>
+            <div>{competitorName || "Competitor"}</div>
             <ScoreCount>
               <AnsImg src={correct} alt="correct" />
               &nbsp;&nbsp;
