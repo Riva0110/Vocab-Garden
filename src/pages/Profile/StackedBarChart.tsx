@@ -26,7 +26,7 @@ const Chart = styled.div`
   justify-content: space-around;
   align-items: flex-end;
   width: 100%;
-  min-height: 200px;
+  min-height: 250px;
   border-left: 1px solid gray;
   border-bottom: 1px solid gray;
   position: relative;
