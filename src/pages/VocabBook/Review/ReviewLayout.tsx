@@ -145,7 +145,7 @@ export default function ReviewLayout() {
               navigate("/vocabbook/review");
             }}
           >
-            Single Mode
+            Single {window.screen.width > 750 && "Mode"}
           </ModeBtn>
           <ModeBtn
             isBattle={isBattle}
@@ -155,7 +155,7 @@ export default function ReviewLayout() {
               navigate(`/vocabbook/review/${userId + roomId}`);
             }}
           >
-            Battle Mode
+            Battle {window.screen.width > 750 && "Mode"}
           </ModeBtn>
         </ModeBtns>
         <HintWrapper>
