@@ -229,12 +229,23 @@ const Time = styled.div`
 `;
 
 const ProfileMenu = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 80px;
-  height: 80px;
-  background-color: black;
+  padding: 10px;
+  gap: 10px;
+  background-color: white;
   position: fixed;
   right: 20px;
-  top: 40px;
+  top: 45px;
+
+  border: lightgray 1px solid;
+`;
+
+const ProfileLink = styled(Link)`
+  text-decoration: none;
+  color: #4f4f4f;
 `;
 
 interface Props {
@@ -262,6 +273,7 @@ function App() {
     useState<BattleInvitation[]>();
   const [showInvitation, setShowInvitation] = useState<boolean>(false);
   const [isHover, setIsHover] = useState<boolean[]>([
+    false,
     false,
     false,
     false,
@@ -376,8 +388,8 @@ function App() {
           <NavLink
             to={"/articles"}
             style={({ isActive }) => renderNavLink(isActive, 0)}
-            onMouseEnter={() => setIsHover([true, false, false, false])}
-            onMouseLeave={() => setIsHover([false, false, false, false])}
+            onMouseEnter={() => setIsHover([true, false, false, false, false])}
+            onMouseLeave={() => setIsHover([false, false, false, false, false])}
           >
             Article
           </NavLink>
@@ -386,38 +398,64 @@ function App() {
           <NavLink
             to={"/vocabbook"}
             style={({ isActive }) => renderNavLink(isActive, 1)}
-            onMouseEnter={() => setIsHover([false, true, false, false])}
-            onMouseLeave={() => setIsHover([false, false, false, false])}
+            onMouseEnter={() => setIsHover([false, true, false, false, false])}
+            onMouseLeave={() => setIsHover([false, false, false, false, false])}
           >
             VocabBook
-          </NavLink>
-        </NavDiv>
-        <NavDiv length={"Friend".length}>
-          <NavLink
-            to={"/friends"}
-            style={({ isActive }) => renderNavLink(isActive, 2)}
-            onMouseEnter={() => setIsHover([false, false, true, false])}
-            onMouseLeave={() => setIsHover([false, false, false, false])}
-          >
-            Friend
           </NavLink>
         </NavDiv>
         <NavDiv length={"Profile".length}>
           <NavLink
             to={"/profile"}
-            style={({ isActive }) => renderNavLink(isActive, 3)}
+            style={({ isActive }) => renderNavLink(isActive, 2)}
             onMouseEnter={() => {
-              setIsHover([false, false, false, true]);
+              setIsHover([false, false, true, true, false]);
               setIsProfileHovered(true);
             }}
             onMouseLeave={() => {
-              setIsHover([false, false, false, false]);
+              setIsHover([false, false, false, false, false]);
               setIsProfileHovered(false);
             }}
           >
             Profile
           </NavLink>
         </NavDiv>
+        {window.screen.width < 601 && (
+          <NavDiv length={"Profile".length}>
+            <NavLink
+              to={"/profile"}
+              style={({ isActive }) => renderNavLink(isActive, 3)}
+              onMouseEnter={() => {
+                setIsHover([false, false, true, true, false]);
+                setIsProfileHovered(true);
+              }}
+              onMouseLeave={() => {
+                setIsHover([false, false, false, false, false]);
+                setIsProfileHovered(false);
+              }}
+            >
+              &nbsp;&nbsp;&nbsp;&nbsp;Garden
+            </NavLink>
+          </NavDiv>
+        )}
+        {window.screen.width < 601 && (
+          <NavDiv length={"Profile".length}>
+            <NavLink
+              to={"/friends"}
+              style={({ isActive }) => renderNavLink(isActive, 4)}
+              onMouseEnter={() => {
+                setIsHover([false, false, true, false, true]);
+                setIsProfileHovered(true);
+              }}
+              onMouseLeave={() => {
+                setIsHover([false, false, false, false, false]);
+                setIsProfileHovered(false);
+              }}
+            >
+              &nbsp;&nbsp;&nbsp;&nbsp;Friend
+            </NavLink>
+          </NavDiv>
+        )}
       </>
     );
   }
@@ -462,7 +500,19 @@ function App() {
             <Menu src={menu} alt="menu" onClick={() => setShowNav(true)} />
           </InputWrapper>
           <DesktopNav>{renderNav()}</DesktopNav>
-          {isProfileHovered && <ProfileMenu></ProfileMenu>}
+          {isProfileHovered && window.innerWidth > 601 && (
+            <ProfileMenu
+              onMouseEnter={() => {
+                setIsProfileHovered(true);
+              }}
+              onMouseLeave={() => {
+                setIsProfileHovered(false);
+              }}
+            >
+              <ProfileLink to="profile">Garden</ProfileLink>
+              <ProfileLink to="profile/friends">Friend</ProfileLink>
+            </ProfileMenu>
+          )}
         </HeaderNav>
       </Header>
       {window.innerWidth < 601 && (
