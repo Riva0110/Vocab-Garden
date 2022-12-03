@@ -39,7 +39,9 @@ const LabelX = styled.div`
   padding-top: 10px;
 `;
 
-const DateText = styled.div``;
+const DateText = styled.div`
+  width: 32px;
+`;
 
 const Bar = styled.div`
   width: 30px;
