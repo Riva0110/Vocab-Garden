@@ -23,6 +23,7 @@ export function KeywordContextProvider({ children }: ContextProviderProps) {
 
   const setKeyword = (value: Value) => {
     if (!value || value === " ") return;
+    if (typeof value === "string" && value.trim() === "") return;
     if (typeof value === "function") {
       _setKeyword((preKeyword) => value(preKeyword));
     }
