@@ -95,10 +95,12 @@ export default function LoginPage({ name, setName, signup }: Props) {
           <>
             <WelcomeMsg>Log in or sign up to enjoy full functions!</WelcomeMsg>
             <Input
+              key="loginEmail"
               placeholder="email"
               onChange={(e) => setEmail(e.target.value)}
             />
             <Input
+              key="loginPassword"
               type="password"
               placeholder="password"
               onChange={(e) => setPassword(e.target.value)}
@@ -123,14 +125,17 @@ export default function LoginPage({ name, setName, signup }: Props) {
           <>
             <WelcomeMsg>Log in or sign up to enjoy full functions!</WelcomeMsg>
             <Input
+              key="signUpName"
               placeholder="name"
               onChange={(e) => setName(e.target.value)}
             />
             <Input
+              key="signUpEmail"
               placeholder="email"
               onChange={(e) => setEmail(e.target.value)}
             />
             <Input
+              key="signUpPassword"
               type="password"
               placeholder="password"
               onChange={(e) => setPassword(e.target.value)}
