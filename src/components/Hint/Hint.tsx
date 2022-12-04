@@ -36,7 +36,7 @@ function Hint({ children }: { children: React.ReactNode }) {
   const { x, y, reference, floating, strategy } = useFloating({
     middleware: [flip(), shift({ padding: 5 })],
   });
-  console.log("hint", x, y);
+
   return (
     <Wrapper
       onMouseOver={() => setIsShown(true)}
