@@ -114,6 +114,11 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
       await setDoc(doc(db, "plantsList", user.uid), {
         plants: [],
       });
+
+      await setDoc(doc(db, "searchHistory", user.uid), {
+        words: [],
+      });
+
       return user.uid;
     } catch (error) {
       if (error instanceof Error) return error["message"];

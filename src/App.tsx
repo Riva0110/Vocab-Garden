@@ -5,7 +5,13 @@ import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { keywordContext } from "./context/keywordContext";
 import { authContext } from "./context/authContext";
 import logo from "./logoName.png";
-import { arrayRemove, doc, onSnapshot, updateDoc } from "firebase/firestore";
+import {
+  arrayRemove,
+  doc,
+  getDoc,
+  onSnapshot,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "./firebase/firebase";
 import bell from "./notification.png";
 import yellowBell from "./notification-yellow.png";
@@ -78,6 +84,31 @@ const MobileDarkBackground = styled.div`
 const InputWrapper = styled.div`
   display: flex;
   justify-content: center;
+`;
+
+const SearchHistory = styled.div`
+  width: 180px;
+  border: 1px solid lightgray;
+  position: fixed;
+  top: 45px;
+  right: 335px;
+  background-color: white;
+  cursor: pointer;
+  @media screen and (max-width: 635px) {
+    left: 120px;
+  }
+  @media screen and (max-width: 601px) {
+    right: 100px;
+    left: auto;
+  }
+  @media screen and (max-width: 331px) {
+    right: auto;
+    left: 50px;
+  }
+`;
+
+const SearchedWord = styled.div`
+  padding-left: 10px;
 `;
 
 const LogoImg = styled.img`
@@ -281,6 +312,8 @@ function App() {
   ]);
   const [isProfileHovered, setIsProfileHovered] = useState<boolean>(false);
   const [showNav, setShowNav] = useState<boolean>(false);
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [showSearchHistory, setShowSearchHistory] = useState<boolean>(false);
   const pathName = window.location.pathname;
   const notificationRef = useRef(null);
   useOnClickOutside(notificationRef, async () => setShowInvitation(false));
@@ -298,6 +331,15 @@ function App() {
     }
     return unsub;
   }, [isLogin, userId]);
+
+  async function handleFocusInput() {
+    const searchHistoryRef = doc(db, "searchHistory", userId);
+    const docSnap = await getDoc(searchHistoryRef);
+    if (docSnap) {
+      const searchHistoryData = docSnap.data()?.words as string[];
+      setSearchHistory(searchHistoryData);
+    }
+  }
 
   const handleClearInvitation = async ({
     ownerName,
@@ -470,6 +512,23 @@ function App() {
           <BrandName>Vocab Garden</BrandName>
         </HomeLink>
         <HeaderNav>
+          {showSearchHistory && (
+            <SearchHistory>
+              {searchHistory
+                ?.reverse()
+                .slice(0, 10)
+                .map((word: string) => (
+                  <SearchedWord
+                    onClick={() => {
+                      console.log("click word");
+                      setKeyword(word);
+                    }}
+                  >
+                    {word}
+                  </SearchedWord>
+                ))}
+            </SearchHistory>
+          )}
           <InputWrapper>
             <Input
               placeholder="Search a word..."
@@ -477,6 +536,11 @@ function App() {
                 e.target.value = e.target.value.toLowerCase();
                 setInputVocab(e.target.value);
               }}
+              onFocus={async () => {
+                await handleFocusInput();
+                setShowSearchHistory(true);
+              }}
+              onBlur={() => setShowSearchHistory(false)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && inputVocab && inputVocab !== "") {
                   setKeyword(inputVocab);

@@ -19,6 +19,7 @@ import saved from "./saved.png";
 import spinner from "./spinner.gif";
 import Alert from "./Alert/Alert";
 import Button from "./Button/Button";
+import googleTranslate from "./googleTranslate.png";
 import { X } from "react-feather";
 import Hint from "../components/Hint/Hint";
 
@@ -109,6 +110,17 @@ const SaveVocabImg = styled.img`
   width: 20px;
   height: 20px;
   cursor: pointer;
+`;
+
+const GoogleTranslateImg = styled.img`
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+`;
+
+const A = styled.a`
+  display: flex;
+  align-items: center;
 `;
 
 const SavePopup = styled.div`
@@ -366,6 +378,8 @@ export default function VocabDetails() {
         if (response.status === 200) {
           setVocabDetails(data[0]);
           setShowVocabInMobile(true);
+          const searchRef = doc(db, "searchHistory", userId);
+          updateDoc(searchRef, { words: arrayUnion(keyword) });
         } else if (data.title === "No Definitions Found") {
           if (vocabDetails && vocabDetails.word !== undefined)
             setKeyword(vocabDetails.word);
@@ -385,7 +399,7 @@ export default function VocabDetails() {
     if (keyword?.trim()?.toLowerCase() !== vocabDetails?.word) {
       fetchVocabDetails(resourceUrl);
     }
-  }, [keyword, resourceUrl, setKeyword, vocabDetails]);
+  }, [keyword, resourceUrl, setKeyword, userId, vocabDetails]);
 
   useEffect(() => {
     getVocabBooks(userId);
@@ -444,6 +458,15 @@ export default function VocabDetails() {
                   isSaved ? handleDeleteVocabFromBook() : setIsPopuping(true)
                 }
               />
+              <A
+                target="blank"
+                href={`https://translate.google.com.tw/?hl=zh-TW&sl=en&tl=zh-TW&text=${vocabDetails?.word}%0A&op=translate`}
+              >
+                <GoogleTranslateImg
+                  src={googleTranslate}
+                  alt="googleTranslate"
+                />
+              </A>
               <SavePopup isPopuping={isPopuping} ref={popupRef}>
                 <label>Save to Book:</label>
                 <Select
