@@ -407,15 +407,6 @@ function BattleReview({ pin }: { pin: string }) {
   const [friendState, setFriendState] = useState<string[]>(["offline"]);
   const ref = useRef<null | AddFunction>(null);
 
-  const handleSyncScore = async (answerCountAfterClick: AnswerCount) => {
-    if (!pin) return;
-    const roomRef = doc(db, "battleRooms", pin);
-
-    updateDoc(roomRef, {
-      answerCount: answerCountAfterClick,
-    });
-  };
-
   useEffect(() => {
     async function getRoomInfo() {
       if (pin) {
