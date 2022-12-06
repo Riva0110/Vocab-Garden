@@ -133,7 +133,7 @@ export default function Friends() {
   const [myEmail, setMyEmail] = useState<string>();
   const [searchingEmail, setSearchingEmail] = useState<string>("");
   const [friendList, setFriendList] = useState<string[]>();
-  const [friendRequest, setfriendRequest] = useState<string[]>();
+  const [friendRequest, setFriendRequest] = useState<string[]>();
   const [friendState, setFriendState] = useState<string[]>([]);
   const [awaitingFriendReply, setAwaitingFriendReply] = useState<string[]>();
   const emailInput = useRef<HTMLInputElement>(null);
@@ -145,7 +145,7 @@ export default function Friends() {
       unsub = onSnapshot(doc(db, "users", userId), (doc) => {
         setMyEmail(doc.data()?.email);
         setFriendList(doc.data()?.friendList);
-        setfriendRequest(doc.data()?.friendRequest);
+        setFriendRequest(doc.data()?.friendRequest);
         setAwaitingFriendReply(doc.data()?.awaitingFriendReply);
       });
     }
