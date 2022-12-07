@@ -480,7 +480,7 @@ function BattleReview({ pin }: { pin: string }) {
     if (isLogin && friendList?.length) {
       unsub = onSnapshot(
         query(collection(db, "users"), where("email", "in", friendList)),
-        (doc) => {
+        () => {
           let newFriendState: string[] = [];
           friendList?.forEach((friendEmail) => {
             async function checkState() {
@@ -561,9 +561,7 @@ function BattleReview({ pin }: { pin: string }) {
     if (isAnswered) return;
 
     const roomRef = doc(db, "battleRooms", pin);
-
     const who = isOwner ? "owner" : "competitor";
-
     updateDoc(roomRef, {
       ["answerCount." + who + ".wrong"]: increment(1),
     });
@@ -618,17 +616,12 @@ function BattleReview({ pin }: { pin: string }) {
         }
       };
 
-      if (
-        isOwner &&
-        (answerCount.owner.correct / questionsNumber) * 100 >= 80 &&
-        answerCount.owner.correct > answerCount.competitor.correct
-      )
-        checkUserScoreStatus();
+      const me = isOwner ? "owner" : "competitor";
+      const other = isOwner ? "competitor" : "owner";
 
       if (
-        !isOwner &&
-        (answerCount.competitor.correct / questionsNumber) * 100 >= 80 &&
-        answerCount.owner.correct < answerCount.competitor.correct
+        (answerCount[me].correct / questionsNumber) * 100 >= 80 &&
+        answerCount[me].correct > answerCount[other].correct
       )
         checkUserScoreStatus();
     } else {
@@ -650,6 +643,7 @@ function BattleReview({ pin }: { pin: string }) {
     round,
     userId,
     isWaiting,
+    answerCount,
   ]);
 
   const handlePlayAudio = (audioLink: string) => {
@@ -714,19 +708,11 @@ function BattleReview({ pin }: { pin: string }) {
     });
   };
 
-  const handleCorrectAnswer = () => {
+  const handleAnswer = (check: string) => {
     const roomRef = doc(db, "battleRooms", pin);
     const who = isOwner ? "owner" : "competitor";
     updateDoc(roomRef, {
-      ["answerCount." + who + ".correct"]: increment(1),
-    });
-  };
-
-  const handleWrongAnswer = () => {
-    const roomRef = doc(db, "battleRooms", pin);
-    const who = isOwner ? "owner" : "competitor";
-    updateDoc(roomRef, {
-      ["answerCount." + who + ".wrong"]: increment(1),
+      ["answerCount." + who + `.${check}`]: increment(1),
     });
   };
 
@@ -753,7 +739,6 @@ function BattleReview({ pin }: { pin: string }) {
                       <FriendStateWrapper stateColor={friendState[index]}>
                         {friendState[index]}
                         <FriendState stateColor={friendState[index]} />
-
                         <div
                           onClick={() => {
                             handleInviteFriendBattle(friendEmail, index);
@@ -815,40 +800,37 @@ function BattleReview({ pin }: { pin: string }) {
               key={clickedVocab}
               showAnswer={showAnswerArr[index]}
               onClick={() => {
-                if (!isAnswered) {
-                  setIsAnswered(true);
+                if (isAnswered) return;
+                setIsAnswered(true);
 
-                  let answerStatus = [...currentOptions].map(
-                    ([vocabOption, insideDef], index) => {
-                      if (vocabOption === correctVocab?.vocab)
-                        return "correctAnswer";
-                      if (
-                        clickedVocab !== vocabOption &&
-                        vocabOption !== correctVocab?.vocab
-                      )
-                        return "notAnswer";
-                      else return "wrongAnswer";
-                    }
-                  );
-                  setShowAnswerArr(answerStatus);
+                let answerStatus = [...currentOptions].map(([vocabOption]) => {
+                  if (vocabOption === correctVocab?.vocab)
+                    return "correctAnswer";
+                  if (
+                    clickedVocab !== vocabOption &&
+                    vocabOption !== correctVocab?.vocab
+                  ) {
+                    return "notAnswer";
+                  } else return "wrongAnswer";
+                });
+                setShowAnswerArr(answerStatus);
 
-                  if (clickedVocab === correctVocab?.vocab) {
-                    handleCorrectAnswer();
-                  } else {
-                    handleWrongAnswer();
-                  }
-
-                  setOutcomeVocabList((outcomeVocabList) => {
-                    return outcomeVocabList.map((question, index) => {
-                      if (index === round)
-                        return {
-                          ...question,
-                          isCorrect: clickedVocab === correctVocab?.vocab,
-                        };
-                      return question;
-                    });
-                  });
+                if (clickedVocab === correctVocab?.vocab) {
+                  handleAnswer("correct");
+                } else {
+                  handleAnswer("wrong");
                 }
+
+                setOutcomeVocabList((outcomeVocabList) => {
+                  return outcomeVocabList.map((question, index) => {
+                    if (index === round)
+                      return {
+                        ...question,
+                        isCorrect: clickedVocab === correctVocab?.vocab,
+                      };
+                    return question;
+                  });
+                });
               }}
             >
               {def}
@@ -883,18 +865,22 @@ function BattleReview({ pin }: { pin: string }) {
     );
   }
 
+  function renderMessage() {
+    const who = isOwner ? "owner" : "competitor";
+
+    if ((answerCount[who].correct / questionsNumber) * 100 >= 80) {
+      return "You're amazing! Keep up the good work.";
+    } else {
+      return "Keep fighting, Keep pushing!";
+    }
+  }
+
   function renderOutcome() {
     return (
       <Main>
         <OutcomeWrapper>
           <Message>
-            {isOwner
-              ? (answerCount.owner.correct / questionsNumber) * 100 >= 80
-                ? "You're amazing! Keep up the good work."
-                : "Keep fighting, Keep pushing!"
-              : (answerCount.competitor.correct / questionsNumber) * 100 >= 80
-              ? "You're amazing! Keep up the good work."
-              : "Keep fighting, Keep pushing!"}
+            {renderMessage()}
             <br />
             {addScore && "You've got 1 point!"}
           </Message>
