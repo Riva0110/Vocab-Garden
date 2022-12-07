@@ -1,6 +1,6 @@
 import styled, { css } from "styled-components";
 import { useContext, useState, useEffect, useRef } from "react";
-import { authContext } from "../../../context/AuthContext";
+import { AuthContext } from "../../../context/AuthContext";
 import audio from "../../../components/audio.png";
 import { useReviewLayout } from "./ReviewLayout";
 import { useNavigate } from "react-router-dom";
@@ -370,7 +370,7 @@ export default function BattleReviewWrapper() {
 
 function BattleReview({ pin }: { pin: string }) {
   const navigate = useNavigate();
-  const { isLogin, userId } = useContext(authContext);
+  const { isLogin, userId } = useContext(AuthContext);
   const { questionsNumber, setIsBattle } = useReviewLayout();
   const [isWaiting, setIsWaiting] = useState<boolean>(true);
   const [gameOver, setGameOver] = useState<boolean>(false);

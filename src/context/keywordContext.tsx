@@ -39,4 +39,4 @@ export function KeywordContextProvider({ children }: ContextProviderProps) {
   );
 }
 
-export const useKeywordContext = () => useContext(keywordContext);
+export const useKeywordContext = () => useContext(KeywordContext);

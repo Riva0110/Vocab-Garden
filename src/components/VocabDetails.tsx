@@ -1,9 +1,9 @@
 import { useEffect, useState, useContext, useRef, Fragment } from "react";
 import { useOnClickOutside } from "./useOnClickOutside";
 import styled, { css } from "styled-components";
-import { keywordContext } from "../context/KeywordContext";
-import { authContext } from "../context/AuthContext";
-import { vocabBookContext } from "../context/VocabBookContext";
+import { KeywordContext } from "../context/KeywordContext";
+import { AuthContext } from "../context/AuthContext";
+import { VocabBookContext } from "../context/VocabBookContext";
 import {
   updateDoc,
   doc,
@@ -241,10 +241,10 @@ interface VocabDetailsInterface {
 type AddFunction = (msg: string) => void;
 
 export default function VocabDetails() {
-  const { userId } = useContext(authContext);
-  const { keyword, setKeyword } = useContext(keywordContext);
+  const { userId } = useContext(AuthContext);
+  const { keyword, setKeyword } = useContext(KeywordContext);
   const { vocabBooks, getVocabBooks, isSaved, setIsSaved } =
-    useContext(vocabBookContext);
+    useContext(VocabBookContext);
   const [vocabDetails, setVocabDetails] = useState<VocabDetailsInterface>();
   const [newBook, setNewBook] = useState<string>();
   const [selectedvocabBook, setSelectedvocabBook] =
