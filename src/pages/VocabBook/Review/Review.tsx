@@ -377,6 +377,32 @@ export default function Review() {
     setReviewLog();
   };
 
+  function renderNextDoneButton() {
+    return round === questionsNumber - 1 ? (
+      <StyledButton
+        btnType={"primary"}
+        showBtn={showBtn}
+        onClick={() => {
+          handleGameOver();
+        }}
+      >
+        Done
+      </StyledButton>
+    ) : (
+      <StyledButton
+        btnType={"primary"}
+        showBtn={showBtn}
+        onClick={() => {
+          setShowBtn(false);
+          setRound(round + 1);
+          setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
+        }}
+      >
+        Next &gt;&gt;&gt;
+      </StyledButton>
+    );
+  }
+
   function renderTest() {
     return (
       <Main>
@@ -394,172 +420,60 @@ export default function Review() {
           ({correctVocab?.partOfSpeech})
         </VocabWrapper>
         <Options>
-          {currentOptions?.map(([clickedVocab, def], index) => (
-            <Option
-              key={clickedVocab}
-              showAnswer={showAnswerArr[index]}
-              onClick={() => {
-                if (!showBtn) {
+          <>
+            {currentOptions?.map(([clickedVocab, def], index) => (
+              <Option
+                key={clickedVocab}
+                showAnswer={showAnswerArr[index]}
+                onClick={() => {
+                  if (showBtn) return;
                   setShowBtn(true);
-                  let answerStatus = [...currentOptions].map(
-                    ([vocabOption, insideDef], index) => {
-                      if (vocabOption === correctVocab?.vocab)
-                        return "correctAnswer";
-                      if (
-                        clickedVocab !== vocabOption &&
-                        vocabOption !== correctVocab?.vocab
-                      )
-                        return "notAnswer";
-                      else return "wrongAnswer";
-                    }
-                  );
+
+                  let answerStatus = currentOptions.map(([vocabOption]) => {
+                    if (vocabOption === correctVocab?.vocab)
+                      return "correctAnswer";
+                    if (
+                      clickedVocab !== vocabOption &&
+                      vocabOption !== correctVocab?.vocab
+                    )
+                      return "notAnswer";
+                    else return "wrongAnswer";
+                  });
                   setShowAnswerArr(answerStatus);
 
-                  let newUpdateLogInViewingBook;
+                  const isCorrect = clickedVocab === correctVocab?.vocab;
 
-                  if (clickedVocab === correctVocab?.vocab) {
-                    setAnswerCount((prev) => ({
-                      ...prev,
-                      correct: prev.correct + 1,
-                    }));
+                  setAnswerCount((ac) => ({
+                    ...ac,
+                    ...(isCorrect
+                      ? { correct: ac.correct + 1 }
+                      : { wrong: ac.wrong + 1 }),
+                  }));
 
-                    newUpdateLogInViewingBook = [...updateLogInViewingBook].map(
-                      ({
-                        vocab,
-                        audioLink,
-                        partOfSpeech,
-                        definition,
-                        log,
-                        correctRate,
-                      }) => {
-                        if (vocab === correctVocab?.vocab) {
-                          if (log && log?.length > 0) {
-                            const correctCount = log?.reduce((acc, item) => {
-                              if (item.isCorrect) {
-                                acc += 1;
-                              }
-                              return acc;
-                            }, 0);
-                            return {
-                              vocab,
-                              audioLink,
-                              partOfSpeech,
-                              definition,
-                              log: [
-                                ...log,
-                                { isCorrect: true, time: new Date() },
-                              ],
-                              correctRate:
-                                (correctCount + 1) / (log.length + 1),
-                            };
-                          } else {
-                            return {
-                              vocab,
-                              audioLink,
-                              partOfSpeech,
-                              definition,
-                              log: [{ isCorrect: true, time: new Date() }],
-                              correctRate: 1,
-                            };
-                          }
-                        } else {
-                          return {
-                            vocab,
-                            audioLink,
-                            partOfSpeech,
-                            definition,
-                            log,
-                            correctRate,
-                          };
-                        }
-                      }
-                    );
-                  } else {
-                    setAnswerCount((prev) => ({
-                      ...prev,
-                      wrong: prev.wrong + 1,
-                    }));
-                    newUpdateLogInViewingBook = [...updateLogInViewingBook].map(
-                      ({
-                        vocab,
-                        audioLink,
-                        partOfSpeech,
-                        definition,
-                        log,
-                        correctRate,
-                      }) => {
-                        if (vocab === correctVocab?.vocab) {
-                          if (log && log?.length > 0) {
-                            const correctCount = log?.reduce((acc, item) => {
-                              if (item.isCorrect) {
-                                acc += 1;
-                              }
-                              return acc;
-                            }, 0);
-                            return {
-                              vocab,
-                              audioLink,
-                              partOfSpeech,
-                              definition,
-                              log: [
-                                ...log,
-                                { isCorrect: false, time: new Date() },
-                              ],
-                              correctRate: correctCount / (log.length + 1),
-                            };
-                          } else {
-                            return {
-                              vocab,
-                              audioLink,
-                              partOfSpeech,
-                              definition,
-                              log: [{ isCorrect: false, time: new Date() }],
-                              correctRate: 0,
-                            };
-                          }
-                        } else {
-                          return {
-                            vocab,
-                            audioLink,
-                            partOfSpeech,
-                            definition,
-                            log,
-                            correctRate,
-                          };
-                        }
-                      }
-                    );
-                  }
+                  const newUpdateLogInViewingBook = updateLogInViewingBook.map(
+                    (book) => {
+                      if (book.vocab !== correctVocab?.vocab) return book;
+                      const correctCount = book.log.reduce(
+                        (acc, item) => acc + (item.isCorrect ? 1 : 0),
+                        0
+                      );
+                      return {
+                        ...book,
+                        log: [...book.log, { isCorrect, time: new Date() }],
+                        correctRate:
+                          (correctCount + (isCorrect ? 1 : 0)) /
+                          (book.log.length + 1),
+                      };
+                    }
+                  );
                   setUpdateLogInViewingBook(newUpdateLogInViewingBook);
-                }
-              }}
-            >
-              {def}
-            </Option>
-          ))}
-          {round === questionsNumber - 1 ? (
-            <StyledButton
-              btnType={"primary"}
-              showBtn={showBtn}
-              onClick={() => {
-                handleGameOver();
-              }}
-            >
-              Done
-            </StyledButton>
-          ) : (
-            <StyledButton
-              btnType={"primary"}
-              showBtn={showBtn}
-              onClick={() => {
-                setShowBtn(false);
-                setRound(round + 1);
-                setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
-              }}
-            >
-              Next &gt;&gt;&gt;
-            </StyledButton>
-          )}
+                }}
+              >
+                {def}
+              </Option>
+            ))}
+            {renderNextDoneButton()}
+          </>
         </Options>
       </Main>
     );
