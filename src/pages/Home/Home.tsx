@@ -60,6 +60,7 @@ const Intro = styled.div`
   text-shadow: white 0.1em 0.1em 0.2em;
   color: #1c1b1b;
   margin-left: -8px;
+  display: flex;
 `;
 
 const BeMember = styled.div`
