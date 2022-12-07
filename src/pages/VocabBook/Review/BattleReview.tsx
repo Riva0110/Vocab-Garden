@@ -1,5 +1,5 @@
 import styled, { css } from "styled-components";
-import { useContext, useState, useEffect, useCallback, useRef } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import { authContext } from "../../../context/authContext";
 import audio from "../../../components/audio.png";
 import { useReviewLayout } from "./ReviewLayout";
