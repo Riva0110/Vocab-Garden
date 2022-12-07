@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { keywordContext } from "../../context/keywordContext";
-import { authContext } from "../../context/authContext";
-import { vocabBookContext, VocabBooks } from "../../context/vocabBookContext";
+import { KeywordContext } from "../../context/KeywordContext";
+import { AuthContext } from "../../context/AuthContext";
+import { VocabBookContext, VocabBooks } from "../../context/VocabBookContext";
 import React, {
   useContext,
   useState,
@@ -275,10 +275,10 @@ function getAllWords(vocabBooks: VocabBooks) {
 export default function VocabBook() {
   const navigate = useNavigate();
   const { viewingBook, setViewingBook } = useViewingBook();
-  const { userId } = useContext(authContext);
-  const { setKeyword } = useContext(keywordContext);
+  const { userId } = useContext(AuthContext);
+  const { setKeyword } = useContext(KeywordContext);
   const { vocabBooks, getVocabBooks, isSaved, setIsSaved } =
-    useContext(vocabBookContext);
+    useContext(VocabBookContext);
   const [newBook, setNewBook] = useState<string>();
   const [bookCorrectRate, setBookCorrectRate] = useState<number>();
   const ref = useRef<null | AddFunction>(null);

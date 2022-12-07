@@ -1,6 +1,6 @@
 import styled, { css } from "styled-components";
 import { useContext, useState, useEffect, useRef } from "react";
-import { authContext } from "../../../context/authContext";
+import { authContext } from "../../../context/AuthContext";
 import audio from "../../../components/audio.png";
 import { useReviewLayout } from "./ReviewLayout";
 import { useNavigate } from "react-router-dom";

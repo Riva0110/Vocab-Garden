@@ -32,7 +32,7 @@ interface BooksInterface {
   setIsSaved: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const vocabBookContext = createContext<BooksInterface>({
+export const VocabBookContext = createContext<BooksInterface>({
   vocabBooks: {},
   setVocabBooks: () => {},
   getVocabBooks: () => {},
@@ -54,10 +54,10 @@ export function VocabBookContextProvider({ children }: ContextProviderProps) {
   }, []);
 
   return (
-    <vocabBookContext.Provider
+    <VocabBookContext.Provider
       value={{ vocabBooks, setVocabBooks, getVocabBooks, isSaved, setIsSaved }}
     >
       {children}
-    </vocabBookContext.Provider>
+    </VocabBookContext.Provider>
   );
 }

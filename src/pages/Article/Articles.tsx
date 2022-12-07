@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { useEffect } from "react";
-import { authContext } from "../../context/authContext";
+import { AuthContext } from "../../context/AuthContext";
 import Button from "../../components/Button/Button";
 
 const ArticlesWrapper = styled.div`
@@ -60,7 +60,7 @@ interface ArticleListInterface {
 }
 
 export default function Articles() {
-  const { userId } = useContext(authContext);
+  const { userId } = useContext(AuthContext);
   const navigate = useNavigate();
   const [articleList, setArticleList] = useState<ArticleListInterface[]>([]);
 

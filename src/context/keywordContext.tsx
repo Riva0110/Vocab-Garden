@@ -9,7 +9,7 @@ export type keywordType = {
   setKeyword: React.Dispatch<React.SetStateAction<string>>;
 };
 
-export const keywordContext = createContext<keywordType>({
+export const KeywordContext = createContext<keywordType>({
   keyword: "",
   setKeyword: () => {},
 });
@@ -33,9 +33,9 @@ export function KeywordContextProvider({ children }: ContextProviderProps) {
   };
 
   return (
-    <keywordContext.Provider value={{ keyword, setKeyword }}>
+    <KeywordContext.Provider value={{ keyword, setKeyword }}>
       {children}
-    </keywordContext.Provider>
+    </KeywordContext.Provider>
   );
 }
 

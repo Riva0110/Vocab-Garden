@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { Navigate, Outlet, useOutletContext } from "react-router-dom";
 import { useContext, useState } from "react";
-import { authContext } from "../../context/authContext";
+import { AuthContext } from "../../context/AuthContext";
 
 const Wrapper = styled.div`
   @media screen and (min-width: 1440px) {
@@ -16,7 +16,7 @@ type ContextType = {
 };
 
 export default function VocabBookLayout() {
-  const { isLogin } = useContext(authContext);
+  const { isLogin } = useContext(AuthContext);
   const [viewingBook, setViewingBook] = useState<string>("unsorted");
   return isLogin ? (
     <Wrapper>

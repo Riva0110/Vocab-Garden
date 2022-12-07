@@ -2,8 +2,8 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { useOnClickOutside } from "./components/useOnClickOutside";
 import styled, { createGlobalStyle } from "styled-components";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
-import { keywordContext } from "./context/keywordContext";
-import { authContext } from "./context/authContext";
+import { KeywordContext } from "./context/KeywordContext";
+import { AuthContext } from "./context/AuthContext";
 import logo from "./logoName.png";
 import {
   arrayRemove,
@@ -296,8 +296,8 @@ interface BattleInvitation {
 }
 
 function App() {
-  const { setKeyword } = useContext(keywordContext);
-  const { isLogin, userId, isLoadingUserAuth } = useContext(authContext);
+  const { setKeyword } = useContext(KeywordContext);
+  const { isLogin, userId, isLoadingUserAuth } = useContext(AuthContext);
   const navigate = useNavigate();
   const [inputVocab, setInputVocab] = useState<string>();
   const [battleInvitation, setBattleInvitation] =

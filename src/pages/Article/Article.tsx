@@ -1,8 +1,8 @@
 import styled from "styled-components";
 import { useState, useContext, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { authContext } from "../../context/authContext";
-import { keywordContext } from "../../context/keywordContext";
+import { AuthContext } from "../../context/AuthContext";
+import { KeywordContext } from "../../context/KeywordContext";
 import {
   doc,
   collection,
@@ -76,8 +76,8 @@ type AddFunction = (msg: string) => void;
 
 export default function Article() {
   const navigate = useNavigate();
-  const { userId } = useContext(authContext);
-  const { setKeyword } = useContext(keywordContext);
+  const { userId } = useContext(AuthContext);
+  const { setKeyword } = useContext(KeywordContext);
   const [isEditing, setIsEditing] = useState<boolean>();
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");

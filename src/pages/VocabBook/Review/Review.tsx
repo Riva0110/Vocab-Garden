@@ -1,8 +1,8 @@
 import styled, { css } from "styled-components";
 import { useContext, useState, useEffect } from "react";
 import { useViewingBook } from "../VocabBookLayout";
-import { vocabBookContext } from "../../../context/vocabBookContext";
-import { authContext } from "../../../context/authContext";
+import { VocabBookContext } from "../../../context/VocabBookContext";
+import { AuthContext } from "../../../context/AuthContext";
 import audio from "../../../components/audio.png";
 import { useNavigate } from "react-router-dom";
 import {
@@ -265,7 +265,7 @@ export default function Review() {
   const [answerCount, setAnswerCount] = useState({ correct: 0, wrong: 0 });
 
   const { viewingBook } = useViewingBook();
-  const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
+  const { vocabBooks, getVocabBooks } = useContext(VocabBookContext);
   const [updateLogInViewingBook, setUpdateLogInViewingBook] = useState<
     Answer[]
   >(vocabBooks?.[viewingBook]);
@@ -277,7 +277,7 @@ export default function Review() {
   const [reviewingQuestions, setReviewingQuestions] =
     useState<ReviewingQuestions[]>(questions);
 
-  const { userId } = useContext(authContext);
+  const { userId } = useContext(AuthContext);
   const [score, setScore] = useState<number>();
   const [isChallenging, setIsChallenging] = useState<boolean>();
   const [currentOptions, setCurrentOptions] = useState<[string, string][]>([]);

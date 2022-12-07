@@ -4,7 +4,7 @@ import { Outlet, Navigate } from "react-router-dom";
 import plant from "./plant.webp";
 import plant2 from "./plant2.webp";
 import { useContext } from "react";
-import { authContext } from "../../context/authContext";
+import { AuthContext } from "../../context/AuthContext";
 
 const Wrapper = styled.div`
   display: flex;
@@ -49,7 +49,7 @@ const OutletWrapper = styled.div`
 `;
 
 export default function ArticlesLayout() {
-  const { isLogin } = useContext(authContext);
+  const { isLogin } = useContext(AuthContext);
   return isLogin ? (
     <Wrapper>
       <Img src={plant} alt="plant" />

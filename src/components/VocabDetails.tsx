@@ -1,9 +1,9 @@
 import { useEffect, useState, useContext, useRef, Fragment } from "react";
 import { useOnClickOutside } from "./useOnClickOutside";
 import styled, { css } from "styled-components";
-import { keywordContext } from "../context/keywordContext";
-import { authContext } from "../context/authContext";
-import { vocabBookContext } from "../context/vocabBookContext";
+import { keywordContext } from "../context/KeywordContext";
+import { authContext } from "../context/AuthContext";
+import { vocabBookContext } from "../context/VocabBookContext";
 import {
   updateDoc,
   doc,

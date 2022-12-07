@@ -2,7 +2,7 @@ import styled from "styled-components";
 import banner from "./banner.webp";
 import next from "./next.png";
 import VocabDetails from "../../components/VocabDetails";
-import { keywordContext } from "../../context/keywordContext";
+import { KeywordContext } from "../../context/KeywordContext";
 import { useContext } from "react";
 import { Link } from "react-router-dom";
 
@@ -86,7 +86,7 @@ const NextImg = styled.img`
 `;
 
 export default function Home() {
-  const { setKeyword } = useContext(keywordContext);
+  const { setKeyword } = useContext(KeywordContext);
   function getSelectedText() {
     if (window.getSelection) {
       const txt = window.getSelection()?.toString();

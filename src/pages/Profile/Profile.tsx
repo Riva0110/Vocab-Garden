@@ -1,5 +1,5 @@
 import styled, { css } from "styled-components";
-import { authContext } from "../../context/authContext";
+import { AuthContext } from "../../context/AuthContext";
 import { useContext, useState, useEffect, useCallback } from "react";
 import { arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
@@ -241,7 +241,7 @@ function getCamelCasePlantName(plantName: string) {
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { isLogin, logout, userId, signup } = useContext(authContext);
+  const { isLogin, logout, userId, signup } = useContext(AuthContext);
   const [name, setName] = useState<string>("");
   const [score, setScore] = useState<number>(0);
   const [isChallenging, setIsChallenging] = useState<boolean>();

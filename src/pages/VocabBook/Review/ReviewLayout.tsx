@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { Outlet, useOutletContext } from "react-router-dom";
-import { vocabBookContext } from "../../../context/vocabBookContext";
-import { authContext } from "../../../context/authContext";
+import { VocabBookContext } from "../../../context/VocabBookContext";
+import { AuthContext } from "../../../context/AuthContext";
 import { useViewingBook } from "../VocabBookLayout";
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
@@ -89,11 +89,11 @@ const questionsNumber = 5;
 
 export default function ReviewLayout() {
   const navigate = useNavigate();
-  const { userId } = useContext(authContext);
+  const { userId } = useContext(AuthContext);
   const [isBattle, setIsBattle] = useState<boolean>(false);
   const roomId = Math.floor(Math.random() * 10000);
   const { viewingBook } = useViewingBook();
-  const { vocabBooks } = useContext(vocabBookContext);
+  const { vocabBooks } = useContext(VocabBookContext);
   const [name, setName] = useState<string>();
 
   const questionsArr = vocabBooks[viewingBook]

@@ -38,7 +38,7 @@ interface AuthInterface {
   ): Promise<string | undefined>;
 }
 
-export const authContext = createContext<AuthInterface>({} as AuthInterface);
+export const AuthContext = createContext<AuthInterface>({} as AuthInterface);
 
 export function AuthContextProvider({ children }: ContextProviderProps) {
   const [isLogin, setIsLogin] = useState(false);
@@ -152,7 +152,7 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
   };
 
   return (
-    <authContext.Provider
+    <AuthContext.Provider
       value={{
         userId,
         setUserId,
@@ -166,6 +166,6 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
       }}
     >
       {children}
-    </authContext.Provider>
+    </AuthContext.Provider>
   );
 }

@@ -2,7 +2,7 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { authContext } from "../../context/authContext";
+import { AuthContext } from "../../context/AuthContext";
 import { db } from "../../firebase/firebase";
 
 const Wrapper = styled.div`
@@ -110,7 +110,7 @@ const lastWeekDate = () => {
 
 export default function StackedBarChart() {
   const navigate = useNavigate();
-  const { userId } = useContext(authContext);
+  const { userId } = useContext(AuthContext);
   const [selectedId, setSelectedId] = useState("");
   const [data, setData] = useState<Data[] | []>([]);
 

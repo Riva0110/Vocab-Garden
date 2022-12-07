@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import styled from "styled-components";
-import { authContext } from "../../context/authContext";
+import { AuthContext } from "../../context/AuthContext";
 import banner from "./banner.webp";
 import Button from "../../components/Button/Button";
 
@@ -81,7 +81,7 @@ interface Props {
 }
 
 export default function LoginPage({ name, setName, signup }: Props) {
-  const { login } = useContext(authContext);
+  const { login } = useContext(AuthContext);
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");

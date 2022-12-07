@@ -1,4 +1,4 @@
-import { authContext } from "../../context/authContext";
+import { AuthContext } from "../../context/AuthContext";
 import { useContext, useState, useEffect, useRef } from "react";
 import {
   collection,
@@ -129,7 +129,7 @@ interface Props {
 type AddFunction = (msg: string) => void;
 
 export default function Friends() {
-  const { isLogin, userId } = useContext(authContext);
+  const { isLogin, userId } = useContext(AuthContext);
   const [myEmail, setMyEmail] = useState<string>();
   const [searchingEmail, setSearchingEmail] = useState<string>("");
   const [friendList, setFriendList] = useState<string[]>();
