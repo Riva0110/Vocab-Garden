@@ -5,7 +5,13 @@ import { authContext } from "../../../context/authContext";
 import { useViewingBook } from "../VocabBookLayout";
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  doc,
+  DocumentData,
+  DocumentSnapshot,
+  getDoc,
+  setDoc,
+} from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
 import Hint from "../../../components/Hint/Hint";
 
@@ -35,9 +41,21 @@ const ModeBtnsWrapper = styled.div`
   z-index: 100;
 `;
 
+const VocabBook = styled.div`
+  width: 33%;
+`;
+
+const HintWrapper = styled.div`
+  width: 33%;
+  display: flex;
+  justify-content: end;
+`;
+
 const ModeBtns = styled.div`
   display: flex;
+  justify-content: center;
   gap: 20px;
+  width: 33%;
 `;
 
 const ModeBtn = styled.button`
@@ -73,7 +91,7 @@ export default function ReviewLayout() {
   const navigate = useNavigate();
   const { userId } = useContext(authContext);
   const [isBattle, setIsBattle] = useState<boolean>(false);
-  const [roomId, setRoomId] = useState<number>();
+  const roomId = Math.floor(Math.random() * 10000);
   const { viewingBook } = useViewingBook();
   const { vocabBooks } = useContext(vocabBookContext);
   const [name, setName] = useState<string>();
@@ -86,15 +104,10 @@ export default function ReviewLayout() {
     }));
 
   useEffect(() => {
-    const randomRoomId = Math.floor(Math.random() * 10000);
-    setRoomId(randomRoomId);
-  }, [viewingBook]);
-
-  useEffect(() => {
     const getUserInfo = async () => {
       const docRef = doc(db, "users", userId);
-      const docSnap: any = await getDoc(docRef);
-      setName(docSnap.data().name);
+      const docSnap: DocumentSnapshot<DocumentData> = await getDoc(docRef);
+      setName(docSnap?.data()?.name);
     };
     getUserInfo();
   }, [userId]);
@@ -112,13 +125,18 @@ export default function ReviewLayout() {
         owner: { correct: 0, wrong: 0 },
         competitor: { correct: 0, wrong: 0 },
       },
+      invitingList: [],
     });
   };
 
   return (
     <Wrapper>
       <ModeBtnsWrapper>
-        <div />
+        {window.screen.width > 401 ? (
+          <VocabBook>[VocabBook] {viewingBook}</VocabBook>
+        ) : (
+          <VocabBook></VocabBook>
+        )}
         <ModeBtns>
           <ModeBtn
             isBattle={!isBattle}
@@ -127,7 +145,7 @@ export default function ReviewLayout() {
               navigate("/vocabbook/review");
             }}
           >
-            Single Mode
+            Single {window.screen.width > 750 && "Mode"}
           </ModeBtn>
           <ModeBtn
             isBattle={isBattle}
@@ -137,43 +155,49 @@ export default function ReviewLayout() {
               navigate(`/vocabbook/review/${userId + roomId}`);
             }}
           >
-            Battle Mode
+            Battle {window.screen.width > 750 && "Mode"}
           </ModeBtn>
         </ModeBtns>
-        <Hint>
-          <GameRule>
-            If you are in a challenge, you can get 1 point by two ways:
+        <HintWrapper>
+          <Hint>
+            <GameRule>
+              If you are in a challenge,
+              <br /> you can get 1 point by two ways:
+              <br />
+              <br />
+              1. [Single Mode] <br />
+              ．correct rate &gt;= 80%
+              <br />
+              <br />
+              2. [Battle Mode] <br />
+              ．Invite your friends to battle <br />
+              ．Win the battle!
+              <br />
+              ．correct rate &gt;= 80%
+              <br />
+              <br />
+              Reminder:
+              <br />
+              1. You need to review at least once a day,
+              <br />
+              &nbsp;&nbsp;&nbsp;otherwise you would lose 1 point per day.
+              <br />
+              2. If the score was deducted to 0,
+              <br />
+              &nbsp;&nbsp;&nbsp;the plant would die.
+              <br />
+            </GameRule>
             <br />
-            <br />
-            1. [Single Mode] <br />
-            ．correct rate &gt;= 80%
-            <br />
-            <br />
-            2. [Battle Mode] <br />
-            ．Invite your friends to battle <br />
-            ．Win the battle!
-            <br />
-            ．correct rate &gt;= 80%
-            <br />
-            <br />
-            Reminder:
-            <br />
-            1. You need to review at least once a day, otherwise you would lose
-            1 point per day.
-            <br />
-            2. If the score was deducted to 0, the plant would die.
-            <br />
-          </GameRule>
-          <br />
-          Haven't started a challenge?
-          <div
-            onClick={() => {
-              navigate("/profile");
-            }}
-          >
-            &gt;&gt;&gt; Click me &gt;&gt;&gt;
-          </div>
-        </Hint>
+            Haven't started a challenge?
+            <div
+              onClick={() => {
+                navigate("/profile");
+              }}
+            >
+              &gt;&gt;&gt; Click me &gt;&gt;&gt;
+            </div>
+          </Hint>
+        </HintWrapper>
       </ModeBtnsWrapper>
       <Outlet
         context={{ viewingBook, questionsNumber, isBattle, setIsBattle }}

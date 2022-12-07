@@ -54,7 +54,7 @@ export const ArticleWords = () => {
   const { setKeyword } = useContext(keywordContext);
   const navigate = useNavigate();
   const [articleWords, setArticleWords] = useState<[string, number][]>([]);
-  let articleWordsArray = useRef<[string, any][]>([]);
+  let articleWordsArray = useRef<[string, number][]>([]);
 
   useEffect(() => {
     const getArticleContent = async () => {
@@ -73,8 +73,8 @@ export const ArticleWords = () => {
       .toLocaleLowerCase()
       .replace(/[^a-zA-Z]/g, " ")
       .split(" ")
-      .filter((x: any) => !commonWordsArray.includes(x))
-      .reduce(function (obj: any, item: any) {
+      .filter((x) => !commonWordsArray.includes(x))
+      .reduce<Record<string, number>>(function (obj, item) {
         if (!obj[item]) {
           obj[item] = 0;
         }
@@ -83,7 +83,7 @@ export const ArticleWords = () => {
       }, {});
     if (sortByCount) {
       articleWordsArray.current = Object.entries(countArticleWords).sort(
-        (a: any, b: any) => b[1] - a[1]
+        (a, b) => b[1] - a[1]
       );
       setArticleWords(articleWordsArray.current);
     } else {

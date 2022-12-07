@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import styled from "styled-components";
 import { authContext } from "../../context/authContext";
-import plant from "./banner.webp";
+import banner from "./banner.webp";
 import Button from "../../components/Button/Button";
 
 const Wrapper = styled.div`
@@ -19,9 +19,9 @@ const BackgroundImg = styled.div`
   position: fixed;
   left: 0;
   top: 0;
-  background-image: url(${plant});
+  background-image: url(${banner});
   background-size: cover;
-  opacity: 0.5;
+  opacity: 0.6;
 `;
 
 const LoginWrapper = styled.div`
@@ -95,10 +95,12 @@ export default function LoginPage({ name, setName, signup }: Props) {
           <>
             <WelcomeMsg>Log in or sign up to enjoy full functions!</WelcomeMsg>
             <Input
+              key="loginEmail"
               placeholder="email"
               onChange={(e) => setEmail(e.target.value)}
             />
             <Input
+              key="loginPassword"
               type="password"
               placeholder="password"
               onChange={(e) => setPassword(e.target.value)}
@@ -123,14 +125,17 @@ export default function LoginPage({ name, setName, signup }: Props) {
           <>
             <WelcomeMsg>Log in or sign up to enjoy full functions!</WelcomeMsg>
             <Input
+              key="signUpName"
               placeholder="name"
               onChange={(e) => setName(e.target.value)}
             />
             <Input
+              key="signUpEmail"
               placeholder="email"
               onChange={(e) => setEmail(e.target.value)}
             />
             <Input
+              key="signUpPassword"
               type="password"
               placeholder="password"
               onChange={(e) => setPassword(e.target.value)}

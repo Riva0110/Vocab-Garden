@@ -5,7 +5,9 @@ import { arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { plantImgsObj } from "./plantImgs";
 import Button from "../../components/Button/Button";
-import texture from "./texture.png";
+import plant from "./plant.webp";
+import growingPlants from "./growingPlants.webp";
+import dyingPlants from "./dyingPlants.webp";
 import Hint from "../../components/Hint/Hint";
 import LoginPage from "./Login";
 import { useNavigate } from "react-router-dom";
@@ -25,15 +27,15 @@ const Wrapper = styled.div`
   }
 `;
 
-const GardenImg = styled.div`
-  width: 100vw;
-  height: 100vh;
+const Img = styled.img`
+  width: 400px;
   position: fixed;
-  left: 0;
-  top: 0;
-  background-size: cover;
-  background-image: url(${texture});
-  opacity: 0.4;
+  right: 30px;
+  bottom: 0px;
+  opacity: 0.5;
+  @media screen and (max-width: 1001px) {
+    display: none;
+  }
 `;
 
 const Select = styled.select`
@@ -77,7 +79,6 @@ const ScoreDiv = styled.div`
 `;
 
 const UserInfoWrapper = styled.div`
-  /* background-color: rgb(255, 255, 255, 0.9); */
   padding: 30px 0;
   border-radius: 30px;
   position: relative;
@@ -116,7 +117,6 @@ const GrowingPlantImg = styled.img`
 
 const PlantsWrapper = styled.div`
   width: 70%;
-  /* background-color: rgb(255, 255, 255, 0.9); */
   position: relative;
   z-index: 1;
   border-radius: 30px;
@@ -138,6 +138,7 @@ const PlantsWrapper = styled.div`
 const Plants = styled.div`
   display: grid;
   grid-template-columns: auto auto auto auto auto;
+  grid-template-rows: 260px 260px;
   gap: 20px;
   @media screen and (max-width: 1701px) {
     grid-template-columns: auto auto auto auto;
@@ -148,7 +149,7 @@ const Plants = styled.div`
   @media screen and (max-width: 1201px) {
     grid-template-columns: auto auto;
   }
-  @media screen and (max-width: 1025px) {
+  @media screen and (max-width: 1001px) {
     grid-template-columns: auto auto auto;
   }
   @media screen and (max-width: 731px) {
@@ -192,6 +193,14 @@ const FewPlants = styled.div`
   height: 100%;
   justify-content: center;
   align-items: center;
+  padding-top: 300px;
+  @media screen and (max-width: 1001px) {
+    padding-top: 50px;
+  }
+`;
+
+const HintImg = styled.img`
+  width: 300px;
 `;
 
 const GameRule = styled.div`
@@ -235,7 +244,7 @@ export default function Profile() {
   const { isLogin, logout, userId, signup } = useContext(authContext);
   const [name, setName] = useState<string>("");
   const [score, setScore] = useState<number>(0);
-  const [isChallenging, setIsChallenging] = useState<boolean>(false);
+  const [isChallenging, setIsChallenging] = useState<boolean>();
   const [messages, setMessages] =
     useState<string>("選擇喜歡的植物，開始新的挑戰吧！");
   const [currentPlant, setCurrentPlant] = useState("begonia");
@@ -377,7 +386,7 @@ export default function Profile() {
         [
           ...prev,
           {
-            plantName: currentPlant,
+            plantName: displayPlantName(currentPlant),
             time: {
               seconds: Date.now() / 1000,
               nanoseconds: Date.now() / 1000,
@@ -394,31 +403,41 @@ export default function Profile() {
           <ProfileTitle>
             <p>{name}’s Vocab Garden</p>
             <Hint>
-              Start a challenge, and enrich your Vocab Garden!
+              Start a challenge,
+              <br />
+              and enrich your Vocab Garden!
               <br />
               <br />
               <GameRule>
-                When you are in a challenge, you can get 1 point by two ways:
+                When you are in a challenge,
+                <br />
+                you can get 1 point by two ways:
                 <br />
                 <br />
                 1. [Review - Single Mode] <br />
-                ．correct rate &gt;= 80%
+                ．Correct rate &gt;= 80%
                 <br />
                 <br />
                 2. [Review - Battle Mode] <br />
                 ．Invite your friends to battle <br />
                 ．Win the battle!
                 <br />
-                ．correct rate &gt;= 80%
+                ．Correct rate &gt;= 80%
+                <br />
+                <HintImg src={growingPlants} alt="growingPlants" />
                 <br />
                 <br />
                 Reminder:
                 <br />
-                1. You need to review at least once a day, otherwise you would
-                lose 1 point per day.
+                1. You need to review at least once a day,
                 <br />
-                2. If the score was deducted to 0, the plant would die.
+                &nbsp;&nbsp;&nbsp;otherwise you would lose 1 point per day.
                 <br />
+                2. If the score was deducted to 0,
+                <br />
+                &nbsp;&nbsp;&nbsp;the plant would die.
+                <br />
+                <HintImg src={dyingPlants} alt="growingPlants" />
               </GameRule>
               <br />
               Choose a book to review right now!
@@ -445,12 +464,12 @@ export default function Profile() {
           </ScoreBarWrapper>
           <p>{messages}</p>
           {isChallenging ? (
-            <></>
+            <p>{displayPlantName(currentPlant)}</p>
           ) : score !== 5 ? (
             <>
               <Select
                 value={currentPlant}
-                onChange={async (e: any) => {
+                onChange={async (e) => {
                   setCurrentPlant(e.target.value);
                   setIsDying(false);
                   setPlantPhase("0");
@@ -506,11 +525,11 @@ export default function Profile() {
                 There's no any plants in your garden.
                 <br />
                 Start a challenge TODAY!
+                <Img src={plant} alt="plant" />
               </FewPlants>
             )}
           </Plants>
         </PlantsWrapper>
-        <GardenImg />
       </Wrapper>
     );
   };

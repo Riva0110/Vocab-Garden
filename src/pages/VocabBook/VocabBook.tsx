@@ -53,6 +53,7 @@ const Nav = styled.nav`
 `;
 
 const VocabBookWrapper = styled.div`
+  position: relative;
   width: calc((100% - 30px) / 2);
   height: calc(100vh - 160px);
   z-index: 1;
@@ -111,15 +112,18 @@ const BookButtons = styled.div`
   align-items: center;
 `;
 
-const AddButton = styled.button`
-  width: 20px;
+const AddButton = styled.div`
+  display: flex;
+  justify-content: center;
+  line-height: 20px;
+  min-width: 20px;
   height: 20px;
-  margin-left: 10px;
   background-color: #607973;
   color: #ffffff;
   border: none;
   border-radius: 10px;
   cursor: pointer;
+  margin-right: 10px;
 `;
 
 const Delete = styled.div`
@@ -209,15 +213,20 @@ const ButtonImg = styled.img`
 `;
 
 const Input = styled.input`
+  position: absolute;
+  top: 30px;
+  left: 5px;
   outline: none;
   border: 1px solid lightgray;
   height: 25px;
   padding-left: 10px;
+  display: ${(props: Props) => (props.showAddInput ? "block" : "none")};
 `;
 
 interface Props {
   selected?: boolean;
   weight?: boolean;
+  showAddInput?: boolean;
 }
 
 interface Log {
@@ -275,6 +284,7 @@ export default function VocabBook() {
   const ref = useRef<null | AddFunction>(null);
   const newBookRef = useRef<HTMLInputElement>(null);
   const bookRef = useRef<HTMLDivElement>(null);
+  const [showAddInput, setShowAddInput] = useState<boolean>();
   const topWrongWords = useMemo(() => {
     if (vocabBooks) {
       return getAllWords(vocabBooks)
@@ -289,10 +299,10 @@ export default function VocabBook() {
 
   const callbacks = useMemo(() => {
     return {
-      onWordClick: (word: any) => {
+      onWordClick: (word: { text: string; value: number }) => {
         setKeyword(word.text);
       },
-      getWordTooltip: (word: any) => null,
+      getWordTooltip: (word: { text: string; value: number }) => null,
     };
   }, [setKeyword]);
 
@@ -328,10 +338,10 @@ export default function VocabBook() {
   });
 
   function getCorrectRateOfBooks() {
-    let log: any[][] = [];
+    let log: Log[][] = [];
     if (!vocabBooks) return;
     Object.keys(vocabBooks).forEach((key, index) => {
-      let insideLog: any[] = [];
+      let insideLog: Log[] = [];
       vocabBooks[key].map((vocab) => {
         if (vocab.log) {
           insideLog = [...insideLog, ...vocab.log];
@@ -413,7 +423,7 @@ export default function VocabBook() {
   function handleMouseEnterBook() {
     bookRef.current?.addEventListener(
       "wheel",
-      (ev: { deltaY: any; deltaX: any }) => {
+      (ev: { deltaY: number; deltaX: number }) => {
         if (bookRef.current)
           bookRef.current.scrollLeft += ev.deltaY + ev.deltaX;
       }
@@ -424,7 +434,7 @@ export default function VocabBook() {
     if (bookRef.current) {
       bookRef.current.removeEventListener(
         "wheel",
-        (ev: { deltaY: any; deltaX: any }) => {
+        (ev: { deltaY: number; deltaX: number }) => {
           if (bookRef.current)
             bookRef.current.scrollLeft += ev.deltaY + ev.deltaX;
         }
@@ -441,11 +451,31 @@ export default function VocabBook() {
       />
       <Img src={plant} alt="plant" />
       <VocabBookWrapper>
+        <Input
+          onChange={(e) => setNewBook(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              setShowAddInput(false);
+              handleAddBook();
+            }
+          }}
+          placeholder="Add a VocabBook"
+          ref={newBookRef}
+          showAddInput={showAddInput}
+        />
+
         <BookWrapper
           ref={bookRef}
           onMouseEnter={handleMouseEnterBook}
           onMouseLeave={handleMouseLeaveBook}
         >
+          <AddButton
+            onClick={() => {
+              setShowAddInput(!showAddInput);
+            }}
+          >
+            +
+          </AddButton>
           {vocabBooks &&
             Object.keys(vocabBooks).map((book: string, index) => (
               <Fragment key={book}>
@@ -476,14 +506,28 @@ export default function VocabBook() {
         </BookWrapper>
         <BookInfoWrapper>
           <BookButtons>
-            <div>
-              <Input
-                onChange={(e) => setNewBook(e.target.value)}
-                placeholder="Add a book"
-                ref={newBookRef}
-              />
-              <AddButton onClick={handleAddBook}>+</AddButton>
-            </div>
+            <Hint>
+              {viewingBook === "wrong words" ? (
+                <>
+                  <p>
+                    【Wrong words】
+                    <br /> you have reviewed more than 5 times
+                    <br /> and correct rate is under 50%.
+                  </p>
+                  <br />
+                  <p>Click any words to review the definition!</p>
+                </>
+              ) : (
+                <>
+                  <p>
+                    Click a card or select any words
+                    <br /> in the cards' definition!
+                  </p>
+                  <br /> <p>(Desktop =&gt; double click)</p>
+                  <p>(Mobile =&gt; lond press)</p>
+                </>
+              )}
+            </Hint>
             <Delete>
               {viewingBook !== "wrong words" && (
                 <ButtonImg
@@ -493,27 +537,6 @@ export default function VocabBook() {
                 />
               )}
             </Delete>
-            <Hint>
-              {viewingBook === "wrong words" ? (
-                <>
-                  <p>
-                    【Wrong words】
-                    <br /> you have reviewed more than 5 times and correct rate
-                    is under 50%.
-                  </p>
-                  <br />
-                  <p>Click any words to review the definition!</p>
-                </>
-              ) : (
-                <>
-                  <p>
-                    Click a card or select any words in the cards' definition!
-                  </p>
-                  <br /> <p>(Desktop =&gt; double click)</p>
-                  <p>(Mobile =&gt; lond press)</p>
-                </>
-              )}
-            </Hint>
           </BookButtons>
           <Nav>
             <div>
@@ -533,20 +556,25 @@ export default function VocabBook() {
               }
             >
               {viewingBook !== "wrong words" && (
-                <Button btnType={"primary"}>Review</Button>
+                <Button btnType={"primary"}>Quiz</Button>
               )}
             </div>
           </Nav>
         </BookInfoWrapper>
         <CardWrapper>
           {viewingBook === "wrong words" ? (
-            topWrongWords && (
+            topWrongWords?.length ? (
               <ReactWordcloud
                 words={topWrongWords}
                 callbacks={callbacks}
                 options={options}
                 size={size}
               />
+            ) : (
+              <NoCards>
+                There's no words you have taken quiz for more than 5 times,
+                <br /> and correct rate is under 50%.
+              </NoCards>
             )
           ) : (
             <>

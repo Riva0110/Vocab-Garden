@@ -19,6 +19,7 @@ import saved from "./saved.png";
 import spinner from "./spinner.gif";
 import Alert from "./Alert/Alert";
 import Button from "./Button/Button";
+import googleTranslate from "./googleTranslate.png";
 import { X } from "react-feather";
 import Hint from "../components/Hint/Hint";
 
@@ -54,6 +55,15 @@ const Wrapper = styled.div`
         height: calc(100vh - 300px);
       `}
   }
+`;
+
+const ErrorMsg = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #607973;
 `;
 
 const XDiv = styled(X)`
@@ -102,6 +112,17 @@ const SaveVocabImg = styled.img`
   cursor: pointer;
 `;
 
+const GoogleTranslateImg = styled.img`
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+`;
+
+const A = styled.a`
+  display: flex;
+  align-items: center;
+`;
+
 const SavePopup = styled.div`
   position: absolute;
   border: 1px solid lightgray;
@@ -135,15 +156,23 @@ const Buttons = styled.div`
   gap: 10px;
 `;
 
+const AddBookWrapper = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
 const Input = styled.input`
   outline: none;
   border: 1px solid lightgray;
   height: 25px;
-  padding-left: 10px;
+  padding-left: 15px;
 `;
 
-const AddButton = styled.button`
+const AddButton = styled.div`
+  display: flex;
+  justify-content: center;
   width: 20px;
+  line-height: 20px;
   height: 20px;
   margin-left: 10px;
   background-color: #607973;
@@ -221,6 +250,7 @@ export default function VocabDetails() {
   const [selectedvocabBook, setSelectedvocabBook] =
     useState<string>("unsorted");
   const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
   const [isPopuping, setIsPopuping] = useState(false);
   const popupRef = useRef<HTMLDivElement>(null);
   const resourceUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${keyword}`;
@@ -348,10 +378,16 @@ export default function VocabDetails() {
         if (response.status === 200) {
           setVocabDetails(data[0]);
           setShowVocabInMobile(true);
+          const searchRef = doc(db, "searchHistory", userId);
+          updateDoc(searchRef, { words: arrayUnion(keyword) });
         } else if (data.title === "No Definitions Found") {
           if (vocabDetails && vocabDetails.word !== undefined)
             setKeyword(vocabDetails.word);
           ref.current?.("Sorry......No result.");
+        }
+
+        if (response.status === 500) {
+          setIsError(true);
         }
       } catch (err) {
         if (err instanceof Error) ref.current?.(`Error: ${err.message}`);
@@ -363,7 +399,7 @@ export default function VocabDetails() {
     if (keyword?.trim()?.toLowerCase() !== vocabDetails?.word) {
       fetchVocabDetails(resourceUrl);
     }
-  }, [keyword, resourceUrl, setKeyword, vocabDetails]);
+  }, [keyword, resourceUrl, setKeyword, userId, vocabDetails]);
 
   useEffect(() => {
     getVocabBooks(userId);
@@ -381,10 +417,24 @@ export default function VocabDetails() {
     checkIfSaved();
   }, [userId, keyword, setIsSaved]);
 
-  return isLoading ? (
-    <p>
-      <SpinnerImg src={spinner} alt="spinner" />
-    </p>
+  if (isLoading)
+    return (
+      <p>
+        <SpinnerImg src={spinner} alt="spinner" />
+      </p>
+    );
+
+  return isError ? (
+    <Wrapper showVocabInMobile={showVocabInMobile}>
+      <ErrorMsg>
+        [ It should be vocabulary's definition here. ]
+        <br />
+        <br />
+        Sorry, something went wrong and it's not your fault.
+        <br />
+        You can try the search again at later time.
+      </ErrorMsg>
+    </Wrapper>
   ) : (
     <>
       <Alert
@@ -408,11 +458,20 @@ export default function VocabDetails() {
                   isSaved ? handleDeleteVocabFromBook() : setIsPopuping(true)
                 }
               />
+              <A
+                target="blank"
+                href={`https://translate.google.com.tw/?hl=zh-TW&sl=en&tl=zh-TW&text=${vocabDetails?.word}%0A&op=translate`}
+              >
+                <GoogleTranslateImg
+                  src={googleTranslate}
+                  alt="googleTranslate"
+                />
+              </A>
               <SavePopup isPopuping={isPopuping} ref={popupRef}>
                 <label>Save to Book:</label>
                 <Select
                   value={selectedvocabBook}
-                  onChange={(e: any) => {
+                  onChange={(e) => {
                     setSelectedvocabBook(e.target.value);
                   }}
                 >
@@ -423,22 +482,26 @@ export default function VocabDetails() {
                       </option>
                     ))}
                 </Select>
-                <div>
+                <AddBookWrapper>
                   <Input
                     ref={inputRef}
-                    onChange={(e) => setNewBook(e.target.value)}
-                    placeholder="Add a book"
+                    onChange={(e) => {
+                      setNewBook(e.target.value);
+                    }}
+                    placeholder="Add a VocabBook"
                   />
                   <AddButton
                     onClick={async () => {
-                      await handleAddBook();
-                      if (newBook) setSelectedvocabBook(newBook);
+                      if (newBook && newBook?.trim() !== "") {
+                        await handleAddBook();
+                        setSelectedvocabBook(newBook);
+                      }
                       if (inputRef.current) inputRef.current.value = "";
                     }}
                   >
                     +
                   </AddButton>
-                </div>
+                </AddBookWrapper>
                 <Buttons>
                   <div onClick={() => setIsPopuping(false)}>
                     <Button btnType="secondary">Cancel</Button>

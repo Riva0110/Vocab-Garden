@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import banner from "./banner.webp";
+import next from "./next.png";
 import VocabDetails from "../../components/VocabDetails";
 import { keywordContext } from "../../context/keywordContext";
 import { useContext } from "react";
@@ -42,31 +43,46 @@ const Title = styled.div`
   margin-top: 100px;
   margin-bottom: 80px;
   color: black;
+  @media screen and (max-width: 601px) {
+    margin-top: 10px;
+    margin-bottom: 30px;
+    font-size: 25px;
+  }
 `;
 
 const IntroWrapper = styled.div`
   color: #292727;
 `;
 
-const QuickStart = styled.div`
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 20px;
-  border: 1px solid lightgray;
-  width: 150px;
-  text-align: center;
-  background-color: #fff;
-`;
-
-const Intro = styled(Link)`
-  height: 30px;
+const Intro = styled.div`
+  min-height: 30px;
   text-decoration: none;
   text-shadow: white 0.1em 0.1em 0.2em;
   color: #1c1b1b;
-  &:hover {
-    background-color: #ffffff77;
-    transition: 0.6s;
-  }
+  margin-left: -8px;
+`;
+
+const BeMember = styled.div`
+  height: 30px;
+  text-decoration: none;
+  text-shadow: white 0.1em 0.1em 0.3em;
+  color: #405a54;
+  margin-left: -8px;
+  font-weight: 600;
+`;
+
+const IntroNav = styled(Link)`
+  height: 30px;
+  line-height: 30px;
+  text-decoration: none;
+  text-shadow: white 0.1em 0.1em 0.2em;
+  color: #1c1b1b;
+  margin-left: -8px;
+`;
+
+const NextImg = styled.img`
+  width: 15px;
+  height: 15px;
 `;
 
 export default function Home() {
@@ -87,23 +103,39 @@ export default function Home() {
           <br />
         </Title>
         <IntroWrapper>
-          <QuickStart>Quick Start</QuickStart>
-          <Intro to={"/"}>▶ 【Search】 double click or select any words!</Intro>
+          <Intro>【Search】double click or select any words!</Intro>
           <br />
-          <Intro to={"/articles"}>
-            ▶ 【Read】 look up unfamiliar words while reading!
+          <BeMember>
+            &nbsp;&nbsp;Be a member and enjoy more!&nbsp;&nbsp;
+          </BeMember>
+          <Intro>
+            【Read】look up unfamiliar words while reading! &nbsp;&nbsp;
+            <IntroNav to={"/articles"}>
+              &nbsp;&nbsp;
+              <NextImg src={next} alt={next} />
+            </IntroNav>
           </Intro>
-          <br />
-          <Intro to={"/vocabbook"}>
-            ▶ 【Review】 save word cards and review!
+          <Intro>
+            【Review】save word cards and review!&nbsp;&nbsp;
+            <IntroNav to={"/vocabbook"}>
+              &nbsp;&nbsp;
+              <NextImg src={next} alt={next} />
+            </IntroNav>
           </Intro>
-          <br />
-          <Intro to={"/vocabbook"}>
-            ▶ 【Battle】 invite your friends to review words with you. Have fun!
+          <Intro>
+            【Battle】invite your friends to review words with you. Have
+            fun!&nbsp;&nbsp;
+            <IntroNav to={"/vocabbook"}>
+              &nbsp;&nbsp;
+              <NextImg src={next} alt={next} />
+            </IntroNav>
           </Intro>
-          <br />
-          <Intro to={"/profile"}>
-            ▶ 【Achieve】 review everyday and enrich your Vocab Garden!
+          <Intro>
+            【Achieve】review everyday and enrich your Vocab Garden!&nbsp;&nbsp;
+            <IntroNav to={"/profile"}>
+              &nbsp;&nbsp;
+              <NextImg src={next} alt={next} />
+            </IntroNav>
           </Intro>
         </IntroWrapper>
       </BannerWrapper>

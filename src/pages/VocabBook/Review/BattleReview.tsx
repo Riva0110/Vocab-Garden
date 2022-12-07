@@ -1,5 +1,5 @@
 import styled, { css } from "styled-components";
-import { useContext, useState, useEffect, useCallback, useRef } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import { authContext } from "../../../context/authContext";
 import audio from "../../../components/audio.png";
 import { useReviewLayout } from "./ReviewLayout";
@@ -14,12 +14,17 @@ import {
   query,
   getDocs,
   arrayUnion,
+  DocumentSnapshot,
+  DocumentData,
+  increment,
 } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
 import { useParams } from "react-router-dom";
 import plant from "./battlePlant.webp";
 import Button from "../../../components/Button/Button";
 import Alert from "../../../components/Alert/Alert";
+import correct from "./correct.png";
+import wrong from "./wrong.png";
 
 interface Props {
   correct?: boolean;
@@ -52,6 +57,9 @@ const Img = styled.img`
   left: 100px;
   bottom: 0;
   opacity: 0.4;
+  @media screen and (max-height: 701px) {
+    display: none;
+  }
 `;
 
 const Header = styled.div`
@@ -59,13 +67,35 @@ const Header = styled.div`
   justify-content: space-between;
 `;
 
+const ScoreCount = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const AnsImg = styled.img`
+  width: 20px;
+  height: 20px;
+`;
+
 const RoundCount = styled.div`
   margin-top: 20px;
   text-align: center;
+  margin-bottom: 10px;
 `;
 
 const OwnerCount = styled.div`
   text-align: center;
+`;
+
+const CountDown = styled.div`
+  background-color: #f4e073;
+  text-align: center;
+  width: 50px;
+  height: 30px;
+  line-height: 30px;
+  padding: 0 5px;
+  border-radius: 10px;
 `;
 
 const CompetitorCount = styled.div`
@@ -211,14 +241,23 @@ const Message = styled.div`
 `;
 
 const OutcomeWrapper = styled.div`
-  width: 100%;
-  margin: 50px auto;
+  width: 70vw;
+  margin: 20px auto;
+  @media screen and (min-width: 1441px) {
+    width: 50vw;
+  }
+  @media screen and (max-width: 601px) {
+    width: 90vw;
+  }
 `;
 
 const ReviewVocabs = styled.div`
   position: relative;
   background-color: rgb(255, 255, 255, 0.7);
   z-index: 100;
+  border: 1px solid gray;
+  padding: 20px;
+  margin-top: 20px;
 `;
 
 const WrongVocabs = styled.div``;
@@ -319,6 +358,7 @@ interface RoomInfo {
   competitorName: string;
   status: string;
   questions: Questions[];
+  invitingList: string[];
 }
 
 type AddFunction = (msg: string) => void;
@@ -338,7 +378,7 @@ function BattleReview({ pin }: { pin: string }) {
 
   const [reviewingQuestionsArr, setReviewingQuestionsArr] =
     useState<Questions[]>();
-  const [outcomeVocabList, setOutcomeVocabList] = useState<Questions[]>();
+  const [outcomeVocabList, setOutcomeVocabList] = useState<Questions[]>([]);
 
   const correctVocab = reviewingQuestionsArr?.[round];
   const [currentOptions, setCurrentOptions] = useState<[string, string][]>([]);
@@ -362,21 +402,10 @@ function BattleReview({ pin }: { pin: string }) {
   const [countDown, setCountDown] = useState<number>(5);
   const [showBtn, setShowBtn] = useState<boolean>(false);
   const [friendList, setFriendList] = useState<string[]>();
+  const [invitingList, setInvitingList] = useState<string[]>();
   const [hasInvited, setHasInvited] = useState<boolean[]>([]);
   const [friendState, setFriendState] = useState<string[]>(["offline"]);
   const ref = useRef<null | AddFunction>(null);
-
-  const handleSyncScore = useCallback(
-    async (answerCountAfterClick: AnswerCount) => {
-      if (pin) {
-        const roomRef = doc(db, "battleRooms", pin);
-        await updateDoc(roomRef, {
-          answerCount: answerCountAfterClick,
-        });
-      }
-    },
-    [pin]
-  );
 
   useEffect(() => {
     async function getRoomInfo() {
@@ -423,7 +452,7 @@ function BattleReview({ pin }: { pin: string }) {
   }, [correctVocab, questionsNumber, reviewingQuestionsArr, round]);
 
   useEffect(() => {
-    let newFriendState: any = [];
+    let newFriendState: string[] = [];
     friendList?.forEach((friendEmail) => {
       async function checkState() {
         const friendRef = collection(db, "users");
@@ -452,7 +481,7 @@ function BattleReview({ pin }: { pin: string }) {
       unsub = onSnapshot(
         query(collection(db, "users"), where("email", "in", friendList)),
         (doc) => {
-          let newFriendState: any = [];
+          let newFriendState: string[] = [];
           friendList?.forEach((friendEmail) => {
             async function checkState() {
               const friendRef = collection(db, "users");
@@ -477,6 +506,7 @@ function BattleReview({ pin }: { pin: string }) {
     if (pin) {
       unsub = onSnapshot(doc(db, "battleRooms", pin), (doc) => {
         const data = doc.data() as RoomInfo;
+        setInvitingList(data.invitingList);
         const ownerAnswerCount =
           data?.answerCount.owner.correct + data?.answerCount.owner.wrong;
         const competitorAnswerCount =
@@ -495,7 +525,10 @@ function BattleReview({ pin }: { pin: string }) {
         if (data.ownerId !== userId) setIsOwner(false);
         if (data.competitorName !== "") setCompetitorName(data.competitorName);
         if (isWaiting && data?.status === "playing") setIsWaiting(false);
-        if (data.answerCount) setAnswerCount(data.answerCount);
+        if (data.answerCount) {
+          console.log("sub", data.answerCount);
+          setAnswerCount(data.answerCount);
+        }
         if (
           ownerAnswerCount === competitorAnswerCount &&
           ownerAnswerCount !== 0 &&
@@ -524,38 +557,34 @@ function BattleReview({ pin }: { pin: string }) {
   }, [countDown, isWaiting]);
 
   useEffect(() => {
-    if (countDown === 0 && !isAnswered && outcomeVocabList) {
-      const answerCountAfterClick = {
-        owner: { ...answerCount.owner },
-        competitor: { ...answerCount.competitor },
-      };
+    if (countDown !== 0) return;
+    if (isAnswered) return;
 
-      const vocabListAfterTimeout = [...outcomeVocabList];
+    const roomRef = doc(db, "battleRooms", pin);
 
-      if (answerCount.owner.correct + answerCount.owner.wrong < round + 1)
-        answerCountAfterClick.owner.wrong += 1;
-      vocabListAfterTimeout[round].isCorrect = false;
-      if (
-        answerCount.competitor.correct + answerCount.competitor.wrong <
-        round + 1
-      )
-        answerCountAfterClick.competitor.wrong += 1;
-      vocabListAfterTimeout[round].isCorrect = false;
+    const who = isOwner ? "owner" : "competitor";
 
-      handleSyncScore(answerCountAfterClick);
-      setOutcomeVocabList(vocabListAfterTimeout);
-    }
+    updateDoc(roomRef, {
+      ["answerCount." + who + ".wrong"]: increment(1),
+    });
 
-    if (countDown === 0 && round + 1 < questionsNumber) {
-      setTimeout(() => {
-        setRound(round + 1);
-        setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
-        setCountDown(5);
-        setIsAnswered(false);
-      }, 500);
-    }
+    setIsAnswered(true);
 
-    if (!gameOver && countDown === 0 && round + 1 === questionsNumber) {
+    setOutcomeVocabList((prev) => {
+      return prev.map((question, index) => {
+        if (index !== round) return question;
+        return {
+          ...question,
+          isCorrect: false,
+        };
+      });
+    });
+  }, [countDown, isAnswered, isOwner, pin, round]);
+
+  useEffect(() => {
+    if (countDown !== 0 || gameOver || isWaiting) return;
+    const isFinalRound = round + 1 === questionsNumber;
+    if (isFinalRound) {
       setGameOver(true);
       setIsAnswered(true);
       setShowBtn(true);
@@ -572,11 +601,10 @@ function BattleReview({ pin }: { pin: string }) {
 
       const checkUserScoreStatus = async () => {
         const docRef = doc(db, "users", userId);
-        const docSnap: any = await getDoc(docRef);
+        const docSnap: DocumentSnapshot<DocumentData> = await getDoc(docRef);
 
-        const score = docSnap.data().currentScore;
-        const isChallenging = docSnap.data().isChallenging;
-        console.log({ score });
+        const score = docSnap?.data()?.currentScore;
+        const isChallenging = docSnap?.data()?.isChallenging;
 
         if (isChallenging) {
           if (typeof score === "number" && score < 5) {
@@ -603,20 +631,25 @@ function BattleReview({ pin }: { pin: string }) {
         answerCount.owner.correct < answerCount.competitor.correct
       )
         checkUserScoreStatus();
+    } else {
+      setTimeout(() => {
+        setRound(round + 1);
+        setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
+        setCountDown(5);
+        setIsAnswered(false);
+      }, 500);
     }
   }, [
-    answerCount.competitor,
-    answerCount.owner,
+    answerCount.competitor.correct,
+    answerCount.owner.correct,
     countDown,
     gameOver,
-    handleSyncScore,
-    isAnswered,
     isOwner,
-    outcomeVocabList,
     pin,
     questionsNumber,
     round,
     userId,
+    isWaiting,
   ]);
 
   const handlePlayAudio = (audioLink: string) => {
@@ -627,13 +660,13 @@ function BattleReview({ pin }: { pin: string }) {
   async function handleCompetitorJoinBattle() {
     const getUserInfo = async () => {
       const docRef = doc(db, "users", userId);
-      const docSnap: any = await getDoc(docRef);
+      const docSnap: DocumentSnapshot<DocumentData> = await getDoc(docRef);
 
       if (pin) {
         const roomRef = doc(db, "battleRooms", pin);
         await updateDoc(roomRef, {
           competitorId: userId,
-          competitorName: docSnap.data().name,
+          competitorName: docSnap?.data()?.name,
         });
       }
     };
@@ -654,6 +687,10 @@ function BattleReview({ pin }: { pin: string }) {
     index: number
   ) => {
     if (hasInvited[index]) return;
+
+    const battleRoomRef = doc(db, "battleRooms", pin);
+    const battleRoomInfo = await getDoc(battleRoomRef);
+
     const friendRef = collection(db, "users");
     const q = query(friendRef, where("email", "==", friendEmail));
     const querySnapshot = await getDocs(q);
@@ -667,8 +704,29 @@ function BattleReview({ pin }: { pin: string }) {
             time: new Date(),
           }),
         });
+        await updateDoc(battleRoomRef, {
+          invitingList: arrayUnion(friendEmail),
+        });
       };
-      updateFriendStatus();
+      if (!battleRoomInfo.data()?.invitingList.includes(friendEmail)) {
+        updateFriendStatus();
+      }
+    });
+  };
+
+  const handleCorrectAnswer = () => {
+    const roomRef = doc(db, "battleRooms", pin);
+    const who = isOwner ? "owner" : "competitor";
+    updateDoc(roomRef, {
+      ["answerCount." + who + ".correct"]: increment(1),
+    });
+  };
+
+  const handleWrongAnswer = () => {
+    const roomRef = doc(db, "battleRooms", pin);
+    const who = isOwner ? "owner" : "competitor";
+    updateDoc(roomRef, {
+      ["answerCount." + who + ".wrong"]: increment(1),
     });
   };
 
@@ -688,27 +746,33 @@ function BattleReview({ pin }: { pin: string }) {
                   Waiting for the competitor joining the battle
                 </WaitingMessage>
                 <Title>Friend List</Title>
-                {friendList?.map((friendEmail, index) => (
-                  <InviteWrapper key={friendEmail}>
-                    <Email>{friendEmail}</Email>
-                    <FriendStateWrapper stateColor={friendState[index]}>
-                      {friendState[index]}
-                      <FriendState stateColor={friendState[index]} />
-                      <div
-                        onClick={() => {
-                          const newHasInvited = [...hasInvited];
-                          newHasInvited[index] = true;
-                          setHasInvited(newHasInvited);
-                          handleInviteFriendBattle(friendEmail, index);
-                        }}
-                      >
-                        <Button btnType="secondary">
-                          {!hasInvited[index] ? "Invite" : "Inviting"}
-                        </Button>
-                      </div>
-                    </FriendStateWrapper>
-                  </InviteWrapper>
-                ))}
+                {friendList?.map((friendEmail, index) => {
+                  return (
+                    <InviteWrapper key={friendEmail}>
+                      <Email>{friendEmail}</Email>
+                      <FriendStateWrapper stateColor={friendState[index]}>
+                        {friendState[index]}
+                        <FriendState stateColor={friendState[index]} />
+
+                        <div
+                          onClick={() => {
+                            handleInviteFriendBattle(friendEmail, index);
+                            const newHasInvited = [...hasInvited];
+                            newHasInvited[index] = true;
+                            setHasInvited(newHasInvited);
+                          }}
+                        >
+                          <Button btnType="secondary">
+                            {hasInvited[index] ||
+                            invitingList?.includes(friendEmail)
+                              ? "Inviting"
+                              : "Invite"}
+                          </Button>
+                        </div>
+                      </FriendStateWrapper>
+                    </InviteWrapper>
+                  );
+                })}
               </>
             )
           ) : isCompetitorIn ? (
@@ -768,29 +832,22 @@ function BattleReview({ pin }: { pin: string }) {
                   );
                   setShowAnswerArr(answerStatus);
 
-                  if (outcomeVocabList) {
-                    const answerCountAfterClick = {
-                      owner: { ...answerCount.owner },
-                      competitor: { ...answerCount.competitor },
-                    };
-
-                    const vocabListAfterClick = [...outcomeVocabList];
-
-                    if (clickedVocab === correctVocab?.vocab) {
-                      if (isOwner) answerCountAfterClick.owner.correct += 1;
-                      else answerCountAfterClick.competitor.correct += 1;
-
-                      vocabListAfterClick[round].isCorrect = true;
-                    } else {
-                      if (isOwner) answerCountAfterClick.owner.wrong += 1;
-                      else answerCountAfterClick.competitor.wrong += 1;
-
-                      vocabListAfterClick[round].isCorrect = false;
-                    }
-
-                    handleSyncScore(answerCountAfterClick);
-                    setOutcomeVocabList(vocabListAfterClick);
+                  if (clickedVocab === correctVocab?.vocab) {
+                    handleCorrectAnswer();
+                  } else {
+                    handleWrongAnswer();
                   }
+
+                  setOutcomeVocabList((outcomeVocabList) => {
+                    return outcomeVocabList.map((question, index) => {
+                      if (index === round)
+                        return {
+                          ...question,
+                          isCorrect: clickedVocab === correctVocab?.vocab,
+                        };
+                      return question;
+                    });
+                  });
                 }
               }}
             >
@@ -811,7 +868,7 @@ function BattleReview({ pin }: { pin: string }) {
     return (
       <VocabList key={vocab + partOfSpeech}>
         <VocabDiv>
-          ▶ {vocab}{" "}
+          {vocab}{" "}
           {audioLink && (
             <AudioImg
               src={audio}
@@ -898,17 +955,18 @@ function BattleReview({ pin }: { pin: string }) {
         }}
       />
       <Wrapper>
-        <RoundCount>Round: {round + 1}</RoundCount>
+        <RoundCount>
+          Round: {round + 1} / {questionsNumber}
+        </RoundCount>
         <Header>
           <OwnerCount>
-            <div>
-              <p>
-                Owner:
-                {window.innerWidth < 601 && <br />} {ownerName}
-              </p>
-              O: {answerCount.owner.correct} X: {answerCount.owner.wrong} /
-              Total: {questionsNumber}
-            </div>
+            <div>{ownerName}</div>
+            <ScoreCount>
+              <AnsImg src={correct} alt="correct" />
+              &nbsp;&nbsp;{answerCount.owner.correct}&nbsp;&nbsp;
+              <AnsImg src={wrong} alt="wrong" />
+              &nbsp;&nbsp;{answerCount.owner.wrong}
+            </ScoreCount>
             <Div>
               <ScoreBar insideColor={true} score={answerCount.owner.correct}>
                 <ScoreBar>
@@ -920,17 +978,16 @@ function BattleReview({ pin }: { pin: string }) {
               </ScoreBar>
             </Div>
           </OwnerCount>
-          {isWaiting ? <></> : <p>{countDown} seconds left</p>}
+          {isWaiting ? <></> : <CountDown>{countDown} s</CountDown>}
           <CompetitorCount>
-            <div>
-              <p>
-                Competitor:
-                {window.innerWidth < 601 && <br />}{" "}
-                {competitorName || (window.innerWidth < 601 && <br />)}
-              </p>
-              O: {answerCount.competitor.correct} X:{" "}
-              {answerCount.competitor.wrong} / Total: {questionsNumber}
-            </div>
+            <div>{competitorName || "Competitor"}</div>
+            <ScoreCount>
+              <AnsImg src={correct} alt="correct" />
+              &nbsp;&nbsp;
+              {answerCount.competitor.correct}&nbsp;&nbsp;
+              <AnsImg src={wrong} alt="wrong" />
+              &nbsp;&nbsp;{answerCount.competitor.wrong}
+            </ScoreCount>
             <Div>
               <ScoreBar
                 insideColor={true}

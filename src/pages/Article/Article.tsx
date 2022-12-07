@@ -55,8 +55,12 @@ const Content = styled.div`
   font-size: 16px;
   overflow-y: scroll;
   scrollbar-width: none;
+  background-color: rgba(255, 255, 255, 0.7);
   ::-webkit-scrollbar {
     display: none; /* for Chrome, Safari, and Opera */
+  }
+  img {
+    max-width: 100%;
   }
 `;
 

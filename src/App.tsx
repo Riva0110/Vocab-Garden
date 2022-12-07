@@ -5,7 +5,13 @@ import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { keywordContext } from "./context/keywordContext";
 import { authContext } from "./context/authContext";
 import logo from "./logoName.png";
-import { arrayRemove, doc, onSnapshot, updateDoc } from "firebase/firestore";
+import {
+  arrayRemove,
+  doc,
+  getDoc,
+  onSnapshot,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "./firebase/firebase";
 import bell from "./notification.png";
 import yellowBell from "./notification-yellow.png";
@@ -80,9 +86,33 @@ const InputWrapper = styled.div`
   justify-content: center;
 `;
 
+const SearchHistory = styled.div`
+  width: 180px;
+  border: 1px solid lightgray;
+  position: fixed;
+  top: 45px;
+  right: 335px;
+  background-color: white;
+  cursor: pointer;
+  @media screen and (max-width: 635px) {
+    left: 120px;
+  }
+  @media screen and (max-width: 601px) {
+    right: 100px;
+    left: auto;
+  }
+  @media screen and (max-width: 331px) {
+    right: auto;
+    left: 50px;
+  }
+`;
+
+const SearchedWord = styled.div`
+  padding-left: 10px;
+`;
+
 const LogoImg = styled.img`
   height: 30px;
-  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.1);
 `;
 
 const Menu = styled.img`
@@ -134,8 +164,10 @@ const XDiv = styled(X)`
   @media screen and (max-width: 601px) {
     display: flex;
     color: white;
-    width: 100%;
     margin-top: 20px;
+    margin-left: auto;
+    margin-right: 20px;
+    text-align: end;
   } ;
 `;
 
@@ -176,6 +208,7 @@ const Input = styled.input`
   border: 1px solid lightgray;
   border-radius: 5px;
   padding-left: 10px;
+  font-size: 16px;
   &:focus {
     outline: none;
   }
@@ -201,9 +234,16 @@ const Notification = styled.div`
   padding: 20px;
   gap: 20px;
   box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+  overflow-y: scroll;
+  max-height: 270px;
   @media screen and (max-width: 601px) {
     right: 50px;
   }
+`;
+
+const Clear = styled.div`
+  border: 1px solid lightgray;
+  font-size: 12px;
 `;
 
 const Invitation = styled.div``;
@@ -216,6 +256,27 @@ const InvitationA = styled(Link)`
 
 const Time = styled.div`
   font-size: 12px;
+  color: lightgray;
+`;
+
+const ProfileMenu = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80px;
+  padding: 10px;
+  gap: 10px;
+  background-color: white;
+  position: fixed;
+  right: 20px;
+  top: 45px;
+
+  border: lightgray 1px solid;
+`;
+
+const ProfileLink = styled(Link)`
+  text-decoration: none;
+  color: #4f4f4f;
 `;
 
 interface Props {
@@ -247,17 +308,22 @@ function App() {
     false,
     false,
     false,
+    false,
   ]);
+  const [isProfileHovered, setIsProfileHovered] = useState<boolean>(false);
   const [showNav, setShowNav] = useState<boolean>(false);
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [showSearchHistory, setShowSearchHistory] = useState<boolean>(false);
   const pathName = window.location.pathname;
   const notificationRef = useRef(null);
-  useOnClickOutside(notificationRef, () => setShowInvitation(false));
+  useOnClickOutside(notificationRef, async () => setShowInvitation(false));
 
   useEffect(() => {
     let unsub;
     if (isLogin) {
       unsub = onSnapshot(doc(db, "users", userId), (doc) => {
         setBattleInvitation(doc.data()?.battleInvitation);
+        if (doc.data()?.battleInvitation.length > 0) setShowInvitation(true);
       });
     } else {
       setBattleInvitation([]);
@@ -265,6 +331,15 @@ function App() {
     }
     return unsub;
   }, [isLogin, userId]);
+
+  async function handleFocusInput() {
+    const searchHistoryRef = doc(db, "searchHistory", userId);
+    const docSnap = await getDoc(searchHistoryRef);
+    if (docSnap) {
+      const searchHistoryData = docSnap.data()?.words as string[];
+      setSearchHistory(searchHistoryData);
+    }
+  }
 
   const handleClearInvitation = async ({
     ownerName,
@@ -355,8 +430,8 @@ function App() {
           <NavLink
             to={"/articles"}
             style={({ isActive }) => renderNavLink(isActive, 0)}
-            onMouseEnter={() => setIsHover([true, false, false, false])}
-            onMouseLeave={() => setIsHover([false, false, false, false])}
+            onMouseEnter={() => setIsHover([true, false, false, false, false])}
+            onMouseLeave={() => setIsHover([false, false, false, false, false])}
           >
             Article
           </NavLink>
@@ -365,32 +440,64 @@ function App() {
           <NavLink
             to={"/vocabbook"}
             style={({ isActive }) => renderNavLink(isActive, 1)}
-            onMouseEnter={() => setIsHover([false, true, false, false])}
-            onMouseLeave={() => setIsHover([false, false, false, false])}
+            onMouseEnter={() => setIsHover([false, true, false, false, false])}
+            onMouseLeave={() => setIsHover([false, false, false, false, false])}
           >
             VocabBook
-          </NavLink>
-        </NavDiv>
-        <NavDiv length={"Friend".length}>
-          <NavLink
-            to={"/friends"}
-            style={({ isActive }) => renderNavLink(isActive, 2)}
-            onMouseEnter={() => setIsHover([false, false, true, false])}
-            onMouseLeave={() => setIsHover([false, false, false, false])}
-          >
-            Friend
           </NavLink>
         </NavDiv>
         <NavDiv length={"Profile".length}>
           <NavLink
             to={"/profile"}
-            style={({ isActive }) => renderNavLink(isActive, 3)}
-            onMouseEnter={() => setIsHover([false, false, false, true])}
-            onMouseLeave={() => setIsHover([false, false, false, false])}
+            style={({ isActive }) => renderNavLink(isActive, 2)}
+            onMouseEnter={() => {
+              setIsHover([false, false, true, true, false]);
+              setIsProfileHovered(true);
+            }}
+            onMouseLeave={() => {
+              setIsHover([false, false, false, false, false]);
+              setIsProfileHovered(false);
+            }}
           >
             Profile
           </NavLink>
         </NavDiv>
+        {window.screen.width < 601 && (
+          <NavDiv length={"Profile".length}>
+            <NavLink
+              to={"/profile"}
+              style={({ isActive }) => renderNavLink(isActive, 3)}
+              onMouseEnter={() => {
+                setIsHover([false, false, true, true, false]);
+                setIsProfileHovered(true);
+              }}
+              onMouseLeave={() => {
+                setIsHover([false, false, false, false, false]);
+                setIsProfileHovered(false);
+              }}
+            >
+              &nbsp;&nbsp;&nbsp;&nbsp;Garden
+            </NavLink>
+          </NavDiv>
+        )}
+        {window.screen.width < 601 && (
+          <NavDiv length={"Profile".length}>
+            <NavLink
+              to={"/friends"}
+              style={({ isActive }) => renderNavLink(isActive, 4)}
+              onMouseEnter={() => {
+                setIsHover([false, false, true, false, true]);
+                setIsProfileHovered(true);
+              }}
+              onMouseLeave={() => {
+                setIsHover([false, false, false, false, false]);
+                setIsProfileHovered(false);
+              }}
+            >
+              &nbsp;&nbsp;&nbsp;&nbsp;Friend
+            </NavLink>
+          </NavDiv>
+        )}
       </>
     );
   }
@@ -405,22 +512,55 @@ function App() {
           <BrandName>Vocab Garden</BrandName>
         </HomeLink>
         <HeaderNav>
+          {showSearchHistory && (
+            <SearchHistory
+              onMouseEnter={() => setShowSearchHistory(true)}
+              onMouseLeave={() => setShowSearchHistory(false)}
+            >
+              {[...searchHistory]
+                ?.reverse()
+                .slice(0, 10)
+                .map((word: string) => (
+                  <SearchedWord
+                    key={word}
+                    onClick={() => {
+                      setKeyword(word);
+                      if (
+                        pathName !== "/" &&
+                        pathName !== "/articles" &&
+                        pathName !== "/vocabbook"
+                      ) {
+                        navigate("/");
+                      }
+                      setShowSearchHistory(false);
+                    }}
+                  >
+                    {word}
+                  </SearchedWord>
+                ))}
+            </SearchHistory>
+          )}
           <InputWrapper>
             <Input
-              placeholder="search a word..."
+              placeholder="Search a word..."
               onChange={(e) => {
                 e.target.value = e.target.value.toLowerCase();
                 setInputVocab(e.target.value);
+              }}
+              onFocus={async () => {
+                await handleFocusInput();
+                setShowSearchHistory(true);
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && inputVocab && inputVocab !== "") {
                   setKeyword(inputVocab);
                   const target = e.target as HTMLInputElement;
                   target.value = "";
-                  if (pathName === "/profile") {
-                    navigate("/");
-                  }
-                  if (pathName === "/friends") {
+                  if (
+                    pathName !== "/" &&
+                    pathName !== "/articles" &&
+                    pathName !== "/vocabbook"
+                  ) {
                     navigate("/");
                   }
                 }
@@ -435,6 +575,19 @@ function App() {
             <Menu src={menu} alt="menu" onClick={() => setShowNav(true)} />
           </InputWrapper>
           <DesktopNav>{renderNav()}</DesktopNav>
+          {isProfileHovered && window.innerWidth > 601 && (
+            <ProfileMenu
+              onMouseEnter={() => {
+                setIsProfileHovered(true);
+              }}
+              onMouseLeave={() => {
+                setIsProfileHovered(false);
+              }}
+            >
+              <ProfileLink to="profile">Garden</ProfileLink>
+              <ProfileLink to="profile/friends">Friend</ProfileLink>
+            </ProfileMenu>
+          )}
         </HeaderNav>
       </Header>
       {window.innerWidth < 601 && (
@@ -446,26 +599,39 @@ function App() {
       <Main>
         <Notification showInvitation={showInvitation} ref={notificationRef}>
           {battleInvitation?.length !== 0 ? (
-            battleInvitation?.map(
-              ({ ownerName, pin, time }: BattleInvitation) => {
-                const newTime = new Date(time.seconds * 1000);
-                return (
-                  <Invitation key={pin}>
-                    <InvitationA
-                      style={{ marginLeft: 0 }}
-                      to={`/vocabbook/review/${pin}`}
-                      onClick={() => {
-                        setShowInvitation(false);
-                        handleClearInvitation({ ownerName, pin, time });
-                      }}
-                    >
-                      {ownerName} invites you to battle! ▶
-                    </InvitationA>
-                    <Time>{newTime.toLocaleString()}</Time>
-                  </Invitation>
-                );
-              }
-            )
+            <>
+              <Clear
+                onClick={async () => {
+                  const userRef = doc(db, "users", userId);
+                  await updateDoc(userRef, {
+                    battleInvitation: [],
+                  });
+                }}
+              >
+                clear all
+              </Clear>
+              {battleInvitation
+                ?.reverse()
+                .slice(0, 10)
+                .map(({ ownerName, pin, time }: BattleInvitation) => {
+                  const newTime = new Date(time.seconds * 1000);
+                  return (
+                    <Invitation key={pin}>
+                      <InvitationA
+                        style={{ marginLeft: 0 }}
+                        to={`/vocabbook/review/${pin}`}
+                        onClick={() => {
+                          setShowInvitation(false);
+                          handleClearInvitation({ ownerName, pin, time });
+                        }}
+                      >
+                        {ownerName} invites you to battle! &gt;&gt;&gt;
+                      </InvitationA>
+                      <Time>{newTime.toLocaleString()}</Time>
+                    </Invitation>
+                  );
+                })}
+            </>
           ) : (
             <div>There's no invitation.</div>
           )}

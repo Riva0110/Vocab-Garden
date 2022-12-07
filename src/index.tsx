@@ -8,6 +8,7 @@ import Article from "./pages/Article/Article";
 import VocabBookLayout from "./pages/VocabBook/VocabBookLayout";
 import Home from "./pages/Home/Home";
 import Profile from "./pages/Profile/Profile";
+import ProfileLayout from "./pages/Profile/ProfileLayout";
 import ReviewLayout from "./pages/VocabBook/Review/ReviewLayout";
 import Review from "./pages/VocabBook/Review/Review";
 import BattleReview from "./pages/VocabBook/Review/BattleReview";
@@ -44,8 +45,10 @@ root.render(
                   <Route path=":pin" element={<BattleReview />} />
                 </Route>
               </Route>
-              <Route path="friends" element={<Friends />} />
-              <Route path="profile" element={<Profile />} />
+              <Route path="profile" element={<ProfileLayout />}>
+                <Route index element={<Profile />} />
+                <Route path="friends" element={<Friends />} />
+              </Route>
               <Route path="*" element={<Home />} />
             </Route>
           </Routes>

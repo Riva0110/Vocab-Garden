@@ -5,10 +5,20 @@ import { vocabBookContext } from "../../../context/vocabBookContext";
 import { authContext } from "../../../context/authContext";
 import audio from "../../../components/audio.png";
 import { useNavigate } from "react-router-dom";
-import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  DocumentData,
+  DocumentSnapshot,
+  getDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
 import plant from "./reviewPlant.webp";
 import Button from "../../../components/Button/Button";
+import correct from "./correct.png";
+import wrong from "./wrong.png";
 
 interface Props {
   correct?: boolean;
@@ -35,11 +45,15 @@ const Img = styled.img`
   right: 0px;
   bottom: 50px;
   opacity: 0.5;
+  @media screen and (max-height: 701px) {
+    display: none;
+  }
 `;
 
 const RoundCount = styled.div`
   margin-top: 20px;
   text-align: center;
+  margin-bottom: 10px;
 `;
 
 const Header = styled.div`
@@ -48,6 +62,17 @@ const Header = styled.div`
   text-align: center;
   position: relative;
   z-index: 1;
+`;
+
+const ScoreCount = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const AnsImg = styled.img`
+  width: 20px;
+  height: 20px;
 `;
 
 const Div = styled.div`
@@ -164,8 +189,11 @@ const Message = styled.div`
 `;
 
 const OutcomeWrapper = styled.div`
-  width: 50vw;
+  width: 70vw;
   margin: 20px auto;
+  @media screen and (min-width: 1441px) {
+    width: 50vw;
+  }
 `;
 
 const ReviewVocabs = styled.div`
@@ -261,13 +289,17 @@ export default function Review() {
   ]);
 
   useEffect(() => {
+    if (reviewingQuestions === undefined) setReviewingQuestions(questions);
+  }, [questions, reviewingQuestions, vocabBooks]);
+
+  useEffect(() => {
     getVocabBooks(userId);
 
     const getUserInfo = async (userId: string) => {
       const docRef = doc(db, "users", userId);
-      const docSnap: any = await getDoc(docRef);
-      setScore(docSnap.data().currentScore);
-      setIsChallenging(docSnap.data().isChallenging);
+      const docSnap: DocumentSnapshot<DocumentData> = await getDoc(docRef);
+      setScore(docSnap?.data()?.currentScore);
+      setIsChallenging(docSnap?.data()?.isChallenging);
     };
     getUserInfo(userId);
   }, [getVocabBooks, userId]);
@@ -400,15 +432,12 @@ export default function Review() {
                       }) => {
                         if (vocab === correctVocab?.vocab) {
                           if (log && log?.length > 0) {
-                            const correctCount = log?.reduce(
-                              (acc: any, item) => {
-                                if (item.isCorrect) {
-                                  acc += 1;
-                                }
-                                return acc;
-                              },
-                              0
-                            );
+                            const correctCount = log?.reduce((acc, item) => {
+                              if (item.isCorrect) {
+                                acc += 1;
+                              }
+                              return acc;
+                            }, 0);
                             return {
                               vocab,
                               audioLink,
@@ -541,7 +570,7 @@ export default function Review() {
     return (
       <VocabList key={vocab + partOfSpeech}>
         <VocabDiv>
-          ▶ {vocab}{" "}
+          {vocab}{" "}
           {audioLink && (
             <AudioImg
               src={audio}
@@ -632,12 +661,17 @@ export default function Review() {
   return (
     <Wrapper>
       <Img src={plant} alt="plant" />
-      <RoundCount>Round: {gameOver ? questionsNumber : round + 1}</RoundCount>
+      <RoundCount>
+        Round: {gameOver ? questionsNumber : round + 1} / {questionsNumber}
+      </RoundCount>
       <Header>
-        <div>
-          O: {answerCount.correct} X: {answerCount.wrong} / Total:{" "}
-          {questionsNumber}
-        </div>
+        <ScoreCount>
+          <AnsImg src={correct} alt="correct" />
+          &nbsp;&nbsp;{answerCount.correct}&nbsp;&nbsp;
+          <AnsImg src={wrong} alt="wrong" />
+          &nbsp;&nbsp;
+          {answerCount.wrong}
+        </ScoreCount>
         <Div>
           <ScoreBarDiv>
             <ScoreBar insideColor={true} score={answerCount.correct}>

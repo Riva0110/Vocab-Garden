@@ -65,6 +65,7 @@ const Input = styled.input`
   width: 70%;
   height: 25px;
   border: none;
+  font-size: 16px;
   &:focus {
     outline: none;
   }
@@ -132,7 +133,7 @@ export default function Friends() {
   const [myEmail, setMyEmail] = useState<string>();
   const [searchingEmail, setSearchingEmail] = useState<string>("");
   const [friendList, setFriendList] = useState<string[]>();
-  const [friendRequest, setfriendRequest] = useState<string[]>();
+  const [friendRequest, setFriendRequest] = useState<string[]>();
   const [friendState, setFriendState] = useState<string[]>([]);
   const [awaitingFriendReply, setAwaitingFriendReply] = useState<string[]>();
   const emailInput = useRef<HTMLInputElement>(null);
@@ -144,7 +145,7 @@ export default function Friends() {
       unsub = onSnapshot(doc(db, "users", userId), (doc) => {
         setMyEmail(doc.data()?.email);
         setFriendList(doc.data()?.friendList);
-        setfriendRequest(doc.data()?.friendRequest);
+        setFriendRequest(doc.data()?.friendRequest);
         setAwaitingFriendReply(doc.data()?.awaitingFriendReply);
       });
     }
@@ -157,7 +158,7 @@ export default function Friends() {
       unsub = onSnapshot(
         query(collection(db, "users"), where("email", "in", friendList)),
         (doc) => {
-          let newFriendState: any = [];
+          let newFriendState: string[] = [];
           friendList?.forEach((friendEmail) => {
             async function checkState() {
               const friendRef = collection(db, "users");
@@ -177,7 +178,7 @@ export default function Friends() {
   }, [friendList, isLogin, userId]);
 
   useEffect(() => {
-    let newFriendState: any = [];
+    let newFriendState: string[] = [];
     friendList?.forEach((friendEmail) => {
       async function checkState() {
         const friendRef = collection(db, "users");
@@ -267,7 +268,7 @@ export default function Friends() {
         <FriendRequest>
           <Input
             ref={emailInput}
-            placeholder="search friends by email..."
+            placeholder="Search by emails..."
             onChange={(e) => setSearchingEmail(e.target.value)}
           />
           <div

@@ -18,6 +18,7 @@ const Wrapper = styled.button`
   cursor: pointer;
   @media screen and (max-width: 601px) {
     min-width: 0px;
+    font-size: 16px;
   }
 `;
 

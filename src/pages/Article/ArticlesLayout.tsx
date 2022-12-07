@@ -10,6 +10,9 @@ const Wrapper = styled.div`
   display: flex;
   padding: 80px 20px 20px 20px;
   gap: 30px;
+  a {
+    color: #60827a !important;
+  }
   @media screen and (min-width: 1440px) {
     margin: 0 auto;
     max-width: 1440px;

@@ -5,65 +5,6 @@ import styled from "styled-components";
 import { authContext } from "../../context/authContext";
 import { db } from "../../firebase/firebase";
 
-// const data = [
-//   {
-//     docId: "1",
-//     userId: 1,
-//     time: "11/25",
-//     correctRate: 0.6,
-//     vocabBook: "unsorted",
-//   },
-//   {
-//     docId: "2",
-//     userId: 1,
-//     time: "11/24",
-//     correctRate: 0.1,
-//     vocabBook: "finance",
-//   },
-//   {
-//     docId: "3",
-//     userId: 1,
-//     time: "11/24",
-//     correctRate: 1,
-//     vocabBook: "technology",
-//   },
-//   {
-//     docId: "4",
-//     userId: 1,
-//     time: "11/20",
-//     correctRate: 0.7,
-//     vocabBook: "unsorted",
-//   },
-//   {
-//     docId: "5",
-//     userId: 1,
-//     time: "11/24",
-//     correctRate: 0.33,
-//     vocabBook: "unsorted",
-//   },
-//   {
-//     docId: "6",
-//     userId: 1,
-//     time: "11/20",
-//     correctRate: 0.7,
-//     vocabBook: "unsorted",
-//   },
-//   {
-//     docId: "7",
-//     userId: 1,
-//     time: "11/20",
-//     correctRate: 0.1,
-//     vocabBook: "finance",
-//   },
-//   {
-//     docId: "8",
-//     userId: 1,
-//     time: "11/24",
-//     correctRate: 0.33,
-//     vocabBook: "unsorted",
-//   },
-// ];
-
 const Wrapper = styled.div`
   width: 100%;
   padding: 20px;
@@ -85,7 +26,7 @@ const Chart = styled.div`
   justify-content: space-around;
   align-items: flex-end;
   width: 100%;
-  min-height: 200px;
+  min-height: 250px;
   border-left: 1px solid gray;
   border-bottom: 1px solid gray;
   position: relative;
@@ -98,10 +39,15 @@ const LabelX = styled.div`
   padding-top: 10px;
 `;
 
-const DateText = styled.div``;
+const DateText = styled.div`
+  width: 32px;
+`;
 
 const Bar = styled.div`
   width: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
 const ReviewCount = styled.div`
@@ -116,6 +62,9 @@ const BarItem = styled.div`
     props.isHovered ? "#607973" : "#95caca"};
   border-bottom: 1px solid white;
   cursor: pointer;
+  @media screen and (max-width: 1025px) {
+    width: 80%;
+  }
 `;
 
 const Message = styled.div`
