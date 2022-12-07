@@ -315,7 +315,7 @@ function App() {
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const [showSearchHistory, setShowSearchHistory] = useState<boolean>(false);
   const pathName = window.location.pathname;
-  const notificationRef = useRef(null);
+  const notificationRef = useRef<HTMLDivElement | null>(null);
   useOnClickOutside(notificationRef, async () => setShowInvitation(false));
 
   useEffect(() => {
@@ -597,7 +597,12 @@ function App() {
         </MobileNav>
       )}
       <Main>
-        <Notification showInvitation={showInvitation} ref={notificationRef}>
+        <Notification
+          showInvitation={showInvitation}
+          ref={(ref) => {
+            notificationRef.current = ref;
+          }}
+        >
           {battleInvitation?.length !== 0 ? (
             <>
               <Clear
