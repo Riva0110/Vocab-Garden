@@ -513,15 +513,26 @@ function App() {
         </HomeLink>
         <HeaderNav>
           {showSearchHistory && (
-            <SearchHistory>
-              {searchHistory
+            <SearchHistory
+              onMouseEnter={() => setShowSearchHistory(true)}
+              onMouseLeave={() => setShowSearchHistory(false)}
+            >
+              {[...searchHistory]
                 ?.reverse()
                 .slice(0, 10)
                 .map((word: string) => (
                   <SearchedWord
+                    key={word}
                     onClick={() => {
-                      console.log("click word");
                       setKeyword(word);
+                      if (
+                        pathName !== "/" &&
+                        pathName !== "/articles" &&
+                        pathName !== "/vocabbook"
+                      ) {
+                        navigate("/");
+                      }
+                      setShowSearchHistory(false);
                     }}
                   >
                     {word}
@@ -540,16 +551,16 @@ function App() {
                 await handleFocusInput();
                 setShowSearchHistory(true);
               }}
-              onBlur={() => setShowSearchHistory(false)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && inputVocab && inputVocab !== "") {
                   setKeyword(inputVocab);
                   const target = e.target as HTMLInputElement;
                   target.value = "";
-                  if (pathName === "/profile") {
-                    navigate("/");
-                  }
-                  if (pathName === "/friends") {
+                  if (
+                    pathName !== "/" &&
+                    pathName !== "/articles" &&
+                    pathName !== "/vocabbook"
+                  ) {
                     navigate("/");
                   }
                 }
