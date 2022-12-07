@@ -25,10 +25,16 @@ const Wrapper = styled.button`
 interface Props {
   children: string;
   btnType: string;
+  onClick?: React.MouseEventHandler<HTMLButtonElement> & Function;
+  showBtn?: boolean;
 }
 
-function Button({ children, btnType }: Props) {
-  return <Wrapper btnType={btnType}>{children}</Wrapper>;
+function Button({ children, btnType, onClick, ...props }: Props) {
+  return (
+    <Wrapper {...props} btnType={btnType} onClick={onClick}>
+      {children}
+    </Wrapper>
+  );
 }
 
 export default Button;

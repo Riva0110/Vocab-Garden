@@ -503,10 +503,14 @@ export default function VocabDetails() {
                   </AddButton>
                 </AddBookWrapper>
                 <Buttons>
-                  <div onClick={() => setIsPopuping(false)}>
-                    <Button btnType="secondary">Cancel</Button>
-                  </div>
-                  <div
+                  <Button
+                    btnType="secondary"
+                    onClick={() => setIsPopuping(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    btnType="primary"
                     onClick={() => {
                       if (selectedvocabBook) {
                         handleSaveVocab(selectedvocabBook);
@@ -516,8 +520,8 @@ export default function VocabDetails() {
                       }
                     }}
                   >
-                    <Button btnType="primary">Done</Button>
-                  </div>
+                    Done
+                  </Button>
                 </Buttons>
               </SavePopup>
               <Hint>

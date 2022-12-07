@@ -173,12 +173,14 @@ const Btns = styled.div`
   justify-content: center;
 `;
 
-const BtnDiv = styled.div`
+const StyledButton = styled(Button)`
   display: ${(props: Props) => (props.showBtn ? "flex" : "none")};
+  margin: 0 auto;
   margin-top: 20px;
-  justify-content: flex-end;
+  justify-content: center;
   position: relative;
   z-index: 2;
+  width: 100px;
 `;
 
 const Message = styled.div`
@@ -536,16 +538,18 @@ export default function Review() {
             </Option>
           ))}
           {round === questionsNumber - 1 ? (
-            <BtnDiv
+            <StyledButton
+              btnType={"primary"}
               showBtn={showBtn}
               onClick={() => {
                 handleGameOver();
               }}
             >
-              <Button btnType={"primary"}>Done</Button>
-            </BtnDiv>
+              Done
+            </StyledButton>
           ) : (
-            <BtnDiv
+            <StyledButton
+              btnType={"primary"}
               showBtn={showBtn}
               onClick={() => {
                 setShowBtn(false);
@@ -553,8 +557,8 @@ export default function Review() {
                 setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
               }}
             >
-              <Button btnType={"secondary"}>Next &gt;&gt;&gt;</Button>
-            </BtnDiv>
+              Next &gt;&gt;&gt;
+            </StyledButton>
           )}
         </Options>
       </Main>
@@ -595,7 +599,8 @@ export default function Review() {
               : "Keep fighting, Keep pushing!"}
           </Message>
           <Btns>
-            <BtnDiv
+            <Button
+              btnType="secondary"
               showBtn={showBtn}
               onClick={() => {
                 setGameOver(false);
@@ -605,11 +610,15 @@ export default function Review() {
                 setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
               }}
             >
-              <Button btnType="secondary">Review again</Button>
-            </BtnDiv>
-            <BtnDiv showBtn={showBtn} onClick={() => navigate("/vocabbook")}>
-              <Button btnType="secondary">Back to VocabBooks</Button>
-            </BtnDiv>
+              Review again
+            </Button>
+            <Button
+              btnType="secondary"
+              showBtn={showBtn}
+              onClick={() => navigate("/vocabbook")}
+            >
+              Back to VocabBooks
+            </Button>
           </Btns>
           <ReviewVocabs>
             <WrongVocabs>

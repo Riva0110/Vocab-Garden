@@ -227,11 +227,11 @@ const Btns = styled.div`
   margin-top: 20px;
 `;
 
-const BtnDiv = styled.div`
-  display: ${(props: Props) => (props.showBtn ? "flex" : "none")};
-  margin-top: 20px;
-  justify-content: flex-end;
-`;
+// const BtnDiv = styled.div`
+//   display: ${(props: Props) => (props.showBtn ? "flex" : "none")};
+//   margin-top: 20px;
+//   justify-content: flex-end;
+// `;
 
 const Message = styled.div`
   text-align: center;
@@ -899,9 +899,13 @@ function BattleReview({ pin }: { pin: string }) {
             {addScore && "You've got 1 point!"}
           </Message>
           <Btns>
-            <BtnDiv showBtn={showBtn} onClick={() => navigate("/vocabbook")}>
-              <Button btnType="secondary">Back to VocabBooks</Button>
-            </BtnDiv>
+            <Button
+              btnType="secondary"
+              showBtn={showBtn}
+              onClick={() => navigate("/vocabbook")}
+            >
+              Back to VocabBooks
+            </Button>
           </Btns>
           <ReviewVocabs>
             <WrongVocabs>
