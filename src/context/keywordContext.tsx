@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
 
 type ContextProviderProps = {
   children: React.ReactNode;
@@ -32,8 +32,12 @@ export function KeywordContextProvider({ children }: ContextProviderProps) {
     }
   };
 
+  const memoizedValue = useMemo(() => {
+    return { keyword, setKeyword };
+  }, [keyword]);
+
   return (
-    <KeywordContext.Provider value={{ keyword, setKeyword }}>
+    <KeywordContext.Provider value={memoizedValue}>
       {children}
     </KeywordContext.Provider>
   );

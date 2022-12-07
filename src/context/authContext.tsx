@@ -148,7 +148,8 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
       });
     };
     updateState();
-    await signOut(auth);
+    signOut(auth);
+    return;
   };
 
   return (

@@ -1,4 +1,4 @@
-import { createContext, useCallback, useState } from "react";
+import { createContext, useCallback, useMemo, useState } from "react";
 import { getDoc, doc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 
@@ -53,10 +53,12 @@ export function VocabBookContextProvider({ children }: ContextProviderProps) {
     }
   }, []);
 
+  const memoizedValue = useMemo(() => {
+    return { vocabBooks, setVocabBooks, getVocabBooks, isSaved, setIsSaved };
+  }, [getVocabBooks, isSaved, vocabBooks]);
+
   return (
-    <VocabBookContext.Provider
-      value={{ vocabBooks, setVocabBooks, getVocabBooks, isSaved, setIsSaved }}
-    >
+    <VocabBookContext.Provider value={memoizedValue}>
       {children}
     </VocabBookContext.Provider>
   );
