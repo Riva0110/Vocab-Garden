@@ -24,7 +24,7 @@ import { X } from "react-feather";
 import Hint from "../components/Hint/Hint";
 
 interface Props {
-  isPopuping?: boolean;
+  isPoppingUp?: boolean;
   showVocabInMobile?: boolean;
 }
 
@@ -129,7 +129,7 @@ const SavePopup = styled.div`
   border-radius: 10px;
   top: 130px;
   background-color: white;
-  display: ${(props: Props) => (props.isPopuping ? "block" : "none")};
+  display: ${(props: Props) => (props.isPoppingUp ? "block" : "none")};
   padding: 10px;
   box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
   @media screen and (max-width: 601px) {
@@ -251,13 +251,13 @@ export default function VocabDetails() {
     useState<string>("unsorted");
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
-  const [isPopuping, setIsPopuping] = useState(false);
+  const [isPoppingUp, setIsPoppingUp] = useState(false);
   const popupRef = useRef<HTMLDivElement>(null);
   const resourceUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${keyword}`;
   const ref = useRef<null | AddFunction>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [showVocabInMobile, setShowVocabInMobile] = useState(false);
-  useOnClickOutside(popupRef, () => setIsPopuping(false));
+  useOnClickOutside(popupRef, () => setIsPoppingUp(false));
 
   const handlePlayAudio = () => {
     const audio = new Audio(vocabDetails?.phonetics?.[0].audio);
@@ -455,7 +455,7 @@ export default function VocabDetails() {
                 src={isSaved ? saved : save}
                 alt="save"
                 onClick={() =>
-                  isSaved ? handleDeleteVocabFromBook() : setIsPopuping(true)
+                  isSaved ? handleDeleteVocabFromBook() : setIsPoppingUp(true)
                 }
               />
               <A
@@ -467,7 +467,7 @@ export default function VocabDetails() {
                   alt="googleTranslate"
                 />
               </A>
-              <SavePopup isPopuping={isPopuping} ref={popupRef}>
+              <SavePopup isPoppingUp={isPoppingUp} ref={popupRef}>
                 <label>Save to Book:</label>
                 <Select
                   value={selectedvocabBook}
@@ -505,7 +505,7 @@ export default function VocabDetails() {
                 <Buttons>
                   <Button
                     btnType="secondary"
-                    onClick={() => setIsPopuping(false)}
+                    onClick={() => setIsPoppingUp(false)}
                   >
                     Cancel
                   </Button>
@@ -515,7 +515,7 @@ export default function VocabDetails() {
                       if (selectedvocabBook) {
                         handleSaveVocab(selectedvocabBook);
                         getVocabBooks(userId);
-                        setIsPopuping(false);
+                        setIsPoppingUp(false);
                         ref.current?.(`"${keyword}" saved successfully!`);
                       }
                     }}
@@ -576,7 +576,7 @@ export default function VocabDetails() {
                           key={index}
                           onClick={() => {
                             synonym !== "" && setKeyword(synonym);
-                            setIsPopuping(false);
+                            setIsPoppingUp(false);
                           }}
                         >
                           {synonym}
