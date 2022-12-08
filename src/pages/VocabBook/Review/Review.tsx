@@ -85,6 +85,14 @@ const ScoreBarDiv = styled.div`
   width: 200px;
 `;
 
+const ScoreBarStyle = css`
+  border: 0px;
+  background-color: #95caca;
+  width: ${(props: Props) => (props.score ? `${props.score * 40}px` : "0px")};
+  z-index: 2;
+  margin-bottom: 20px;
+`;
+
 const ScoreBar = styled.div`
   width: 200px;
   height: 30px;
@@ -93,16 +101,7 @@ const ScoreBar = styled.div`
   border-radius: 20px;
   margin-top: 10px;
   z-index: 3;
-  ${(props: Props) =>
-    props.insideColor &&
-    css`
-      border: 0px;
-      background-color: #95caca;
-      width: ${(props: Props) =>
-        props.score ? `${props.score * 40}px` : "0px"};
-      z-index: 2;
-      margin-bottom: 20px;
-    `}
+  ${(props: Props) => props.insideColor && ScoreBarStyle}
   @media screen and (max-width: 601px) {
     ${(props: Props) =>
       props.insideColor &&
