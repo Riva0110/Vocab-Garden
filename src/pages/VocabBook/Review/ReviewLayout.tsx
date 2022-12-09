@@ -126,6 +126,8 @@ export default function ReviewLayout() {
       },
       invitingList: [],
     });
+    setIsBattle(true);
+    navigate(`/vocabbook/review/${userId + roomId}`);
   };
 
   return (
@@ -146,14 +148,7 @@ export default function ReviewLayout() {
           >
             Single {window.screen.width > 750 && "Mode"}
           </ModeBtn>
-          <ModeBtn
-            isBattle={isBattle}
-            onClick={() => {
-              handleSetBattleRoom();
-              setIsBattle(true);
-              navigate(`/vocabbook/review/${userId + roomId}`);
-            }}
-          >
+          <ModeBtn isBattle={isBattle} onClick={handleSetBattleRoom}>
             Battle {window.screen.width > 750 && "Mode"}
           </ModeBtn>
         </ModeBtns>
