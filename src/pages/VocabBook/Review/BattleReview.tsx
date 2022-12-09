@@ -731,7 +731,8 @@ function BattleReview({ pin }: { pin: string }) {
                       <FriendStateWrapper stateColor={friendState[index]}>
                         {friendState[index]}
                         <FriendState stateColor={friendState[index]} />
-                        <div
+                        <Button
+                          btnType="secondary"
                           onClick={() => {
                             handleInviteFriendBattle(friendEmail, index);
                             const newHasInvited = [...hasInvited];
@@ -739,13 +740,11 @@ function BattleReview({ pin }: { pin: string }) {
                             setHasInvited(newHasInvited);
                           }}
                         >
-                          <Button btnType="secondary">
-                            {hasInvited[index] ||
-                            invitingList?.includes(friendEmail)
-                              ? "Inviting"
-                              : "Invite"}
-                          </Button>
-                        </div>
+                          {hasInvited[index] ||
+                          invitingList?.includes(friendEmail)
+                            ? "Inviting"
+                            : "Invite"}
+                        </Button>
                       </FriendStateWrapper>
                     </InviteWrapper>
                   );
