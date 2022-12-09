@@ -518,7 +518,6 @@ function BattleReview({ pin }: { pin: string }) {
         if (data.competitorName !== "") setCompetitorName(data.competitorName);
         if (isWaiting && data?.status === "playing") setIsWaiting(false);
         if (data.answerCount) {
-          console.log("sub", data.answerCount);
           setAnswerCount(data.answerCount);
         }
         if (

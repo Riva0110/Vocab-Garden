@@ -167,13 +167,11 @@ export default function LoginPage({
                   setErrorMsg("Please fill in your name.");
                   return;
                 }
-                console.log("sign up");
                 const signupStatus = await signupAndUpdateState(
                   email,
                   password,
                   name
                 );
-                console.log("login", signupStatus);
                 if (typeof signupStatus === "string") {
                   const signupErrorMsg = signupStatus.slice(9);
                   setErrorMsg(signupErrorMsg);
