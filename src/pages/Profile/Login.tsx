@@ -163,7 +163,7 @@ export default function LoginPage({
             <Button
               btnType="primary"
               onClick={async () => {
-                if (name === "") {
+                if (name?.trim() === "") {
                   setErrorMsg("Please fill in your name.");
                   return;
                 }
