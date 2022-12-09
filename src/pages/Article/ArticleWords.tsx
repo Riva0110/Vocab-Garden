@@ -1,8 +1,8 @@
 import styled from "styled-components";
 import { collection, query, getDocs } from "firebase/firestore";
-import { db } from "../../firebase/firebase";
 import { useState, useContext, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { db } from "../../firebase/firebase";
 import { AuthContext } from "../../context/AuthContext";
 import { KeywordContext } from "../../context/KeywordContext";
 
@@ -54,7 +54,7 @@ export const ArticleWords = () => {
   const { setKeyword } = useContext(KeywordContext);
   const navigate = useNavigate();
   const [articleWords, setArticleWords] = useState<[string, number][]>([]);
-  let articleWordsArray = useRef<[string, number][]>([]);
+  const articleWordsArray = useRef<[string, number][]>([]);
 
   useEffect(() => {
     const getArticleContent = async () => {
@@ -125,7 +125,10 @@ export const ArticleWords = () => {
         </Buttons>
         <Words>
           {articleWords?.map((word) => (
-            <div onClick={() => word[0] !== "" && setKeyword(word[0])}>
+            <div
+              key={word[0]}
+              onClick={() => word[0] !== "" && setKeyword(word[0])}
+            >
               {word[0]}: {word[1]}
             </div>
           ))}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import styled from "styled-components";
 import { useFloating, flip, shift } from "@floating-ui/react-dom";
 
@@ -31,7 +31,7 @@ const Message = styled.div`
   font-size: 14px;
 `;
 
-function Hint({ children }: { children: React.ReactNode }) {
+function Hint({ children }: { children: ReactNode }) {
   const [isShown, setIsShown] = useState(false);
   const { x, y, reference, floating, strategy } = useFloating({
     middleware: [flip(), shift({ padding: 5 })],

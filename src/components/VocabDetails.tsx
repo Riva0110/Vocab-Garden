@@ -1,9 +1,5 @@
 import { useEffect, useState, useContext, useRef, Fragment } from "react";
-import { useOnClickOutside } from "./useOnClickOutside";
 import styled, { css } from "styled-components";
-import { KeywordContext } from "../context/KeywordContext";
-import { AuthContext } from "../context/AuthContext";
-import { VocabBookContext } from "../context/VocabBookContext";
 import {
   updateDoc,
   doc,
@@ -12,7 +8,13 @@ import {
   getDoc,
   deleteDoc,
 } from "firebase/firestore";
+import { X } from "react-feather";
+import { KeywordContext } from "../context/KeywordContext";
+import { AuthContext } from "../context/AuthContext";
+import { VocabBookContext } from "../context/VocabBookContext";
 import { db } from "../firebase/firebase";
+import Hint from "../components/Hint/Hint";
+import { useOnClickOutside } from "./useOnClickOutside";
 import audio from "./audio.png";
 import save from "./save.png";
 import saved from "./saved.png";
@@ -20,8 +22,6 @@ import spinner from "./spinner.gif";
 import Alert from "./Alert/Alert";
 import Button from "./Button/Button";
 import googleTranslate from "./googleTranslate.png";
-import { X } from "react-feather";
-import Hint from "../components/Hint/Hint";
 
 interface Props {
   isPoppingUp?: boolean;
@@ -238,6 +238,7 @@ interface VocabDetailsInterface {
   sourceUrls?: [];
 }
 
+// eslint-disable-next-line no-unused-vars
 type AddFunction = (msg: string) => void;
 
 export default function VocabDetails() {
@@ -334,7 +335,7 @@ export default function VocabDetails() {
       "iPod",
     ];
     let flag = "desktop";
-    for (var v = 0; v < Agents.length; v++) {
+    for (let v = 0; v < Agents.length; v++) {
       if (userAgentInfo.indexOf(Agents[v]) > 0) {
         flag = "mobile";
         break;
@@ -355,7 +356,7 @@ export default function VocabDetails() {
   useEffect(() => {
     let mobileSelection;
     if (checkDevice() === "mobile") {
-      mobileSelection = document.addEventListener("selectionchange", (e) => {
+      mobileSelection = document.addEventListener("selectionchange", () => {
         const value = document.getSelection()?.toString();
         if (value) {
           setKeyword(value);
@@ -427,10 +428,10 @@ export default function VocabDetails() {
   return isError ? (
     <Wrapper showVocabInMobile={showVocabInMobile}>
       <ErrorMsg>
-        [ It should be vocabulary's definition here. ]
+        [ It should be vocabulary&apos;s definition here. ]
         <br />
         <br />
-        Sorry, something went wrong and it's not your fault.
+        Sorry, something went wrong and it&apos;s not your fault.
         <br />
         You can try the search again at later time.
       </ErrorMsg>
@@ -438,7 +439,7 @@ export default function VocabDetails() {
   ) : (
     <>
       <Alert
-        children={(add: AddFunction) => {
+        myChildren={(add: AddFunction) => {
           ref.current = add;
         }}
       />
@@ -525,7 +526,7 @@ export default function VocabDetails() {
                 </Buttons>
               </SavePopup>
               <Hint>
-                Select any words to search word's definition! <br />
+                Select any words to search word&apos;s definition! <br />
                 <br /> (Desktop =&gt; double click) <br /> (Mobile =&gt; long
                 press)
               </Hint>
@@ -559,7 +560,7 @@ export default function VocabDetails() {
                           </Definition>
                           {example && (
                             <Example onClick={() => getSelectedText()}>
-                              "{example}"
+                              &quot;{example}&quot;
                             </Example>
                           )}
                         </DefinitionWrapper>

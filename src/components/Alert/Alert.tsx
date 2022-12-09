@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, MouseEvent } from "react";
 import { useTransition } from "@react-spring/web";
-import { Container, Message, Button, Content, Life } from "./styles";
 import { X } from "react-feather";
+import { Container, Message, Button, Content, Life } from "./styles";
 
 let id = 0;
 
@@ -12,9 +12,11 @@ interface MessageHubProps {
     precision: number;
   };
   timeout?: number;
-  children: (add: AddFunction) => void;
+  // eslint-disable-next-line no-unused-vars
+  myChildren: (add: AddFunction) => void;
 }
 
+// eslint-disable-next-line no-unused-vars
 type AddFunction = (msg: string) => void;
 
 interface Item {
@@ -25,7 +27,7 @@ interface Item {
 function Alert({
   config = { tension: 125, friction: 20, precision: 0.1 },
   timeout = 3000,
-  children,
+  myChildren,
 }: MessageHubProps) {
   const refMap = useMemo(() => new WeakMap(), []);
   const cancelMap = useMemo(() => new WeakMap(), []);
@@ -52,10 +54,10 @@ function Alert({
   });
 
   useEffect(() => {
-    children((msg: string) => {
+    myChildren((msg: string) => {
       setItems((state) => [...state, { key: id++, msg }]);
     });
-  }, [children]);
+  }, [myChildren]);
 
   return (
     <Container>

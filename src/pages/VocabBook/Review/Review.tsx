@@ -1,22 +1,14 @@
 import styled, { css } from "styled-components";
 import { useContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
 import { useViewingBook } from "../VocabBookLayout";
 import { VocabBookContext } from "../../../context/VocabBookContext";
 import { AuthContext } from "../../../context/AuthContext";
 import audio from "../../../components/audio.png";
-import { useNavigate } from "react-router-dom";
-import {
-  addDoc,
-  collection,
-  doc,
-  DocumentData,
-  DocumentSnapshot,
-  getDoc,
-  updateDoc,
-} from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
-import plant from "./reviewPlant.webp";
 import Button from "../../../components/Button/Button";
+import plant from "./reviewPlant.webp";
 import correct from "./correct.png";
 import wrong from "./wrong.png";
 
@@ -240,7 +232,7 @@ const VocabList = styled.div`
 
 interface Log {
   isCorrect?: boolean;
-  time?: {};
+  time?: Record<string, unknown>;
 }
 
 interface ReviewingQuestions {
@@ -298,7 +290,7 @@ export default function Review() {
 
     const getUserInfo = async (userId: string) => {
       const docRef = doc(db, "users", userId);
-      const docSnap: DocumentSnapshot<DocumentData> = await getDoc(docRef);
+      const docSnap = await getDoc(docRef);
       setScore(docSnap?.data()?.currentScore);
       setIsChallenging(docSnap?.data()?.isChallenging);
     };
@@ -428,7 +420,7 @@ export default function Review() {
                   if (showBtn) return;
                   setShowBtn(true);
 
-                  let answerStatus = currentOptions.map(([vocabOption]) => {
+                  const answerStatus = currentOptions.map(([vocabOption]) => {
                     if (vocabOption === correctVocab?.vocab)
                       return "correctAnswer";
                     if (
@@ -464,7 +456,7 @@ export default function Review() {
                           (book.log.length + 1),
                       };
                     }
-                  );
+                  ) as Answer[];
                   setUpdateLogInViewingBook(newUpdateLogInViewingBook);
                 }}
               >

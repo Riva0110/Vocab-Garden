@@ -1,16 +1,16 @@
 import styled, { css } from "styled-components";
-import { AuthContext } from "../../context/AuthContext";
 import { useContext, useState, useEffect, useCallback } from "react";
 import { arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 import { db } from "../../firebase/firebase";
-import { plantImgsObj } from "./plantImgs";
 import Button from "../../components/Button/Button";
+import Hint from "../../components/Hint/Hint";
+import { plantImgsObj } from "./plantImgs";
 import plant from "./plant.webp";
 import growingPlants from "./growingPlants.webp";
 import dyingPlants from "./dyingPlants.webp";
-import Hint from "../../components/Hint/Hint";
 import LoginPage from "./Login";
-import { useNavigate } from "react-router-dom";
 import StackedBarChart from "./StackedBarChart";
 
 interface Props {
@@ -480,7 +480,7 @@ export default function Profile() {
                   });
                 }}
               >
-                {Object.keys(plantImgsObj)?.map((plant, index) => (
+                {Object.keys(plantImgsObj)?.map((plant) => (
                   <Option key={plant} value={plant}>
                     {displayPlantName(plant)}
                   </Option>
@@ -522,7 +522,7 @@ export default function Profile() {
               })
             ) : (
               <FewPlants>
-                There's no any plants in your garden.
+                There&apos;s no any plants in your garden.
                 <br />
                 Start a challenge TODAY!
                 <Img src={plant} alt="plant" />

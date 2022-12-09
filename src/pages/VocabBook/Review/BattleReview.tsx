@@ -1,9 +1,6 @@
 import styled, { css } from "styled-components";
 import { useContext, useState, useEffect, useRef } from "react";
-import { AuthContext } from "../../../context/AuthContext";
-import audio from "../../../components/audio.png";
-import { useReviewLayout } from "./ReviewLayout";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   doc,
   getDoc,
@@ -14,15 +11,15 @@ import {
   query,
   getDocs,
   arrayUnion,
-  DocumentSnapshot,
-  DocumentData,
   increment,
 } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
-import { useParams } from "react-router-dom";
-import plant from "./battlePlant.webp";
+import audio from "../../../components/audio.png";
+import { AuthContext } from "../../../context/AuthContext";
 import Button from "../../../components/Button/Button";
 import Alert from "../../../components/Alert/Alert";
+import { useReviewLayout } from "./ReviewLayout";
+import plant from "./battlePlant.webp";
 import correct from "./correct.png";
 import wrong from "./wrong.png";
 
@@ -227,12 +224,6 @@ const Btns = styled.div`
   margin-top: 20px;
 `;
 
-// const BtnDiv = styled.div`
-//   display: ${(props: Props) => (props.showBtn ? "flex" : "none")};
-//   margin-top: 20px;
-//   justify-content: flex-end;
-// `;
-
 const Message = styled.div`
   text-align: center;
   font-size: 20px;
@@ -361,6 +352,7 @@ interface RoomInfo {
   invitingList: string[];
 }
 
+// eslint-disable-next-line no-unused-vars
 type AddFunction = (msg: string) => void;
 
 export default function BattleReviewWrapper() {
@@ -549,7 +541,7 @@ function BattleReview({ pin }: { pin: string }) {
   }, [isCompetitorIn, isOwner, isWaiting, pin, questionsNumber, round, userId]);
 
   useEffect(() => {
-    let countDownTimer: string | number | NodeJS.Timeout | undefined;
+    let countDownTimer: ReturnType<typeof setTimeout>;
     if (countDown > 0 && !isWaiting) {
       countDownTimer = setTimeout(() => setCountDown((prev) => prev - 1), 1000);
     }
@@ -599,7 +591,7 @@ function BattleReview({ pin }: { pin: string }) {
 
       const checkUserScoreStatus = async () => {
         const docRef = doc(db, "users", userId);
-        const docSnap: DocumentSnapshot<DocumentData> = await getDoc(docRef);
+        const docSnap = await getDoc(docRef);
 
         const score = docSnap?.data()?.currentScore;
         const isChallenging = docSnap?.data()?.isChallenging;
@@ -654,7 +646,7 @@ function BattleReview({ pin }: { pin: string }) {
   async function handleCompetitorJoinBattle() {
     const getUserInfo = async () => {
       const docRef = doc(db, "users", userId);
-      const docSnap: DocumentSnapshot<DocumentData> = await getDoc(docRef);
+      const docSnap = await getDoc(docRef);
 
       if (pin) {
         const roomRef = doc(db, "battleRooms", pin);
@@ -803,16 +795,18 @@ function BattleReview({ pin }: { pin: string }) {
                 if (isAnswered) return;
                 setIsAnswered(true);
 
-                let answerStatus = [...currentOptions].map(([vocabOption]) => {
-                  if (vocabOption === correctVocab?.vocab)
-                    return "correctAnswer";
-                  if (
-                    clickedVocab !== vocabOption &&
-                    vocabOption !== correctVocab?.vocab
-                  ) {
-                    return "notAnswer";
-                  } else return "wrongAnswer";
-                });
+                const answerStatus = [...currentOptions].map(
+                  ([vocabOption]) => {
+                    if (vocabOption === correctVocab?.vocab)
+                      return "correctAnswer";
+                    if (
+                      clickedVocab !== vocabOption &&
+                      vocabOption !== correctVocab?.vocab
+                    ) {
+                      return "notAnswer";
+                    } else return "wrongAnswer";
+                  }
+                );
                 setShowAnswerArr(answerStatus);
 
                 if (clickedVocab === correctVocab?.vocab) {
@@ -940,7 +934,7 @@ function BattleReview({ pin }: { pin: string }) {
     <>
       <Img src={plant} alt="plant" />
       <Alert
-        children={(add: AddFunction) => {
+        myChildren={(add: AddFunction) => {
           ref.current = add;
         }}
       />

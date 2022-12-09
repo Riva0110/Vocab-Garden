@@ -1,14 +1,22 @@
-import { createContext, useCallback, useMemo, useState } from "react";
+import {
+  createContext,
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import { getDoc, doc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 
 type ContextProviderProps = {
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 interface Log {
   isCorrect: boolean;
-  testTime: {};
+  testTime: Record<string, unknown>;
 }
 
 export interface VocabBooks {
@@ -26,19 +34,16 @@ export interface VocabBooks {
 
 interface BooksInterface {
   vocabBooks: VocabBooks;
-  setVocabBooks: React.Dispatch<React.SetStateAction<string>>;
+  setVocabBooks: Dispatch<SetStateAction<string>>;
+  // eslint-disable-next-line no-unused-vars
   getVocabBooks(userId: string): void;
   isSaved: boolean;
-  setIsSaved: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsSaved: Dispatch<SetStateAction<boolean>>;
 }
 
-export const VocabBookContext = createContext<BooksInterface>({
-  vocabBooks: {},
-  setVocabBooks: () => {},
-  getVocabBooks: () => {},
-  isSaved: false,
-  setIsSaved: () => {},
-});
+export const VocabBookContext = createContext<BooksInterface>(
+  {} as BooksInterface
+);
 
 export function VocabBookContextProvider({ children }: ContextProviderProps) {
   const [vocabBooks, setVocabBooks] = useState({});

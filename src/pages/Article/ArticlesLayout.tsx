@@ -1,10 +1,10 @@
 import styled from "styled-components";
-import VocabDetails from "../../components/VocabDetails";
 import { Outlet, Navigate } from "react-router-dom";
+import { useContext } from "react";
+import VocabDetails from "../../components/VocabDetails";
+import { AuthContext } from "../../context/AuthContext";
 import plant from "./plant.webp";
 import plant2 from "./plant2.webp";
-import { useContext } from "react";
-import { AuthContext } from "../../context/AuthContext";
 
 const Wrapper = styled.div`
   display: flex;

@@ -1,9 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { KeywordContext } from "../../context/KeywordContext";
-import { AuthContext } from "../../context/AuthContext";
-import { VocabBookContext, VocabBooks } from "../../context/VocabBookContext";
-import React, {
+import {
   useContext,
   useState,
   useEffect,
@@ -19,17 +16,21 @@ import {
   deleteDoc,
   setDoc,
 } from "firebase/firestore";
+// eslint-disable-next-line import/named
+import ReactWordcloud, { Optional, Options } from "react-wordcloud";
+import { KeywordContext } from "../../context/KeywordContext";
+import { AuthContext } from "../../context/AuthContext";
+import { VocabBookContext, VocabBooks } from "../../context/VocabBookContext";
 import { db } from "../../firebase/firebase";
 import audio from "../../components/audio.png";
 import saved from "../../components/saved.png";
 import VocabDetails from "../../components/VocabDetails";
+import Button from "../../components/Button/Button";
+import Alert from "../../components/Alert/Alert";
+import Hint from "../../components/Hint/Hint";
 import { useViewingBook } from "./VocabBookLayout";
 import plant from "./plant.webp";
 import deleteBtn from "./delete.png";
-import Button from "../../components/Button/Button";
-import Alert from "../../components/Alert/Alert";
-import ReactWordcloud, { Optional, Options } from "react-wordcloud";
-import Hint from "../../components/Hint/Hint";
 
 const Wrapper = styled.div`
   display: flex;
@@ -231,9 +232,10 @@ interface Props {
 
 interface Log {
   isCorrect: boolean;
-  testTime: {};
+  testTime: Record<string, unknown>;
 }
 
+// eslint-disable-next-line no-unused-vars
 type AddFunction = (msg: string) => void;
 
 const options = {
@@ -302,6 +304,7 @@ export default function VocabBook() {
       onWordClick: (word: { text: string; value: number }) => {
         setKeyword(word.text);
       },
+      // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
       getWordTooltip: (word: { text: string; value: number }) => null,
     };
   }, [setKeyword]);
@@ -317,12 +320,12 @@ export default function VocabBook() {
   }, [getVocabBooks, userId, vocabBooks]);
 
   useEffect(() => {
+    async function setWrongWordsDoc() {
+      await setDoc(doc(db, "wrongWordsBook", userId), {
+        topWrongWords,
+      });
+    }
     if (topWrongWords && topWrongWords.length >= 5) {
-      async function setWrongWordsDoc() {
-        await setDoc(doc(db, "wrongWordsBook", userId), {
-          topWrongWords,
-        });
-      }
       setWrongWordsDoc();
     }
   }, [topWrongWords, userId]);
@@ -340,7 +343,7 @@ export default function VocabBook() {
   function getCorrectRateOfBooks() {
     let log: Log[][] = [];
     if (!vocabBooks) return;
-    Object.keys(vocabBooks).forEach((key, index) => {
+    Object.keys(vocabBooks).forEach((key) => {
       let insideLog: Log[] = [];
       vocabBooks[key].map((vocab) => {
         if (vocab.log) {
@@ -445,7 +448,7 @@ export default function VocabBook() {
   return (
     <Wrapper>
       <Alert
-        children={(add: AddFunction) => {
+        myChildren={(add: AddFunction) => {
           ref.current = add;
         }}
       />
@@ -521,7 +524,7 @@ export default function VocabBook() {
                 <>
                   <p>
                     Click a card or select any words
-                    <br /> in the cards' definition!
+                    <br /> in the cards&apos; definition!
                   </p>
                   <br /> <p>(Desktop =&gt; double click)</p>
                   <p>(Mobile =&gt; lond press)</p>
@@ -572,7 +575,7 @@ export default function VocabBook() {
               />
             ) : (
               <NoCards>
-                There's no words you have taken quiz for more than 5 times,
+                There&apos;s no words you have taken quiz for more than 5 times,
                 <br /> and correct rate is under 50%.
               </NoCards>
             )

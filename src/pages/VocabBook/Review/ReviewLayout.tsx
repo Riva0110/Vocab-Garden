@@ -1,17 +1,16 @@
 import styled from "styled-components";
-import { Outlet, useOutletContext } from "react-router-dom";
+import { Outlet, useOutletContext, useNavigate } from "react-router-dom";
+import {
+  useState,
+  useEffect,
+  useContext,
+  Dispatch,
+  SetStateAction,
+} from "react";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { VocabBookContext } from "../../../context/VocabBookContext";
 import { AuthContext } from "../../../context/AuthContext";
 import { useViewingBook } from "../VocabBookLayout";
-import { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  doc,
-  DocumentData,
-  DocumentSnapshot,
-  getDoc,
-  setDoc,
-} from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
 import Hint from "../../../components/Hint/Hint";
 
@@ -82,7 +81,7 @@ const GameRule = styled.div`
 type ContextType = {
   questionsNumber: number;
   isBattle: boolean;
-  setIsBattle: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsBattle: Dispatch<SetStateAction<boolean>>;
 };
 
 const questionsNumber = 5;
@@ -106,7 +105,7 @@ export default function ReviewLayout() {
   useEffect(() => {
     const getUserInfo = async () => {
       const docRef = doc(db, "users", userId);
-      const docSnap: DocumentSnapshot<DocumentData> = await getDoc(docRef);
+      const docSnap = await getDoc(docRef);
       setName(docSnap?.data()?.name);
     };
     getUserInfo();
@@ -188,7 +187,7 @@ export default function ReviewLayout() {
               <br />
             </GameRule>
             <br />
-            Haven't started a challenge?
+            Haven&apos;t started a challenge?
             <div
               onClick={() => {
                 navigate("/profile");

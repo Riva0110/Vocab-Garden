@@ -1,6 +1,12 @@
-import { createContext, useState } from "react";
+import {
+  createContext,
+  useState,
+  useEffect,
+  ReactNode,
+  SetStateAction,
+  Dispatch,
+} from "react";
 import { doc, setDoc, arrayUnion, updateDoc } from "firebase/firestore";
-import { auth, db } from "../firebase/firebase";
 import {
   getDatabase,
   ref,
@@ -16,25 +22,27 @@ import {
   signOut,
   onAuthStateChanged,
 } from "firebase/auth";
-import { useEffect } from "react";
+import { auth, db } from "../firebase/firebase";
 
 type ContextProviderProps = {
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 interface AuthInterface {
   userId: string;
-  setUserId: React.Dispatch<React.SetStateAction<string>>;
+  setUserId: Dispatch<SetStateAction<string>>;
   isLogin: boolean;
-  setIsLogin: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsLogin: Dispatch<SetStateAction<boolean>>;
   isLoadingUserAuth: boolean;
-  setIsLoadingUserAuth: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsLoadingUserAuth: Dispatch<SetStateAction<boolean>>;
   logout(): void;
+  /* eslint-disable no-unused-vars */
   login(email: string, password: string): Promise<string | undefined>;
   signup(
     email: string,
     password: string,
     name: string
+    /* eslint-enable no-unused-vars */
   ): Promise<string | undefined>;
 }
 

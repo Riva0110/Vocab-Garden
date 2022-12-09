@@ -1,8 +1,8 @@
-import { useContext, useState } from "react";
+import { Dispatch, SetStateAction, useContext, useState } from "react";
 import styled from "styled-components";
 import { AuthContext } from "../../context/AuthContext";
-import banner from "./banner.webp";
 import Button from "../../components/Button/Button";
+import banner from "./banner.webp";
 
 const Wrapper = styled.div`
   padding: 80px 20px 20px 20px;
@@ -76,8 +76,14 @@ const Input = styled.input`
 
 interface Props {
   name: string;
-  setName: React.Dispatch<React.SetStateAction<string>>;
-  signup: Function;
+  setName: Dispatch<SetStateAction<string>>;
+  signup(
+    /* eslint-disable no-unused-vars */
+    email: string,
+    password: string,
+    name: string
+    /* eslint-disable no-unused-vars */
+  ): Promise<void> | string;
 }
 
 export default function LoginPage({ name, setName, signup }: Props) {
@@ -147,7 +153,7 @@ export default function LoginPage({ name, setName, signup }: Props) {
                   setErrorMsg("Please fill in your name.");
                   return;
                 }
-                const signupStatus = await signup(email, password, name);
+                const signupStatus = signup(email, password, name);
                 if (typeof signupStatus === "string") {
                   const signupErrorMsg = signupStatus.slice(9) as string;
                   setErrorMsg(signupErrorMsg);

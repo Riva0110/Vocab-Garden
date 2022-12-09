@@ -1,10 +1,10 @@
 import styled from "styled-components";
-import banner from "./banner.webp";
-import next from "./next.png";
-import VocabDetails from "../../components/VocabDetails";
-import { KeywordContext } from "../../context/KeywordContext";
 import { useContext } from "react";
 import { Link } from "react-router-dom";
+import VocabDetails from "../../components/VocabDetails";
+import { KeywordContext } from "../../context/KeywordContext";
+import banner from "./banner.webp";
+import next from "./next.png";
 
 const Wrapper = styled.div`
   display: flex;

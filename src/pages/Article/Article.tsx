@@ -1,8 +1,6 @@
 import styled from "styled-components";
 import { useState, useContext, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../../context/AuthContext";
-import { KeywordContext } from "../../context/KeywordContext";
 import {
   doc,
   collection,
@@ -12,11 +10,13 @@ import {
   getDocs,
   updateDoc,
 } from "firebase/firestore";
+import { KeywordContext } from "../../context/KeywordContext";
+import { AuthContext } from "../../context/AuthContext";
 import { db } from "../../firebase/firebase";
-import QuillEditor from "./Editor/QuillEditor";
 import Button from "../../components/Button/Button";
 import Alert from "../../components/Alert/Alert";
 import Hint from "../../components/Hint/Hint";
+import QuillEditor from "./Editor/QuillEditor";
 
 const ArticleWrapper = styled.div`
   display: flex;
@@ -72,6 +72,7 @@ const Btns = styled.div`
   align-items: center;
 `;
 
+// eslint-disable-next-line no-unused-vars
 type AddFunction = (msg: string) => void;
 
 export default function Article() {
@@ -188,7 +189,7 @@ export default function Article() {
   return (
     <>
       <Alert
-        children={(add: AddFunction) => {
+        myChildren={(add: AddFunction) => {
           ref.current = add;
         }}
       />
