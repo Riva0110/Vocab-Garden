@@ -63,7 +63,7 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
       }
       setIsLoadingUserAuth(false);
     });
-  }, [userId]);
+  }, []);
 
   useEffect(() => {
     if (!userId) return;
