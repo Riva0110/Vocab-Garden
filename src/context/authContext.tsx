@@ -129,6 +129,7 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
 
       return user.uid;
     } catch (error) {
+      if (error instanceof Error) console.log(error["message"]);
       if (error instanceof Error) return error["message"];
     }
   };

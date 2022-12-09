@@ -77,16 +77,20 @@ const Input = styled.input`
 interface Props {
   name: string;
   setName: Dispatch<SetStateAction<string>>;
-  signup(
+  signupAndUpdateState(
     /* eslint-disable no-unused-vars */
     email: string,
     password: string,
     name: string
     /* eslint-disable no-unused-vars */
-  ): Promise<void> | string;
+  ): Promise<string | undefined>;
 }
 
-export default function LoginPage({ name, setName, signup }: Props) {
+export default function LoginPage({
+  name,
+  setName,
+  signupAndUpdateState,
+}: Props) {
   const { login } = useContext(AuthContext);
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [email, setEmail] = useState<string>("");
@@ -124,7 +128,16 @@ export default function LoginPage({ name, setName, signup }: Props) {
               >
                 <Button btnType="primary">Log in</Button>
               </LoginDiv>
-              <Toggle onClick={() => setIsMember(false)}>not a member？</Toggle>
+              <Toggle
+                onClick={() => {
+                  setIsMember(false);
+                  setEmail("");
+                  setPassword("");
+                  setErrorMsg("");
+                }}
+              >
+                not a member？
+              </Toggle>
             </div>
           </>
         ) : (
@@ -147,22 +160,38 @@ export default function LoginPage({ name, setName, signup }: Props) {
               onChange={(e) => setPassword(e.target.value)}
             />
             <ErrorMsg>{errorMsg}</ErrorMsg>
-            <div
+            <Button
+              btnType="primary"
               onClick={async () => {
                 if (name === "") {
                   setErrorMsg("Please fill in your name.");
                   return;
                 }
-                const signupStatus = signup(email, password, name);
+                console.log("sign up");
+                const signupStatus = await signupAndUpdateState(
+                  email,
+                  password,
+                  name
+                );
+                console.log("login", signupStatus);
                 if (typeof signupStatus === "string") {
-                  const signupErrorMsg = signupStatus.slice(9) as string;
+                  const signupErrorMsg = signupStatus.slice(9);
                   setErrorMsg(signupErrorMsg);
                 }
               }}
             >
-              <Button btnType="primary">Sign up</Button>
-            </div>
-            <Toggle onClick={() => setIsMember(true)}>already a member?</Toggle>
+              Sign up
+            </Button>
+            <Toggle
+              onClick={() => {
+                setIsMember(true);
+                setEmail("");
+                setPassword("");
+                setErrorMsg("");
+              }}
+            >
+              already a member?
+            </Toggle>
           </>
         )}
       </LoginWrapper>

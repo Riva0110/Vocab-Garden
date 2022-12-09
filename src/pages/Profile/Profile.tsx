@@ -292,13 +292,8 @@ export default function Profile() {
     if (typeof newUserId === "string") {
       getAndUpdateUserInfo(newUserId);
     }
+    return newUserId;
   };
-
-  useEffect(() => {
-    if (userId) {
-      getAndUpdateUserInfo(userId);
-    }
-  }, [userId, getAndUpdateUserInfo]);
 
   useEffect(() => {
     if (isChallenging) {
@@ -536,6 +531,10 @@ export default function Profile() {
 
   if (isLogin) return renderProfile();
   return (
-    <LoginPage name={name} setName={setName} signup={signupAndUpdateState} />
+    <LoginPage
+      name={name}
+      setName={setName}
+      signupAndUpdateState={signupAndUpdateState}
+    />
   );
 }
