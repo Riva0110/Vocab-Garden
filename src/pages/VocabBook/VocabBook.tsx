@@ -480,7 +480,12 @@ export default function VocabBook() {
             +
           </AddButton>
           {vocabBooks &&
-            Object.keys(vocabBooks).map((book: string, index) => (
+            [
+              "unsorted",
+              ...Object.keys(vocabBooks)
+                .sort()
+                .filter((x) => x !== "unsorted"),
+            ].map((book: string, index) => (
               <Fragment key={book}>
                 <Book
                   selected={viewingBook === `${book}`}
