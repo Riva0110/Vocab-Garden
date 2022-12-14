@@ -1,18 +1,33 @@
-# Getting Started with Create React App
+# Vocab Garden
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+An English reading and vocabulary learning website.     
+You can look up any word’s definition by simply clicking or selecting words throughout the website!
 
-## Available Scripts
+**Main features:  **  
+searching for words, reading articles, reviewing saved words, taking quizzes, and participating in online battles and achievement systems.
 
-In the project directory, you can run:
+## Link and Test Account
 
-### `npm start`
+https://vocab-garden.web.app/
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Email: riva0110@xxxx.xx     
+Password: xxxx1234
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### Technical Skills
+
+
+- Used Firebase Firestore Database for managing data, including using getting real-time updates for online battle information, such as connection status, scores, and user names for both sides.
+- Provided a friend system, and used Firebase Realtime Database and Cloud Functions for updating friends’ real-time online status.
+- Logged high-frequency wrong words from quizzes and displayed them by React Wordcloud. 
+- Enabled users to save word cards into vocab books, review cards, and take quizzes.
+- Provided online battle mode for quizzes, which allowed users to invite friends and battle online.
+- Created RWD for most of the devices and supported smooth user experience for mobile.
+- Converted image format from PNG to WebP to load the website 3 times faster.
+- Built a plant-growing achievement system to enhance users' learning motivation and stickiness.
+- Implemented a text editor for users to add articles by React-Quill.
+- Applied TypeScript to add type safety to my project and increased my productivity.
+- Adopted React useContext Hook to manage states.
+- Applied React / React router for SPA.
 
 ### `npm test`
 
