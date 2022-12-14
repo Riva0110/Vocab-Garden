@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { Navigate, Outlet, useOutletContext } from "react-router-dom";
-import { useContext, useState } from "react";
-import { AuthContext } from "../../context/AuthContext";
+import { Dispatch, SetStateAction, useContext, useState } from "react";
+import { AuthContext } from "../../context/authContext";
 
 const Wrapper = styled.div`
   @media screen and (min-width: 1440px) {
@@ -12,7 +12,7 @@ const Wrapper = styled.div`
 
 type ContextType = {
   viewingBook: string;
-  setViewingBook: React.Dispatch<React.SetStateAction<string>>;
+  setViewingBook: Dispatch<SetStateAction<string>>;
 };
 
 export default function VocabBookLayout() {

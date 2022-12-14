@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { useContext } from "react";
 import { Link } from "react-router-dom";
 import VocabDetails from "../../components/VocabDetails";
-import { KeywordContext } from "../../context/KeywordContext";
+import { KeywordContext } from "../../context/keywordContext";
 import banner from "./banner.webp";
 import next from "./next.png";
 

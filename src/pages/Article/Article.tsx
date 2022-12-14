@@ -10,8 +10,8 @@ import {
   getDocs,
   updateDoc,
 } from "firebase/firestore";
-import { KeywordContext } from "../../context/KeywordContext";
-import { AuthContext } from "../../context/AuthContext";
+import { KeywordContext } from "../../context/keywordContext";
+import { AuthContext } from "../../context/authContext";
 import { db } from "../../firebase/firebase";
 import Button from "../../components/Button/Button";
 import Alert from "../../components/Alert/Alert";

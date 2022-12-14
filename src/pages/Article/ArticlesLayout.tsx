@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { Outlet, Navigate } from "react-router-dom";
 import { useContext } from "react";
 import VocabDetails from "../../components/VocabDetails";
-import { AuthContext } from "../../context/AuthContext";
+import { AuthContext } from "../../context/authContext";
 import plant from "./plant.webp";
 import plant2 from "./plant2.webp";
 

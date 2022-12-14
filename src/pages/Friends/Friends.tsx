@@ -13,7 +13,7 @@ import {
 import styled from "styled-components";
 import { Navigate } from "react-router-dom";
 import { db } from "../../firebase/firebase";
-import { AuthContext } from "../../context/AuthContext";
+import { AuthContext } from "../../context/authContext";
 import Button from "../../components/Button/Button";
 import Alert from "../../components/Alert/Alert";
 import plantLeft from "./plant-left.webp";

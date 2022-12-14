@@ -9,9 +9,9 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { X } from "react-feather";
-import { KeywordContext } from "../context/KeywordContext";
-import { AuthContext } from "../context/AuthContext";
-import { VocabBookContext } from "../context/VocabBookContext";
+import { KeywordContext } from "../context/keywordContext";
+import { AuthContext } from "../context/authContext";
+import { VocabBookContext } from "../context/vocabBookContext";
 import { db } from "../firebase/firebase";
 import Hint from "../components/Hint/Hint";
 import { useOnClickOutside } from "./useOnClickOutside";

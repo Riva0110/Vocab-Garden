@@ -16,11 +16,10 @@ import {
   deleteDoc,
   setDoc,
 } from "firebase/firestore";
-// eslint-disable-next-line import/named
 import ReactWordcloud, { Optional, Options } from "react-wordcloud";
-import { KeywordContext } from "../../context/KeywordContext";
-import { AuthContext } from "../../context/AuthContext";
-import { VocabBookContext, VocabBooks } from "../../context/VocabBookContext";
+import { KeywordContext } from "../../context/keywordContext";
+import { AuthContext } from "../../context/authContext";
+import { VocabBookContext, VocabBooks } from "../../context/vocabBookContext";
 import { db } from "../../firebase/firebase";
 import audio from "../../components/audio.png";
 import saved from "../../components/saved.png";

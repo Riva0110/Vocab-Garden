@@ -8,8 +8,8 @@ import {
   SetStateAction,
 } from "react";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { VocabBookContext } from "../../../context/VocabBookContext";
-import { AuthContext } from "../../../context/AuthContext";
+import { VocabBookContext } from "../../../context/vocabBookContext";
+import { AuthContext } from "../../../context/authContext";
 import { useViewingBook } from "../VocabBookLayout";
 import { db } from "../../../firebase/firebase";
 import Hint from "../../../components/Hint/Hint";

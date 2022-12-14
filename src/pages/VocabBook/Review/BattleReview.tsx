@@ -15,7 +15,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
 import audio from "../../../components/audio.png";
-import { AuthContext } from "../../../context/AuthContext";
+import { AuthContext } from "../../../context/authContext";
 import Button from "../../../components/Button/Button";
 import Alert from "../../../components/Alert/Alert";
 import { useReviewLayout } from "./ReviewLayout";
