@@ -113,6 +113,7 @@ export function AuthContextProvider({ children }: ContextProviderProps) {
         friendRequest: [],
         awaitingFriendReply: [],
         battleInvitation: [],
+        isDying: false,
       });
 
       await setDoc(doc(db, "vocabBooks", user.uid), {
