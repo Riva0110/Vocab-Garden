@@ -2,7 +2,7 @@ import styled, { css } from "styled-components";
 import { useContext, useState, useEffect, useCallback } from "react";
 import { arrayUnion, doc, getDoc, updateDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../../context/AuthContext";
+import { AuthContext } from "../../context/authContext";
 import { db } from "../../firebase/firebase";
 import Button from "../../components/Button/Button";
 import Hint from "../../components/Hint/Hint";
@@ -244,7 +244,8 @@ export default function Profile() {
   const { isLogin, logout, userId, signup } = useContext(AuthContext);
   const [name, setName] = useState<string>("");
   const [score, setScore] = useState<number>(0);
-  const [isChallenging, setIsChallenging] = useState<boolean>();
+  const [isChallenging, setIsChallenging] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [messages, setMessages] =
     useState<string>("選擇喜歡的植物，開始新的挑戰吧！");
   const [currentPlant, setCurrentPlant] = useState("begonia");
@@ -253,33 +254,39 @@ export default function Profile() {
   const [plantsList, setPlantsList] = useState<PlantsListInterface[]>([]);
 
   const getAndUpdateUserInfo = useCallback(async (userId: string) => {
-    const plantsRef = doc(db, "plantsList", userId);
-    const plantsSnap = await getDoc(plantsRef);
-    const plantData = plantsSnap.data()?.plants as PlantsListInterface[];
-    setPlantsList(plantData);
+    try {
+      const plantsRef = doc(db, "plantsList", userId);
+      const plantsSnap = await getDoc(plantsRef);
+      const plantData = plantsSnap.data()?.plants as PlantsListInterface[];
+      setPlantsList(plantData);
 
-    const userRef = doc(db, "users", userId);
-    const userDocSnap = await getDoc(userRef);
-    const data = userDocSnap.data();
-    setName(data?.name);
-    setIsChallenging(data?.isChallenging);
-    setIsDying(data?.isDying);
-    setCurrentPlant(data?.currentPlant);
-    setScore(data?.currentScore);
+      const userRef = doc(db, "users", userId);
+      const userDocSnap = await getDoc(userRef);
+      const data = userDocSnap.data();
+      setName(data?.name);
+      setIsChallenging(data?.isChallenging);
+      setIsDying(data?.isDying);
+      setCurrentPlant(data?.currentPlant);
+      setScore(data?.currentScore);
 
-    const timeDifference =
-      Date.now() - data?.lastTimeUpdateScore.seconds * 1000;
-    const deduction = Math.floor(timeDifference / (300000 * 576));
+      const timeDifference =
+        Date.now() - data?.lastTimeUpdateScore.seconds * 1000;
+      const deduction = Math.floor(timeDifference / (300000 * 576));
 
-    if (data?.isChallenging && deduction > 0) {
-      setIsDying(true);
-      setScore((prev) => Math.max(prev - deduction, 0));
+      if (data?.isChallenging && deduction > 0) {
+        setIsDying(true);
+        setScore((prev) => Math.max(prev - deduction, 0));
 
-      await updateDoc(userRef, {
-        currentScore: Math.max(data?.currentScore - deduction, 0),
-        lastTimeUpdateScore: new Date(),
-        isDying: true,
-      });
+        await updateDoc(userRef, {
+          currentScore: Math.max(data?.currentScore - deduction, 0),
+          lastTimeUpdateScore: new Date(),
+          isDying: true,
+        });
+      }
+    } catch (err) {
+      //
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -296,30 +303,35 @@ export default function Profile() {
   };
 
   useEffect(() => {
-    if (isChallenging) {
-      if (isDying) {
-        if (score === 0) {
-          setIsChallenging(false);
-          setPlantPhase("minus1");
-          setMessages("植物被你養死了QQ 挑戰失敗！");
-        } else if (score <= 2) {
-          setPlantPhase("minus1");
-          setMessages("植物枯萎了，再加把勁！");
-        } else if (score <= 4) {
-          setPlantPhase("minus3");
-          setMessages("好多天沒看到你了，植物想你囉！");
-        }
-      } else {
-        if (score <= 2) {
-          setPlantPhase("0");
-          setMessages("加油加油，再努力一點，植物快長大囉！");
-        } else if (score <= 4) {
-          setPlantPhase("3");
-          setMessages("你好棒喔！植物長出新葉片了！");
-        }
+    if (userId) {
+      getAndUpdateUserInfo(userId);
+    }
+  }, [userId, getAndUpdateUserInfo]);
 
-        if (score === 3 || score === 4) setPlantPhase("3");
+  useEffect(() => {
+    if (!isChallenging) return;
+    if (isDying) {
+      if (score === 0) {
+        setIsChallenging(false);
+        setPlantPhase("minus1");
+        setMessages("植物被你養死了QQ 挑戰失敗！");
+      } else if (score <= 2) {
+        setPlantPhase("minus1");
+        setMessages("植物枯萎了，再加把勁！");
+      } else if (score <= 4) {
+        setPlantPhase("minus3");
+        setMessages("好多天沒看到你了，植物想你囉！");
       }
+    } else {
+      if (score <= 2) {
+        setPlantPhase("0");
+        setMessages("加油加油，再努力一點，植物快長大囉！");
+      } else if (score <= 4) {
+        setPlantPhase("3");
+        setMessages("你好棒喔！植物長出新葉片了！");
+      }
+
+      if (score === 3 || score === 4) setPlantPhase("3");
     }
 
     if (score === 5) {
@@ -394,110 +406,114 @@ export default function Profile() {
   const renderProfile = () => {
     return (
       <Wrapper>
-        <UserInfoWrapper>
-          <ProfileTitle>
-            <p>{name}’s Vocab Garden</p>
-            <Hint>
-              Start a challenge,
-              <br />
-              and enrich your Vocab Garden!
-              <br />
-              <br />
-              <GameRule>
-                When you are in a challenge,
+        {isLoading ? (
+          <UserInfoWrapper />
+        ) : (
+          <UserInfoWrapper>
+            <ProfileTitle>
+              <p>{name}’s Vocab Garden</p>
+              <Hint>
+                Start a challenge,
                 <br />
-                you can get 1 point by two ways:
+                and enrich your Vocab Garden!
                 <br />
                 <br />
-                1. [Review - Single Mode] <br />
-                ．Correct rate &gt;= 80%
+                <GameRule>
+                  When you are in a challenge,
+                  <br />
+                  you can get 1 point by two ways:
+                  <br />
+                  <br />
+                  1. [Review - Single Mode] <br />
+                  ．Correct rate &gt;= 80%
+                  <br />
+                  <br />
+                  2. [Review - Battle Mode] <br />
+                  ．Invite your friends to battle <br />
+                  ．Win the battle!
+                  <br />
+                  ．Correct rate &gt;= 80%
+                  <br />
+                  <HintImg src={growingPlants} alt="growingPlants" />
+                  <br />
+                  <br />
+                  Reminder:
+                  <br />
+                  1. You need to review at least once a day,
+                  <br />
+                  &nbsp;&nbsp;&nbsp;otherwise you would lose 1 point per day.
+                  <br />
+                  2. If the score was deducted to 0,
+                  <br />
+                  &nbsp;&nbsp;&nbsp;the plant would die.
+                  <br />
+                  <HintImg src={dyingPlants} alt="growingPlants" />
+                </GameRule>
                 <br />
+                Choose a book to review right now!
                 <br />
-                2. [Review - Battle Mode] <br />
-                ．Invite your friends to battle <br />
-                ．Win the battle!
-                <br />
-                ．Correct rate &gt;= 80%
-                <br />
-                <HintImg src={growingPlants} alt="growingPlants" />
-                <br />
-                <br />
-                Reminder:
-                <br />
-                1. You need to review at least once a day,
-                <br />
-                &nbsp;&nbsp;&nbsp;otherwise you would lose 1 point per day.
-                <br />
-                2. If the score was deducted to 0,
-                <br />
-                &nbsp;&nbsp;&nbsp;the plant would die.
-                <br />
-                <HintImg src={dyingPlants} alt="growingPlants" />
-              </GameRule>
-              <br />
-              Choose a book to review right now!
-              <br />
-              <div
-                onClick={() => {
-                  navigate("/vocabbook");
-                }}
-              >
-                &gt;&gt;&gt; Click me &gt;&gt;&gt;
-              </div>
-            </Hint>
-          </ProfileTitle>
-          <GrowingPlantImg
-            src={plantImgsObj[currentPlant]?.[plantPhase]}
-            alt="plants"
-          />
-          <ScoreBarWrapper>
-            <ScoreBar insideColor={true} score={score}>
-              <ScoreBar>
-                <ScoreDiv>{score} / 5</ScoreDiv>
+                <div
+                  onClick={() => {
+                    navigate("/vocabbook");
+                  }}
+                >
+                  &gt;&gt;&gt; Click me &gt;&gt;&gt;
+                </div>
+              </Hint>
+            </ProfileTitle>
+            <GrowingPlantImg
+              src={plantImgsObj[currentPlant]?.[plantPhase]}
+              alt="plants"
+            />
+            <ScoreBarWrapper>
+              <ScoreBar insideColor={true} score={score}>
+                <ScoreBar>
+                  <ScoreDiv>{score} / 5</ScoreDiv>
+                </ScoreBar>
               </ScoreBar>
-            </ScoreBar>
-          </ScoreBarWrapper>
-          <p>{messages}</p>
-          {isChallenging ? (
-            <p>{displayPlantName(currentPlant)}</p>
-          ) : score !== 5 ? (
-            <>
-              <Select
-                value={currentPlant}
-                onChange={async (e) => {
-                  setCurrentPlant(e.target.value);
-                  setIsDying(false);
-                  setPlantPhase("0");
-                  setMessages("選擇喜歡的植物，開始新的挑戰吧！");
-                  const userRef = doc(db, "users", userId);
-                  await updateDoc(userRef, {
-                    isDying: false,
-                  });
-                }}
-              >
-                {Object.keys(plantImgsObj)?.map((plant) => (
-                  <Option key={plant} value={plant}>
-                    {displayPlantName(plant)}
-                  </Option>
-                ))}
-              </Select>
+            </ScoreBarWrapper>
+            <p>{messages}</p>
+            {isChallenging ? (
+              <p>{displayPlantName(currentPlant)}</p>
+            ) : score !== 5 ? (
+              <>
+                <Select
+                  value={currentPlant}
+                  onChange={async (e) => {
+                    setCurrentPlant(e.target.value);
+                    setIsDying(false);
+                    setPlantPhase("0");
+                    setMessages("選擇喜歡的植物，開始新的挑戰吧！");
+                    const userRef = doc(db, "users", userId);
+                    await updateDoc(userRef, {
+                      isDying: false,
+                    });
+                  }}
+                >
+                  {Object.keys(plantImgsObj)?.map((plant) => (
+                    <Option key={plant} value={plant}>
+                      {displayPlantName(plant)}
+                    </Option>
+                  ))}
+                </Select>
 
-              <div onClick={() => handleStartChallenge()}>
-                <Button btnType={"primary"}>Start a challenge</Button>
+                <div onClick={() => handleStartChallenge()}>
+                  <Button btnType={"primary"}>Start a challenge</Button>
+                </div>
+              </>
+            ) : (
+              <div onClick={() => handleSavePlant()}>
+                <Button btnType={"primary"}>
+                  Save the plant in your garden!
+                </Button>
               </div>
-            </>
-          ) : (
-            <div onClick={() => handleSavePlant()}>
-              <Button btnType={"primary"}>
-                Save the plant in your garden!
-              </Button>
+            )}
+            <StackedBarChart />
+            <div onClick={() => logout()}>
+              <Button btnType={"secondary"}>Log out</Button>
             </div>
-          )}
-          <StackedBarChart />
-          <div onClick={() => logout()}>
-            <Button btnType={"secondary"}>Log out</Button>
-          </div>
-        </UserInfoWrapper>
+          </UserInfoWrapper>
+        )}
         <PlantsWrapper>
           <Plants>
             {plantsList?.length !== 0 ? (
