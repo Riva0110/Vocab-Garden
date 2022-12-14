@@ -1,38 +1,38 @@
-const plantBegonia_1_ = require("./plant1-1-.webp");
-const plantBegonia_1 = require("./plant1-1.webp");
-const plantBegonia_3_ = require("./plant1-3-.webp");
-const plantBegonia_3 = require("./plant1-3.webp");
-const plantBegonia_5 = require("./plant1-5.webp");
+import plantBegonia_1_ from "./plant1-1-.webp";
+import plantBegonia_1 from "./plant1-1.webp";
+import plantBegonia_3_ from "./plant1-3-.webp";
+import plantBegonia_3 from "./plant1-3.webp";
+import plantBegonia_5 from "./plant1-5.webp";
 
-const plantMirrorGrass_1_ = require("./plant2-1-.webp");
-const plantMirrorGrass_1 = require("./plant2-1.webp");
-const plantMirrorGrass_3_ = require("./plant2-3-.webp");
-const plantMirrorGrass_3 = require("./plant2-3.webp");
-const plantMirrorGrass_5 = require("./plant2-5.webp");
+import plantMirrorGrass_1_ from "./plant2-1-.webp";
+import plantMirrorGrass_1 from "./plant2-1.webp";
+import plantMirrorGrass_3_ from "./plant2-3-.webp";
+import plantMirrorGrass_3 from "./plant2-3.webp";
+import plantMirrorGrass_5 from "./plant2-5.webp";
 
-const plantTravelerBanana_1_ = require("./plant3-1-.webp");
-const plantTravelerBanana_1 = require("./plant3-1.webp");
-const plantTravelerBanana_3_ = require("./plant3-3-.webp");
-const plantTravelerBanana_3 = require("./plant3-3.webp");
-const plantTravelerBanana_5 = require("./plant3-5.webp");
+import plantTravelerBanana_1_ from "./plant3-1-.webp";
+import plantTravelerBanana_1 from "./plant3-1.webp";
+import plantTravelerBanana_3_ from "./plant3-3-.webp";
+import plantTravelerBanana_3 from "./plant3-3.webp";
+import plantTravelerBanana_5 from "./plant3-5.webp";
 
-const plantPhilodendron_1_ = require("./plant4-1-.webp");
-const plantPhilodendron_1 = require("./plant4-1.webp");
-const plantPhilodendron_3_ = require("./plant4-3-.webp");
-const plantPhilodendron_3 = require("./plant4-3.webp");
-const plantPhilodendron_5 = require("./plant4-5.webp");
+import plantPhilodendron_1_ from "./plant4-1-.webp";
+import plantPhilodendron_1 from "./plant4-1.webp";
+import plantPhilodendron_3_ from "./plant4-3-.webp";
+import plantPhilodendron_3 from "./plant4-3.webp";
+import plantPhilodendron_5 from "./plant4-5.webp";
 
-const plantCeriman_1_ = require("./plant5-1-.webp");
-const plantCeriman_1 = require("./plant5-1.webp");
-const plantCeriman_3_ = require("./plant5-3-.webp");
-const plantCeriman_3 = require("./plant5-3.webp");
-const plantCeriman_5 = require("./plant5-5.webp");
+import plantCeriman_1_ from "./plant5-1-.webp";
+import plantCeriman_1 from "./plant5-1.webp";
+import plantCeriman_3_ from "./plant5-3-.webp";
+import plantCeriman_3 from "./plant5-3.webp";
+import plantCeriman_5 from "./plant5-5.webp";
 
-const plantBirdOfParadise_1_ = require("./plant6-1-.webp");
-const plantBirdOfParadise_1 = require("./plant6-1.webp");
-const plantBirdOfParadise_3_ = require("./plant6-3-.webp");
-const plantBirdOfParadise_3 = require("./plant6-3.webp");
-const plantBirdOfParadise_5 = require("./plant6-5.webp");
+import plantBirdOfParadise_1_ from "./plant6-1-.webp";
+import plantBirdOfParadise_1 from "./plant6-1.webp";
+import plantBirdOfParadise_3_ from "./plant6-3-.webp";
+import plantBirdOfParadise_3 from "./plant6-3.webp";
+import plantBirdOfParadise_5 from "./plant6-5.webp";
 
 type ImgInterface = Record<string, string>;
 
