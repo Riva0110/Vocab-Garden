@@ -5,7 +5,7 @@ An English reading and vocabulary learning website.
 You can look up any word’s definition by simply clicking or selecting words throughout the website!
 
 **Main features:**     
-searching for words, reading articles, reviewing saved words, taking quizzes, and participating in online battles and achievement systems.
+Searching for words, reading articles, reviewing saved words, taking quizzes, and participating in online battles and achievement systems.
 
 **Link:** https://vocab-garden.web.app/
 
@@ -14,20 +14,30 @@ searching for words, reading articles, reviewing saved words, taking quizzes, an
 > Password: xxxx1234
 
 
-## Technical Skills
+## Technologies
 
-- Used Firebase Firestore Database for managing data, including using getting real-time updates for online battle information, such as connection status, scores, and user names for both sides.
-- Provided a friend system, and used Firebase Realtime Database and Cloud Functions for updating friends’ real-time online status.
-- Logged high-frequency wrong words from quizzes and displayed them by React Wordcloud. 
-- Enabled users to save word cards into vocab books, review cards, and take quizzes.
-- Provided online battle mode for quizzes, which allowed users to invite friends and battle online.
-- Created RWD for most of the devices and supported smooth user experience for mobile.
-- Converted image format from PNG to WebP to load the website 3 times faster.
-- Built a plant-growing achievement system to enhance users' learning motivation and stickiness.
-- Implemented a text editor for users to add articles by React-Quill.
-- Applied TypeScript to add type safety to my project and increased my productivity.
-- Adopted React useContext Hook to manage states.
-- Applied React / React router for SPA.
+### Front-End Fundamental
+HTML / CSS / JavaScript    
+Responsive Web Design (RWD)
+
+### Back-End Service
+Firebase (Firestore, Realtime Database, Cloud Functions, Authentication, and Hosting)
+
+### Frameworks & Libraries
+React.js (Hooks)     
+React Router      
+Styled-components
+
+### Packages
+React-wordcloud   
+React-spring      
+React-quill
+
+### Development tools
+Prettier     
+ESLint    
+Storybook (?)
+
 
 ## Functional Map
 
@@ -64,4 +74,4 @@ Start a challenge,come back to take quizzes every day and enrich your Vocab Gard
 ### Manage your friends (Friend system)
 Search friends by emails, and check friends' online status!
 
-![Screen Shot 2022-12-15 at 10 50 23 AM](https://user-images.githubusercontent.com/77892687/207762120-507b6cd8-3a24-474e-8c7f-00446bfae11f.png)
+<kbd>![Screen Shot 2022-12-15 at 10 50 23 AM](https://user-images.githubusercontent.com/77892687/207762120-507b6cd8-3a24-474e-8c7f-00446bfae11f.png)<kbd>
