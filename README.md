@@ -41,7 +41,7 @@ Select any words to search word's definition! (Desktop => select or double click
 <kbd>![Screen Shot 2022-12-15 at 9 53 51 AM](https://user-images.githubusercontent.com/77892687/207754034-50f23950-dce5-4873-9556-f7c885a88849.png)</kbd>
 
 ### Read English articles
-Look up unfamiliar words while reading!
+Upload articles you are interested in, and look up unfamiliar words while reading!
 
 <kbd>![Screen Shot 2022-12-15 at 10 26 30 AM](https://user-images.githubusercontent.com/77892687/207757921-98899d99-e2c1-4f74-98a9-d57400766cab.png)</kbd>
 
@@ -59,4 +59,9 @@ In the battle mode, you can invite your friends to take quizzes with you!
 ### Take challenges (Achievement system)
 Start a challenge,come back to take quizzes every day and enrich your Vocab Garden!
 
-<kbd>![Screen Shot 2022-12-15 at 10 36 38 AM](https://user-images.githubusercontent.com/77892687/207759322-41f42de7-06d7-4300-bb60-296bed5cbe0e.png)</kbd>
+<kbd>![Screen Shot 2022-12-15 at 10 45 38 AM](https://user-images.githubusercontent.com/77892687/207760439-79537c47-d0ca-4bd6-b6b3-80cc600e7bdc.png)</kbd>
+
+### Manage your friends (Friend system)
+Search friends by emails, and check friends' online status!
+
+![Screen Shot 2022-12-15 at 10 50 23 AM](https://user-images.githubusercontent.com/77892687/207762120-507b6cd8-3a24-474e-8c7f-00446bfae11f.png)
