@@ -21,7 +21,7 @@ HTML / CSS / JavaScript
 [TypeScript](https://www.typescriptlang.org/)    
 Responsive Web Design (RWD)
 
-### Back-End Service
+### Cloud
 [Firebase](https://firebase.google.com/) (Firestore, Realtime Database, Cloud Functions, Authentication, and Hosting)
 
 ### Frameworks & Libraries
