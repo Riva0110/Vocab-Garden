@@ -1,10 +1,10 @@
 import styled from "styled-components";
-import banner from "./banner.webp";
-import next from "./next.png";
-import VocabDetails from "../../components/VocabDetails";
-import { keywordContext } from "../../context/keywordContext";
 import { useContext } from "react";
 import { Link } from "react-router-dom";
+import VocabDetails from "../../components/VocabDetails";
+import { KeywordContext } from "../../context/keywordContext";
+import banner from "./banner.webp";
+import next from "./next.png";
 
 const Wrapper = styled.div`
   display: flex;
@@ -60,6 +60,7 @@ const Intro = styled.div`
   text-shadow: white 0.1em 0.1em 0.2em;
   color: #1c1b1b;
   margin-left: -8px;
+  display: flex;
 `;
 
 const BeMember = styled.div`
@@ -86,7 +87,7 @@ const NextImg = styled.img`
 `;
 
 export default function Home() {
-  const { setKeyword } = useContext(keywordContext);
+  const { setKeyword } = useContext(KeywordContext);
   function getSelectedText() {
     if (window.getSelection) {
       const txt = window.getSelection()?.toString();

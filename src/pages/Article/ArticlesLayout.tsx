@@ -1,10 +1,10 @@
 import styled from "styled-components";
-import VocabDetails from "../../components/VocabDetails";
 import { Outlet, Navigate } from "react-router-dom";
+import { useContext } from "react";
+import VocabDetails from "../../components/VocabDetails";
+import { AuthContext } from "../../context/authContext";
 import plant from "./plant.webp";
 import plant2 from "./plant2.webp";
-import { useContext } from "react";
-import { authContext } from "../../context/authContext";
 
 const Wrapper = styled.div`
   display: flex;
@@ -49,7 +49,7 @@ const OutletWrapper = styled.div`
 `;
 
 export default function ArticlesLayout() {
-  const { isLogin } = useContext(authContext);
+  const { isLogin } = useContext(AuthContext);
   return isLogin ? (
     <Wrapper>
       <Img src={plant} alt="plant" />

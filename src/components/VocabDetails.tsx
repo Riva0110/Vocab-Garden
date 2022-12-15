@@ -1,9 +1,5 @@
 import { useEffect, useState, useContext, useRef, Fragment } from "react";
-import { useOnClickOutside } from "./useOnClickOutside";
 import styled, { css } from "styled-components";
-import { keywordContext } from "../context/keywordContext";
-import { authContext } from "../context/authContext";
-import { vocabBookContext } from "../context/vocabBookContext";
 import {
   updateDoc,
   doc,
@@ -12,7 +8,13 @@ import {
   getDoc,
   deleteDoc,
 } from "firebase/firestore";
+import { X } from "react-feather";
+import { KeywordContext } from "../context/keywordContext";
+import { AuthContext } from "../context/authContext";
+import { VocabBookContext } from "../context/vocabBookContext";
 import { db } from "../firebase/firebase";
+import Hint from "../components/Hint/Hint";
+import { useOnClickOutside } from "./useOnClickOutside";
 import audio from "./audio.png";
 import save from "./save.png";
 import saved from "./saved.png";
@@ -20,11 +22,9 @@ import spinner from "./spinner.gif";
 import Alert from "./Alert/Alert";
 import Button from "./Button/Button";
 import googleTranslate from "./googleTranslate.png";
-import { X } from "react-feather";
-import Hint from "../components/Hint/Hint";
 
 interface Props {
-  isPopuping?: boolean;
+  isPoppingUp?: boolean;
   showVocabInMobile?: boolean;
 }
 
@@ -129,7 +129,7 @@ const SavePopup = styled.div`
   border-radius: 10px;
   top: 130px;
   background-color: white;
-  display: ${(props: Props) => (props.isPopuping ? "block" : "none")};
+  display: ${(props: Props) => (props.isPoppingUp ? "block" : "none")};
   padding: 10px;
   box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
   @media screen and (max-width: 601px) {
@@ -238,26 +238,27 @@ interface VocabDetailsInterface {
   sourceUrls?: [];
 }
 
+// eslint-disable-next-line no-unused-vars
 type AddFunction = (msg: string) => void;
 
 export default function VocabDetails() {
-  const { userId } = useContext(authContext);
-  const { keyword, setKeyword } = useContext(keywordContext);
+  const { userId } = useContext(AuthContext);
+  const { keyword, setKeyword } = useContext(KeywordContext);
   const { vocabBooks, getVocabBooks, isSaved, setIsSaved } =
-    useContext(vocabBookContext);
+    useContext(VocabBookContext);
   const [vocabDetails, setVocabDetails] = useState<VocabDetailsInterface>();
   const [newBook, setNewBook] = useState<string>();
   const [selectedvocabBook, setSelectedvocabBook] =
     useState<string>("unsorted");
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
-  const [isPopuping, setIsPopuping] = useState(false);
+  const [isPoppingUp, setIsPoppingUp] = useState(false);
   const popupRef = useRef<HTMLDivElement>(null);
   const resourceUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${keyword}`;
   const ref = useRef<null | AddFunction>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [showVocabInMobile, setShowVocabInMobile] = useState(false);
-  useOnClickOutside(popupRef, () => setIsPopuping(false));
+  useOnClickOutside(popupRef, () => setIsPoppingUp(false));
 
   const handlePlayAudio = () => {
     const audio = new Audio(vocabDetails?.phonetics?.[0].audio);
@@ -334,7 +335,7 @@ export default function VocabDetails() {
       "iPod",
     ];
     let flag = "desktop";
-    for (var v = 0; v < Agents.length; v++) {
+    for (let v = 0; v < Agents.length; v++) {
       if (userAgentInfo.indexOf(Agents[v]) > 0) {
         flag = "mobile";
         break;
@@ -355,7 +356,7 @@ export default function VocabDetails() {
   useEffect(() => {
     let mobileSelection;
     if (checkDevice() === "mobile") {
-      mobileSelection = document.addEventListener("selectionchange", (e) => {
+      mobileSelection = document.addEventListener("selectionchange", () => {
         const value = document.getSelection()?.toString();
         if (value) {
           setKeyword(value);
@@ -427,10 +428,10 @@ export default function VocabDetails() {
   return isError ? (
     <Wrapper showVocabInMobile={showVocabInMobile}>
       <ErrorMsg>
-        [ It should be vocabulary's definition here. ]
+        [ It should be vocabulary&apos;s definition here. ]
         <br />
         <br />
-        Sorry, something went wrong and it's not your fault.
+        Sorry, something went wrong and it&apos;s not your fault.
         <br />
         You can try the search again at later time.
       </ErrorMsg>
@@ -438,7 +439,7 @@ export default function VocabDetails() {
   ) : (
     <>
       <Alert
-        children={(add: AddFunction) => {
+        myChildren={(add: AddFunction) => {
           ref.current = add;
         }}
       />
@@ -455,7 +456,7 @@ export default function VocabDetails() {
                 src={isSaved ? saved : save}
                 alt="save"
                 onClick={() =>
-                  isSaved ? handleDeleteVocabFromBook() : setIsPopuping(true)
+                  isSaved ? handleDeleteVocabFromBook() : setIsPoppingUp(true)
                 }
               />
               <A
@@ -467,7 +468,7 @@ export default function VocabDetails() {
                   alt="googleTranslate"
                 />
               </A>
-              <SavePopup isPopuping={isPopuping} ref={popupRef}>
+              <SavePopup isPoppingUp={isPoppingUp} ref={popupRef}>
                 <label>Save to Book:</label>
                 <Select
                   value={selectedvocabBook}
@@ -503,25 +504,29 @@ export default function VocabDetails() {
                   </AddButton>
                 </AddBookWrapper>
                 <Buttons>
-                  <div onClick={() => setIsPopuping(false)}>
-                    <Button btnType="secondary">Cancel</Button>
-                  </div>
-                  <div
+                  <Button
+                    btnType="secondary"
+                    onClick={() => setIsPoppingUp(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    btnType="primary"
                     onClick={() => {
                       if (selectedvocabBook) {
                         handleSaveVocab(selectedvocabBook);
                         getVocabBooks(userId);
-                        setIsPopuping(false);
+                        setIsPoppingUp(false);
                         ref.current?.(`"${keyword}" saved successfully!`);
                       }
                     }}
                   >
-                    <Button btnType="primary">Done</Button>
-                  </div>
+                    Done
+                  </Button>
                 </Buttons>
               </SavePopup>
               <Hint>
-                Select any words to search word's definition! <br />
+                Select any words to search word&apos;s definition! <br />
                 <br /> (Desktop =&gt; double click) <br /> (Mobile =&gt; long
                 press)
               </Hint>
@@ -555,7 +560,7 @@ export default function VocabDetails() {
                           </Definition>
                           {example && (
                             <Example onClick={() => getSelectedText()}>
-                              "{example}"
+                              &quot;{example}&quot;
                             </Example>
                           )}
                         </DefinitionWrapper>
@@ -572,7 +577,7 @@ export default function VocabDetails() {
                           key={index}
                           onClick={() => {
                             synonym !== "" && setKeyword(synonym);
-                            setIsPopuping(false);
+                            setIsPoppingUp(false);
                           }}
                         >
                           {synonym}

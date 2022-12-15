@@ -1,4 +1,3 @@
-import { authContext } from "../../context/authContext";
 import { useContext, useState, useEffect, useRef } from "react";
 import {
   collection,
@@ -12,12 +11,13 @@ import {
   arrayRemove,
 } from "firebase/firestore";
 import styled from "styled-components";
-import { db } from "../../firebase/firebase";
-import plantRight from "./plant-right.webp";
-import plantLeft from "./plant-left.webp";
 import { Navigate } from "react-router-dom";
+import { db } from "../../firebase/firebase";
+import { AuthContext } from "../../context/authContext";
 import Button from "../../components/Button/Button";
 import Alert from "../../components/Alert/Alert";
+import plantLeft from "./plant-left.webp";
+import plantRight from "./plant-right.webp";
 
 const Wrapper = styled.div`
   display: flex;
@@ -126,10 +126,11 @@ interface Props {
   stateColor: string;
 }
 
+// eslint-disable-next-line no-unused-vars
 type AddFunction = (msg: string) => void;
 
 export default function Friends() {
-  const { isLogin, userId } = useContext(authContext);
+  const { isLogin, userId } = useContext(AuthContext);
   const [myEmail, setMyEmail] = useState<string>();
   const [searchingEmail, setSearchingEmail] = useState<string>("");
   const [friendList, setFriendList] = useState<string[]>();
@@ -157,7 +158,7 @@ export default function Friends() {
     if (isLogin && friendList?.length) {
       unsub = onSnapshot(
         query(collection(db, "users"), where("email", "in", friendList)),
-        (doc) => {
+        () => {
           let newFriendState: string[] = [];
           friendList?.forEach((friendEmail) => {
             async function checkState() {
@@ -258,7 +259,7 @@ export default function Friends() {
   return isLogin ? (
     <Wrapper>
       <Alert
-        children={(add: AddFunction) => {
+        myChildren={(add: AddFunction) => {
           ref.current = add;
         }}
       />

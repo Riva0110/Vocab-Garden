@@ -1,9 +1,6 @@
 import styled, { css } from "styled-components";
 import { useContext, useState, useEffect, useRef } from "react";
-import { authContext } from "../../../context/authContext";
-import audio from "../../../components/audio.png";
-import { useReviewLayout } from "./ReviewLayout";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   doc,
   getDoc,
@@ -14,15 +11,15 @@ import {
   query,
   getDocs,
   arrayUnion,
-  DocumentSnapshot,
-  DocumentData,
   increment,
 } from "firebase/firestore";
 import { db } from "../../../firebase/firebase";
-import { useParams } from "react-router-dom";
-import plant from "./battlePlant.webp";
+import audio from "../../../components/audio.png";
+import { AuthContext } from "../../../context/authContext";
 import Button from "../../../components/Button/Button";
 import Alert from "../../../components/Alert/Alert";
+import { useReviewLayout } from "./ReviewLayout";
+import plant from "./battlePlant.webp";
 import correct from "./correct.png";
 import wrong from "./wrong.png";
 
@@ -227,12 +224,6 @@ const Btns = styled.div`
   margin-top: 20px;
 `;
 
-const BtnDiv = styled.div`
-  display: ${(props: Props) => (props.showBtn ? "flex" : "none")};
-  margin-top: 20px;
-  justify-content: flex-end;
-`;
-
 const Message = styled.div`
   text-align: center;
   font-size: 20px;
@@ -361,6 +352,7 @@ interface RoomInfo {
   invitingList: string[];
 }
 
+// eslint-disable-next-line no-unused-vars
 type AddFunction = (msg: string) => void;
 
 export default function BattleReviewWrapper() {
@@ -370,7 +362,7 @@ export default function BattleReviewWrapper() {
 
 function BattleReview({ pin }: { pin: string }) {
   const navigate = useNavigate();
-  const { isLogin, userId } = useContext(authContext);
+  const { isLogin, userId } = useContext(AuthContext);
   const { questionsNumber, setIsBattle } = useReviewLayout();
   const [isWaiting, setIsWaiting] = useState<boolean>(true);
   const [gameOver, setGameOver] = useState<boolean>(false);
@@ -480,7 +472,7 @@ function BattleReview({ pin }: { pin: string }) {
     if (isLogin && friendList?.length) {
       unsub = onSnapshot(
         query(collection(db, "users"), where("email", "in", friendList)),
-        (doc) => {
+        () => {
           let newFriendState: string[] = [];
           friendList?.forEach((friendEmail) => {
             async function checkState() {
@@ -526,7 +518,6 @@ function BattleReview({ pin }: { pin: string }) {
         if (data.competitorName !== "") setCompetitorName(data.competitorName);
         if (isWaiting && data?.status === "playing") setIsWaiting(false);
         if (data.answerCount) {
-          console.log("sub", data.answerCount);
           setAnswerCount(data.answerCount);
         }
         if (
@@ -549,7 +540,7 @@ function BattleReview({ pin }: { pin: string }) {
   }, [isCompetitorIn, isOwner, isWaiting, pin, questionsNumber, round, userId]);
 
   useEffect(() => {
-    let countDownTimer: string | number | NodeJS.Timeout | undefined;
+    let countDownTimer: ReturnType<typeof setTimeout>;
     if (countDown > 0 && !isWaiting) {
       countDownTimer = setTimeout(() => setCountDown((prev) => prev - 1), 1000);
     }
@@ -561,9 +552,7 @@ function BattleReview({ pin }: { pin: string }) {
     if (isAnswered) return;
 
     const roomRef = doc(db, "battleRooms", pin);
-
     const who = isOwner ? "owner" : "competitor";
-
     updateDoc(roomRef, {
       ["answerCount." + who + ".wrong"]: increment(1),
     });
@@ -601,7 +590,7 @@ function BattleReview({ pin }: { pin: string }) {
 
       const checkUserScoreStatus = async () => {
         const docRef = doc(db, "users", userId);
-        const docSnap: DocumentSnapshot<DocumentData> = await getDoc(docRef);
+        const docSnap = await getDoc(docRef);
 
         const score = docSnap?.data()?.currentScore;
         const isChallenging = docSnap?.data()?.isChallenging;
@@ -618,17 +607,12 @@ function BattleReview({ pin }: { pin: string }) {
         }
       };
 
-      if (
-        isOwner &&
-        (answerCount.owner.correct / questionsNumber) * 100 >= 80 &&
-        answerCount.owner.correct > answerCount.competitor.correct
-      )
-        checkUserScoreStatus();
+      const me = isOwner ? "owner" : "competitor";
+      const other = isOwner ? "competitor" : "owner";
 
       if (
-        !isOwner &&
-        (answerCount.competitor.correct / questionsNumber) * 100 >= 80 &&
-        answerCount.owner.correct < answerCount.competitor.correct
+        (answerCount[me].correct / questionsNumber) * 100 >= 80 &&
+        answerCount[me].correct > answerCount[other].correct
       )
         checkUserScoreStatus();
     } else {
@@ -650,6 +634,7 @@ function BattleReview({ pin }: { pin: string }) {
     round,
     userId,
     isWaiting,
+    answerCount,
   ]);
 
   const handlePlayAudio = (audioLink: string) => {
@@ -660,7 +645,7 @@ function BattleReview({ pin }: { pin: string }) {
   async function handleCompetitorJoinBattle() {
     const getUserInfo = async () => {
       const docRef = doc(db, "users", userId);
-      const docSnap: DocumentSnapshot<DocumentData> = await getDoc(docRef);
+      const docSnap = await getDoc(docRef);
 
       if (pin) {
         const roomRef = doc(db, "battleRooms", pin);
@@ -714,19 +699,11 @@ function BattleReview({ pin }: { pin: string }) {
     });
   };
 
-  const handleCorrectAnswer = () => {
+  const handleAnswer = (check: string) => {
     const roomRef = doc(db, "battleRooms", pin);
     const who = isOwner ? "owner" : "competitor";
     updateDoc(roomRef, {
-      ["answerCount." + who + ".correct"]: increment(1),
-    });
-  };
-
-  const handleWrongAnswer = () => {
-    const roomRef = doc(db, "battleRooms", pin);
-    const who = isOwner ? "owner" : "competitor";
-    updateDoc(roomRef, {
-      ["answerCount." + who + ".wrong"]: increment(1),
+      ["answerCount." + who + `.${check}`]: increment(1),
     });
   };
 
@@ -753,8 +730,8 @@ function BattleReview({ pin }: { pin: string }) {
                       <FriendStateWrapper stateColor={friendState[index]}>
                         {friendState[index]}
                         <FriendState stateColor={friendState[index]} />
-
-                        <div
+                        <Button
+                          btnType="secondary"
                           onClick={() => {
                             handleInviteFriendBattle(friendEmail, index);
                             const newHasInvited = [...hasInvited];
@@ -762,13 +739,11 @@ function BattleReview({ pin }: { pin: string }) {
                             setHasInvited(newHasInvited);
                           }}
                         >
-                          <Button btnType="secondary">
-                            {hasInvited[index] ||
-                            invitingList?.includes(friendEmail)
-                              ? "Inviting"
-                              : "Invite"}
-                          </Button>
-                        </div>
+                          {hasInvited[index] ||
+                          invitingList?.includes(friendEmail)
+                            ? "Inviting"
+                            : "Invite"}
+                        </Button>
                       </FriendStateWrapper>
                     </InviteWrapper>
                   );
@@ -815,40 +790,39 @@ function BattleReview({ pin }: { pin: string }) {
               key={clickedVocab}
               showAnswer={showAnswerArr[index]}
               onClick={() => {
-                if (!isAnswered) {
-                  setIsAnswered(true);
+                if (isAnswered) return;
+                setIsAnswered(true);
 
-                  let answerStatus = [...currentOptions].map(
-                    ([vocabOption, insideDef], index) => {
-                      if (vocabOption === correctVocab?.vocab)
-                        return "correctAnswer";
-                      if (
-                        clickedVocab !== vocabOption &&
-                        vocabOption !== correctVocab?.vocab
-                      )
-                        return "notAnswer";
-                      else return "wrongAnswer";
-                    }
-                  );
-                  setShowAnswerArr(answerStatus);
-
-                  if (clickedVocab === correctVocab?.vocab) {
-                    handleCorrectAnswer();
-                  } else {
-                    handleWrongAnswer();
+                const answerStatus = [...currentOptions].map(
+                  ([vocabOption]) => {
+                    if (vocabOption === correctVocab?.vocab)
+                      return "correctAnswer";
+                    if (
+                      clickedVocab !== vocabOption &&
+                      vocabOption !== correctVocab?.vocab
+                    ) {
+                      return "notAnswer";
+                    } else return "wrongAnswer";
                   }
+                );
+                setShowAnswerArr(answerStatus);
 
-                  setOutcomeVocabList((outcomeVocabList) => {
-                    return outcomeVocabList.map((question, index) => {
-                      if (index === round)
-                        return {
-                          ...question,
-                          isCorrect: clickedVocab === correctVocab?.vocab,
-                        };
-                      return question;
-                    });
-                  });
+                if (clickedVocab === correctVocab?.vocab) {
+                  handleAnswer("correct");
+                } else {
+                  handleAnswer("wrong");
                 }
+
+                setOutcomeVocabList((outcomeVocabList) => {
+                  return outcomeVocabList.map((question, index) => {
+                    if (index === round)
+                      return {
+                        ...question,
+                        isCorrect: clickedVocab === correctVocab?.vocab,
+                      };
+                    return question;
+                  });
+                });
               }}
             >
               {def}
@@ -883,25 +857,33 @@ function BattleReview({ pin }: { pin: string }) {
     );
   }
 
+  function renderMessage() {
+    const who = isOwner ? "owner" : "competitor";
+
+    if ((answerCount[who].correct / questionsNumber) * 100 >= 80) {
+      return "You're amazing! Keep up the good work.";
+    } else {
+      return "Keep fighting, Keep pushing!";
+    }
+  }
+
   function renderOutcome() {
     return (
       <Main>
         <OutcomeWrapper>
           <Message>
-            {isOwner
-              ? (answerCount.owner.correct / questionsNumber) * 100 >= 80
-                ? "You're amazing! Keep up the good work."
-                : "Keep fighting, Keep pushing!"
-              : (answerCount.competitor.correct / questionsNumber) * 100 >= 80
-              ? "You're amazing! Keep up the good work."
-              : "Keep fighting, Keep pushing!"}
+            {renderMessage()}
             <br />
             {addScore && "You've got 1 point!"}
           </Message>
           <Btns>
-            <BtnDiv showBtn={showBtn} onClick={() => navigate("/vocabbook")}>
-              <Button btnType="secondary">Back to VocabBooks</Button>
-            </BtnDiv>
+            <Button
+              btnType="secondary"
+              showBtn={showBtn}
+              onClick={() => navigate("/vocabbook")}
+            >
+              Back to VocabBooks
+            </Button>
           </Btns>
           <ReviewVocabs>
             <WrongVocabs>
@@ -950,7 +932,7 @@ function BattleReview({ pin }: { pin: string }) {
     <>
       <Img src={plant} alt="plant" />
       <Alert
-        children={(add: AddFunction) => {
+        myChildren={(add: AddFunction) => {
           ref.current = add;
         }}
       />

@@ -1,10 +1,4 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { useOnClickOutside } from "./components/useOnClickOutside";
-import styled, { createGlobalStyle } from "styled-components";
-import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
-import { keywordContext } from "./context/keywordContext";
-import { authContext } from "./context/authContext";
-import logo from "./logoName.png";
 import {
   arrayRemove,
   doc,
@@ -12,11 +6,17 @@ import {
   onSnapshot,
   updateDoc,
 } from "firebase/firestore";
+import styled, { createGlobalStyle } from "styled-components";
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { X } from "react-feather";
+import menu from "./menu.png";
+import { useOnClickOutside } from "./components/useOnClickOutside";
+import logo from "./logoName.png";
+import { KeywordContext } from "./context/keywordContext";
+import { AuthContext } from "./context/authContext";
 import { db } from "./firebase/firebase";
 import bell from "./notification.png";
 import yellowBell from "./notification-yellow.png";
-import menu from "./menu.png";
-import { X } from "react-feather";
 
 const GlobalStyle = createGlobalStyle`
   * {
@@ -296,8 +296,8 @@ interface BattleInvitation {
 }
 
 function App() {
-  const { setKeyword } = useContext(keywordContext);
-  const { isLogin, userId, isLoadingUserAuth } = useContext(authContext);
+  const { setKeyword } = useContext(KeywordContext);
+  const { isLogin, userId, isLoadingUserAuth } = useContext(AuthContext);
   const navigate = useNavigate();
   const [inputVocab, setInputVocab] = useState<string>();
   const [battleInvitation, setBattleInvitation] =
@@ -315,7 +315,7 @@ function App() {
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const [showSearchHistory, setShowSearchHistory] = useState<boolean>(false);
   const pathName = window.location.pathname;
-  const notificationRef = useRef(null);
+  const notificationRef = useRef<HTMLDivElement | null>(null);
   useOnClickOutside(notificationRef, async () => setShowInvitation(false));
 
   useEffect(() => {
@@ -597,7 +597,12 @@ function App() {
         </MobileNav>
       )}
       <Main>
-        <Notification showInvitation={showInvitation} ref={notificationRef}>
+        <Notification
+          showInvitation={showInvitation}
+          ref={(ref) => {
+            notificationRef.current = ref;
+          }}
+        >
           {battleInvitation?.length !== 0 ? (
             <>
               <Clear
@@ -633,7 +638,7 @@ function App() {
                 })}
             </>
           ) : (
-            <div>There's no invitation.</div>
+            <div>There&apos;s no invitation.</div>
           )}
         </Notification>
         {isLoadingUserAuth ? <Loading>Loading......</Loading> : <Outlet />}

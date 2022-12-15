@@ -1,3 +1,4 @@
+import { MouseEventHandler } from "react";
 import styled from "styled-components";
 
 const BUTTON_TYPE = {
@@ -25,10 +26,16 @@ const Wrapper = styled.button`
 interface Props {
   children: string;
   btnType: string;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
+  showBtn?: boolean;
 }
 
-function Button({ children, btnType }: Props) {
-  return <Wrapper btnType={btnType}>{children}</Wrapper>;
+function Button({ children, btnType, onClick, ...props }: Props) {
+  return (
+    <Wrapper {...props} btnType={btnType} onClick={onClick}>
+      {children}
+    </Wrapper>
+  );
 }
 
 export default Button;

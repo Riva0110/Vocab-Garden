@@ -1,19 +1,25 @@
-import { createContext, useContext, useState } from "react";
+import {
+  createContext,
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 
 type ContextProviderProps = {
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
-export type keywordType = {
+export type KeywordType = {
   keyword: string;
-  setKeyword: React.Dispatch<React.SetStateAction<string>>;
+  setKeyword: Dispatch<SetStateAction<string>>;
 };
 
-export const keywordContext = createContext<keywordType>({
-  keyword: "",
-  setKeyword: () => {},
-});
+export const KeywordContext = createContext<KeywordType>({} as KeywordType);
 
+// eslint-disable-next-line no-unused-vars
 type Callback = (str: string) => string;
 
 type Value = string | Callback;
@@ -32,11 +38,15 @@ export function KeywordContextProvider({ children }: ContextProviderProps) {
     }
   };
 
+  const memoizedValue = useMemo(() => {
+    return { keyword, setKeyword };
+  }, [keyword]);
+
   return (
-    <keywordContext.Provider value={{ keyword, setKeyword }}>
+    <KeywordContext.Provider value={memoizedValue}>
       {children}
-    </keywordContext.Provider>
+    </KeywordContext.Provider>
   );
 }
 
-export const useKeywordContext = () => useContext(keywordContext);
+export const useKeywordContext = () => useContext(KeywordContext);

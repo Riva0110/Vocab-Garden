@@ -1,9 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { keywordContext } from "../../context/keywordContext";
-import { authContext } from "../../context/authContext";
-import { vocabBookContext, VocabBooks } from "../../context/vocabBookContext";
-import React, {
+import {
   useContext,
   useState,
   useEffect,
@@ -19,17 +16,20 @@ import {
   deleteDoc,
   setDoc,
 } from "firebase/firestore";
+import ReactWordcloud, { Optional, Options } from "react-wordcloud";
+import { KeywordContext } from "../../context/keywordContext";
+import { AuthContext } from "../../context/authContext";
+import { VocabBookContext, VocabBooks } from "../../context/vocabBookContext";
 import { db } from "../../firebase/firebase";
 import audio from "../../components/audio.png";
 import saved from "../../components/saved.png";
 import VocabDetails from "../../components/VocabDetails";
+import Button from "../../components/Button/Button";
+import Alert from "../../components/Alert/Alert";
+import Hint from "../../components/Hint/Hint";
 import { useViewingBook } from "./VocabBookLayout";
 import plant from "./plant.webp";
 import deleteBtn from "./delete.png";
-import Button from "../../components/Button/Button";
-import Alert from "../../components/Alert/Alert";
-import ReactWordcloud, { Optional, Options } from "react-wordcloud";
-import Hint from "../../components/Hint/Hint";
 
 const Wrapper = styled.div`
   display: flex;
@@ -231,9 +231,10 @@ interface Props {
 
 interface Log {
   isCorrect: boolean;
-  testTime: {};
+  testTime: Record<string, unknown>;
 }
 
+// eslint-disable-next-line no-unused-vars
 type AddFunction = (msg: string) => void;
 
 const options = {
@@ -275,10 +276,10 @@ function getAllWords(vocabBooks: VocabBooks) {
 export default function VocabBook() {
   const navigate = useNavigate();
   const { viewingBook, setViewingBook } = useViewingBook();
-  const { userId } = useContext(authContext);
-  const { setKeyword } = useContext(keywordContext);
+  const { userId } = useContext(AuthContext);
+  const { setKeyword } = useContext(KeywordContext);
   const { vocabBooks, getVocabBooks, isSaved, setIsSaved } =
-    useContext(vocabBookContext);
+    useContext(VocabBookContext);
   const [newBook, setNewBook] = useState<string>();
   const [bookCorrectRate, setBookCorrectRate] = useState<number>();
   const ref = useRef<null | AddFunction>(null);
@@ -302,6 +303,7 @@ export default function VocabBook() {
       onWordClick: (word: { text: string; value: number }) => {
         setKeyword(word.text);
       },
+      // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
       getWordTooltip: (word: { text: string; value: number }) => null,
     };
   }, [setKeyword]);
@@ -317,31 +319,32 @@ export default function VocabBook() {
   }, [getVocabBooks, userId, vocabBooks]);
 
   useEffect(() => {
+    async function setWrongWordsDoc() {
+      await setDoc(doc(db, "wrongWordsBook", userId), {
+        topWrongWords,
+      });
+    }
     if (topWrongWords && topWrongWords.length >= 5) {
-      async function setWrongWordsDoc() {
-        await setDoc(doc(db, "wrongWordsBook", userId), {
-          topWrongWords,
-        });
-      }
       setWrongWordsDoc();
     }
   }, [topWrongWords, userId]);
 
-  const correctRateOfBooksArr = getCorrectRateOfBooks()?.map((logOfBook) => {
-    const correctCount = logOfBook.reduce((acc, item) => {
-      if (item.isCorrect) {
-        acc += 1;
-      }
-      return acc;
-    }, 0);
-    return correctCount / logOfBook.length || 0;
-  });
+  const correctRateOfBooksArr = getVocabBooksLogArr();
+  // .map((logOfBook) => {
+  //   const correctCount = logOfBook.reduce((acc, item) => {
+  //     if (item.isCorrect) {
+  //       acc += 1;
+  //     }
+  //     return acc;
+  //   }, 0);
+  //   return correctCount / logOfBook.length || 0;
+  // });
 
-  function getCorrectRateOfBooks() {
-    let log: Log[][] = [];
+  function getVocabBooksLogArr() {
+    let log: any[] = [];
     if (!vocabBooks) return;
-    Object.keys(vocabBooks).forEach((key, index) => {
-      let insideLog: Log[] = [];
+    Object.keys(vocabBooks).forEach((key) => {
+      let insideLog: any[] = [];
       vocabBooks[key].map((vocab) => {
         if (vocab.log) {
           insideLog = [...insideLog, ...vocab.log];
@@ -349,20 +352,26 @@ export default function VocabBook() {
 
         return insideLog;
       });
-      log = [...log, insideLog];
+      const correctCount = insideLog.reduce((acc, item) => {
+        if (item.isCorrect) {
+          acc += 1;
+        }
+        return acc;
+      }, 0);
+      const correctRate = correctCount / insideLog.length || 0;
+      log = [...log, { [key]: correctRate }];
+      return log;
     });
     return log;
   }
 
   useEffect(() => {
     if (typeof bookCorrectRate !== "undefined") return;
-    const findUnsorted = (e: string) => e === "unsorted";
-    const indexOfUnsorted = Object.keys(vocabBooks).findIndex(findUnsorted);
-    if (correctRateOfBooksArr) {
-      setBookCorrectRate(
-        Math.round(correctRateOfBooksArr[indexOfUnsorted] * 100) || 0
-      );
-    }
+    if (!correctRateOfBooksArr) return;
+    const correctRateOfUnsorted = correctRateOfBooksArr?.find(
+      (e) => "unsorted" in e
+    )["unsorted"];
+    setBookCorrectRate(Math.round(correctRateOfUnsorted * 100));
   }, [bookCorrectRate, correctRateOfBooksArr, vocabBooks]);
 
   const handlePlayAudio = (audioLink: string) => {
@@ -445,7 +454,7 @@ export default function VocabBook() {
   return (
     <Wrapper>
       <Alert
-        children={(add: AddFunction) => {
+        myChildren={(add: AddFunction) => {
           ref.current = add;
         }}
       />
@@ -477,17 +486,21 @@ export default function VocabBook() {
             +
           </AddButton>
           {vocabBooks &&
-            Object.keys(vocabBooks).map((book: string, index) => (
+            [
+              "unsorted",
+              ...Object.keys(vocabBooks)
+                .sort()
+                .filter((x) => x !== "unsorted"),
+            ].map((book: string) => (
               <Fragment key={book}>
                 <Book
-                  selected={viewingBook === `${book}`}
+                  selected={viewingBook === book}
                   onClick={() => {
                     setViewingBook(book);
-                    if (correctRateOfBooksArr) {
-                      setBookCorrectRate(
-                        Math.round(correctRateOfBooksArr[index] * 100)
-                      );
-                    }
+                    const correctRateOfBook = correctRateOfBooksArr?.find(
+                      (e) => book in e
+                    )[book];
+                    setBookCorrectRate(Math.round(correctRateOfBook * 100));
                   }}
                 >
                   {book.toLocaleLowerCase()} ({vocabBooks?.[book]?.length})
@@ -521,7 +534,7 @@ export default function VocabBook() {
                 <>
                   <p>
                     Click a card or select any words
-                    <br /> in the cards' definition!
+                    <br /> in the cards&apos; definition!
                   </p>
                   <br /> <p>(Desktop =&gt; double click)</p>
                   <p>(Mobile =&gt; lond press)</p>
@@ -572,7 +585,7 @@ export default function VocabBook() {
               />
             ) : (
               <NoCards>
-                There's no words you have taken quiz for more than 5 times,
+                There&apos;s no words you have taken quiz for more than 5 times,
                 <br /> and correct rate is under 50%.
               </NoCards>
             )

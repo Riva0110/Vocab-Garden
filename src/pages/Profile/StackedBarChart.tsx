@@ -2,7 +2,7 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { authContext } from "../../context/authContext";
+import { AuthContext } from "../../context/authContext";
 import { db } from "../../firebase/firebase";
 
 const Wrapper = styled.div`
@@ -110,7 +110,7 @@ const lastWeekDate = () => {
 
 export default function StackedBarChart() {
   const navigate = useNavigate();
-  const { userId } = useContext(authContext);
+  const { userId } = useContext(AuthContext);
   const [selectedId, setSelectedId] = useState("");
   const [data, setData] = useState<Data[] | []>([]);
 
@@ -123,7 +123,6 @@ export default function StackedBarChart() {
       querySnapshot.forEach((reviewDoc) => {
         resData = [...resData, reviewDoc.data() as Data];
       });
-      console.log(resData);
       setData(resData);
     }
 
@@ -143,15 +142,16 @@ export default function StackedBarChart() {
               ).getDate()}` === date
           );
           return (
-            <Bar>
+            <Bar key={date}>
               {filteredData.length !== 0 && (
                 <ReviewCount>{filteredData.length}</ReviewCount>
               )}
               {filteredData.map(({ vocabBook, docId, correctRate }) => (
                 <BarItem
+                  key={docId}
                   isHovered={docId === selectedId}
-                  onMouseEnter={(e) => setSelectedId(docId)}
-                  onMouseLeave={(e) => setSelectedId("")}
+                  onMouseEnter={() => setSelectedId(docId)}
+                  onMouseLeave={() => setSelectedId("")}
                   onClick={() => navigate("/vocabbook")}
                 >
                   <Message isHovered={docId === selectedId}>
@@ -169,7 +169,7 @@ export default function StackedBarChart() {
       </Chart>
       <LabelX>
         {lastWeekDate().map((date: string) => (
-          <DateText>{date}</DateText>
+          <DateText key={date}>{date}</DateText>
         ))}
       </LabelX>
     </Wrapper>

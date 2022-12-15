@@ -1,17 +1,16 @@
 import styled from "styled-components";
-import { Outlet, useOutletContext } from "react-router-dom";
-import { vocabBookContext } from "../../../context/vocabBookContext";
-import { authContext } from "../../../context/authContext";
-import { useViewingBook } from "../VocabBookLayout";
-import { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { Outlet, useOutletContext, useNavigate } from "react-router-dom";
 import {
-  doc,
-  DocumentData,
-  DocumentSnapshot,
-  getDoc,
-  setDoc,
-} from "firebase/firestore";
+  useState,
+  useEffect,
+  useContext,
+  Dispatch,
+  SetStateAction,
+} from "react";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { VocabBookContext } from "../../../context/vocabBookContext";
+import { AuthContext } from "../../../context/authContext";
+import { useViewingBook } from "../VocabBookLayout";
 import { db } from "../../../firebase/firebase";
 import Hint from "../../../components/Hint/Hint";
 
@@ -82,18 +81,18 @@ const GameRule = styled.div`
 type ContextType = {
   questionsNumber: number;
   isBattle: boolean;
-  setIsBattle: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsBattle: Dispatch<SetStateAction<boolean>>;
 };
 
 const questionsNumber = 5;
 
 export default function ReviewLayout() {
   const navigate = useNavigate();
-  const { userId } = useContext(authContext);
+  const { userId } = useContext(AuthContext);
   const [isBattle, setIsBattle] = useState<boolean>(false);
   const roomId = Math.floor(Math.random() * 10000);
   const { viewingBook } = useViewingBook();
-  const { vocabBooks } = useContext(vocabBookContext);
+  const { vocabBooks } = useContext(VocabBookContext);
   const [name, setName] = useState<string>();
 
   const questionsArr = vocabBooks[viewingBook]
@@ -106,7 +105,7 @@ export default function ReviewLayout() {
   useEffect(() => {
     const getUserInfo = async () => {
       const docRef = doc(db, "users", userId);
-      const docSnap: DocumentSnapshot<DocumentData> = await getDoc(docRef);
+      const docSnap = await getDoc(docRef);
       setName(docSnap?.data()?.name);
     };
     getUserInfo();
@@ -127,6 +126,8 @@ export default function ReviewLayout() {
       },
       invitingList: [],
     });
+    setIsBattle(true);
+    navigate(`/vocabbook/review/${userId + roomId}`);
   };
 
   return (
@@ -147,14 +148,7 @@ export default function ReviewLayout() {
           >
             Single {window.screen.width > 750 && "Mode"}
           </ModeBtn>
-          <ModeBtn
-            isBattle={isBattle}
-            onClick={() => {
-              handleSetBattleRoom();
-              setIsBattle(true);
-              navigate(`/vocabbook/review/${userId + roomId}`);
-            }}
-          >
+          <ModeBtn isBattle={isBattle} onClick={handleSetBattleRoom}>
             Battle {window.screen.width > 750 && "Mode"}
           </ModeBtn>
         </ModeBtns>
@@ -188,7 +182,7 @@ export default function ReviewLayout() {
               <br />
             </GameRule>
             <br />
-            Haven't started a challenge?
+            Haven&apos;t started a challenge?
             <div
               onClick={() => {
                 navigate("/profile");

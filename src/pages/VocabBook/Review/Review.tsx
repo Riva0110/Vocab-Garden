@@ -1,22 +1,14 @@
 import styled, { css } from "styled-components";
 import { useContext, useState, useEffect } from "react";
-import { useViewingBook } from "../VocabBookLayout";
-import { vocabBookContext } from "../../../context/vocabBookContext";
-import { authContext } from "../../../context/authContext";
-import audio from "../../../components/audio.png";
 import { useNavigate } from "react-router-dom";
-import {
-  addDoc,
-  collection,
-  doc,
-  DocumentData,
-  DocumentSnapshot,
-  getDoc,
-  updateDoc,
-} from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore";
+import { useViewingBook } from "../VocabBookLayout";
+import { VocabBookContext } from "../../../context/vocabBookContext";
+import { AuthContext } from "../../../context/authContext";
+import audio from "../../../components/audio.png";
 import { db } from "../../../firebase/firebase";
-import plant from "./reviewPlant.webp";
 import Button from "../../../components/Button/Button";
+import plant from "./reviewPlant.webp";
 import correct from "./correct.png";
 import wrong from "./wrong.png";
 
@@ -85,6 +77,14 @@ const ScoreBarDiv = styled.div`
   width: 200px;
 `;
 
+const ScoreBarStyle = css`
+  border: 0px;
+  background-color: #95caca;
+  width: ${(props: Props) => (props.score ? `${props.score * 40}px` : "0px")};
+  z-index: 2;
+  margin-bottom: 20px;
+`;
+
 const ScoreBar = styled.div`
   width: 200px;
   height: 30px;
@@ -93,24 +93,7 @@ const ScoreBar = styled.div`
   border-radius: 20px;
   margin-top: 10px;
   z-index: 3;
-  ${(props: Props) =>
-    props.insideColor &&
-    css`
-      border: 0px;
-      background-color: #95caca;
-      width: ${(props: Props) =>
-        props.score ? `${props.score * 40}px` : "0px"};
-      z-index: 2;
-      margin-bottom: 20px;
-    `}
-  @media screen and (max-width: 601px) {
-    ${(props: Props) =>
-      props.insideColor &&
-      css`
-        width: ${(props: Props) =>
-          props.score ? `${props.score * 30}px` : "0px"};
-      `}
-  }
+  ${(props: Props) => props.insideColor && ScoreBarStyle}
 `;
 
 const Main = styled.div`
@@ -173,12 +156,14 @@ const Btns = styled.div`
   justify-content: center;
 `;
 
-const BtnDiv = styled.div`
+const StyledButton = styled(Button)`
   display: ${(props: Props) => (props.showBtn ? "flex" : "none")};
+  margin: 0 auto;
   margin-top: 20px;
-  justify-content: flex-end;
+  justify-content: center;
   position: relative;
   z-index: 2;
+  width: 100px;
 `;
 
 const Message = styled.div`
@@ -239,7 +224,7 @@ const VocabList = styled.div`
 
 interface Log {
   isCorrect?: boolean;
-  time?: {};
+  time?: Record<string, unknown>;
 }
 
 interface ReviewingQuestions {
@@ -263,7 +248,7 @@ export default function Review() {
   const [answerCount, setAnswerCount] = useState({ correct: 0, wrong: 0 });
 
   const { viewingBook } = useViewingBook();
-  const { vocabBooks, getVocabBooks } = useContext(vocabBookContext);
+  const { vocabBooks, getVocabBooks } = useContext(VocabBookContext);
   const [updateLogInViewingBook, setUpdateLogInViewingBook] = useState<
     Answer[]
   >(vocabBooks?.[viewingBook]);
@@ -275,7 +260,7 @@ export default function Review() {
   const [reviewingQuestions, setReviewingQuestions] =
     useState<ReviewingQuestions[]>(questions);
 
-  const { userId } = useContext(authContext);
+  const { userId } = useContext(AuthContext);
   const [score, setScore] = useState<number>();
   const [isChallenging, setIsChallenging] = useState<boolean>();
   const [currentOptions, setCurrentOptions] = useState<[string, string][]>([]);
@@ -297,7 +282,7 @@ export default function Review() {
 
     const getUserInfo = async (userId: string) => {
       const docRef = doc(db, "users", userId);
-      const docSnap: DocumentSnapshot<DocumentData> = await getDoc(docRef);
+      const docSnap = await getDoc(docRef);
       setScore(docSnap?.data()?.currentScore);
       setIsChallenging(docSnap?.data()?.isChallenging);
     };
@@ -375,6 +360,32 @@ export default function Review() {
     setReviewLog();
   };
 
+  function renderNextDoneButton() {
+    return round === questionsNumber - 1 ? (
+      <StyledButton
+        btnType={"primary"}
+        showBtn={showBtn}
+        onClick={() => {
+          handleGameOver();
+        }}
+      >
+        Done
+      </StyledButton>
+    ) : (
+      <StyledButton
+        btnType={"primary"}
+        showBtn={showBtn}
+        onClick={() => {
+          setShowBtn(false);
+          setRound(round + 1);
+          setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
+        }}
+      >
+        Next &gt;&gt;&gt;
+      </StyledButton>
+    );
+  }
+
   function renderTest() {
     return (
       <Main>
@@ -392,170 +403,60 @@ export default function Review() {
           ({correctVocab?.partOfSpeech})
         </VocabWrapper>
         <Options>
-          {currentOptions?.map(([clickedVocab, def], index) => (
-            <Option
-              key={clickedVocab}
-              showAnswer={showAnswerArr[index]}
-              onClick={() => {
-                if (!showBtn) {
+          <>
+            {currentOptions?.map(([clickedVocab, def], index) => (
+              <Option
+                key={clickedVocab}
+                showAnswer={showAnswerArr[index]}
+                onClick={() => {
+                  if (showBtn) return;
                   setShowBtn(true);
-                  let answerStatus = [...currentOptions].map(
-                    ([vocabOption, insideDef], index) => {
-                      if (vocabOption === correctVocab?.vocab)
-                        return "correctAnswer";
-                      if (
-                        clickedVocab !== vocabOption &&
-                        vocabOption !== correctVocab?.vocab
-                      )
-                        return "notAnswer";
-                      else return "wrongAnswer";
-                    }
-                  );
+
+                  const answerStatus = currentOptions.map(([vocabOption]) => {
+                    if (vocabOption === correctVocab?.vocab)
+                      return "correctAnswer";
+                    if (
+                      clickedVocab !== vocabOption &&
+                      vocabOption !== correctVocab?.vocab
+                    )
+                      return "notAnswer";
+                    else return "wrongAnswer";
+                  });
                   setShowAnswerArr(answerStatus);
 
-                  let newUpdateLogInViewingBook;
+                  const isCorrect = clickedVocab === correctVocab?.vocab;
 
-                  if (clickedVocab === correctVocab?.vocab) {
-                    setAnswerCount((prev) => ({
-                      ...prev,
-                      correct: prev.correct + 1,
-                    }));
+                  setAnswerCount((ac) => ({
+                    ...ac,
+                    ...(isCorrect
+                      ? { correct: ac.correct + 1 }
+                      : { wrong: ac.wrong + 1 }),
+                  }));
 
-                    newUpdateLogInViewingBook = [...updateLogInViewingBook].map(
-                      ({
-                        vocab,
-                        audioLink,
-                        partOfSpeech,
-                        definition,
-                        log,
-                        correctRate,
-                      }) => {
-                        if (vocab === correctVocab?.vocab) {
-                          if (log && log?.length > 0) {
-                            const correctCount = log?.reduce((acc, item) => {
-                              if (item.isCorrect) {
-                                acc += 1;
-                              }
-                              return acc;
-                            }, 0);
-                            return {
-                              vocab,
-                              audioLink,
-                              partOfSpeech,
-                              definition,
-                              log: [
-                                ...log,
-                                { isCorrect: true, time: new Date() },
-                              ],
-                              correctRate:
-                                (correctCount + 1) / (log.length + 1),
-                            };
-                          } else {
-                            return {
-                              vocab,
-                              audioLink,
-                              partOfSpeech,
-                              definition,
-                              log: [{ isCorrect: true, time: new Date() }],
-                              correctRate: 1,
-                            };
-                          }
-                        } else {
-                          return {
-                            vocab,
-                            audioLink,
-                            partOfSpeech,
-                            definition,
-                            log,
-                            correctRate,
-                          };
-                        }
-                      }
-                    );
-                  } else {
-                    setAnswerCount((prev) => ({
-                      ...prev,
-                      wrong: prev.wrong + 1,
-                    }));
-                    newUpdateLogInViewingBook = [...updateLogInViewingBook].map(
-                      ({
-                        vocab,
-                        audioLink,
-                        partOfSpeech,
-                        definition,
-                        log,
-                        correctRate,
-                      }) => {
-                        if (vocab === correctVocab?.vocab) {
-                          if (log && log?.length > 0) {
-                            const correctCount = log?.reduce((acc, item) => {
-                              if (item.isCorrect) {
-                                acc += 1;
-                              }
-                              return acc;
-                            }, 0);
-                            return {
-                              vocab,
-                              audioLink,
-                              partOfSpeech,
-                              definition,
-                              log: [
-                                ...log,
-                                { isCorrect: false, time: new Date() },
-                              ],
-                              correctRate: correctCount / (log.length + 1),
-                            };
-                          } else {
-                            return {
-                              vocab,
-                              audioLink,
-                              partOfSpeech,
-                              definition,
-                              log: [{ isCorrect: false, time: new Date() }],
-                              correctRate: 0,
-                            };
-                          }
-                        } else {
-                          return {
-                            vocab,
-                            audioLink,
-                            partOfSpeech,
-                            definition,
-                            log,
-                            correctRate,
-                          };
-                        }
-                      }
-                    );
-                  }
+                  const newUpdateLogInViewingBook = updateLogInViewingBook.map(
+                    (book) => {
+                      if (book.vocab !== correctVocab?.vocab) return book;
+                      const correctCount = book.log.reduce(
+                        (acc, item) => acc + (item.isCorrect ? 1 : 0),
+                        0
+                      );
+                      return {
+                        ...book,
+                        log: [...book.log, { isCorrect, time: new Date() }],
+                        correctRate:
+                          (correctCount + (isCorrect ? 1 : 0)) /
+                          (book.log.length + 1),
+                      };
+                    }
+                  ) as Answer[];
                   setUpdateLogInViewingBook(newUpdateLogInViewingBook);
-                }
-              }}
-            >
-              {def}
-            </Option>
-          ))}
-          {round === questionsNumber - 1 ? (
-            <BtnDiv
-              showBtn={showBtn}
-              onClick={() => {
-                handleGameOver();
-              }}
-            >
-              <Button btnType={"primary"}>Done</Button>
-            </BtnDiv>
-          ) : (
-            <BtnDiv
-              showBtn={showBtn}
-              onClick={() => {
-                setShowBtn(false);
-                setRound(round + 1);
-                setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
-              }}
-            >
-              <Button btnType={"secondary"}>Next &gt;&gt;&gt;</Button>
-            </BtnDiv>
-          )}
+                }}
+              >
+                {def}
+              </Option>
+            ))}
+            {renderNextDoneButton()}
+          </>
         </Options>
       </Main>
     );
@@ -595,7 +496,8 @@ export default function Review() {
               : "Keep fighting, Keep pushing!"}
           </Message>
           <Btns>
-            <BtnDiv
+            <Button
+              btnType="secondary"
               showBtn={showBtn}
               onClick={() => {
                 setGameOver(false);
@@ -605,11 +507,15 @@ export default function Review() {
                 setShowAnswerArr(["notAnswer", "notAnswer", "notAnswer"]);
               }}
             >
-              <Button btnType="secondary">Review again</Button>
-            </BtnDiv>
-            <BtnDiv showBtn={showBtn} onClick={() => navigate("/vocabbook")}>
-              <Button btnType="secondary">Back to VocabBooks</Button>
-            </BtnDiv>
+              Review again
+            </Button>
+            <Button
+              btnType="secondary"
+              showBtn={showBtn}
+              onClick={() => navigate("/vocabbook")}
+            >
+              Back to VocabBooks
+            </Button>
           </Btns>
           <ReviewVocabs>
             <WrongVocabs>
