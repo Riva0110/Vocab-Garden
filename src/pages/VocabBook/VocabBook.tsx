@@ -329,21 +329,22 @@ export default function VocabBook() {
     }
   }, [topWrongWords, userId]);
 
-  const correctRateOfBooksArr = getCorrectRateOfBooks()?.map((logOfBook) => {
-    const correctCount = logOfBook.reduce((acc, item) => {
-      if (item.isCorrect) {
-        acc += 1;
-      }
-      return acc;
-    }, 0);
-    return correctCount / logOfBook.length || 0;
-  });
+  const correctRateOfBooksArr = getVocabBooksLogArr();
+  // .map((logOfBook) => {
+  //   const correctCount = logOfBook.reduce((acc, item) => {
+  //     if (item.isCorrect) {
+  //       acc += 1;
+  //     }
+  //     return acc;
+  //   }, 0);
+  //   return correctCount / logOfBook.length || 0;
+  // });
 
-  function getCorrectRateOfBooks() {
-    let log: Log[][] = [];
+  function getVocabBooksLogArr() {
+    let log: any[] = [];
     if (!vocabBooks) return;
     Object.keys(vocabBooks).forEach((key) => {
-      let insideLog: Log[] = [];
+      let insideLog: any[] = [];
       vocabBooks[key].map((vocab) => {
         if (vocab.log) {
           insideLog = [...insideLog, ...vocab.log];
@@ -351,20 +352,26 @@ export default function VocabBook() {
 
         return insideLog;
       });
-      log = [...log, insideLog];
+      const correctCount = insideLog.reduce((acc, item) => {
+        if (item.isCorrect) {
+          acc += 1;
+        }
+        return acc;
+      }, 0);
+      const correctRate = correctCount / insideLog.length || 0;
+      log = [...log, { [key]: correctRate }];
+      return log;
     });
     return log;
   }
 
   useEffect(() => {
     if (typeof bookCorrectRate !== "undefined") return;
-    const findUnsorted = (e: string) => e === "unsorted";
-    const indexOfUnsorted = Object.keys(vocabBooks).findIndex(findUnsorted);
-    if (correctRateOfBooksArr) {
-      setBookCorrectRate(
-        Math.round(correctRateOfBooksArr[indexOfUnsorted] * 100) || 0
-      );
-    }
+    if (!correctRateOfBooksArr) return;
+    const correctRateOfUnsorted = correctRateOfBooksArr?.find(
+      (e) => "unsorted" in e
+    )["unsorted"];
+    setBookCorrectRate(Math.round(correctRateOfUnsorted * 100));
   }, [bookCorrectRate, correctRateOfBooksArr, vocabBooks]);
 
   const handlePlayAudio = (audioLink: string) => {
@@ -484,17 +491,16 @@ export default function VocabBook() {
               ...Object.keys(vocabBooks)
                 .sort()
                 .filter((x) => x !== "unsorted"),
-            ].map((book: string, index) => (
+            ].map((book: string) => (
               <Fragment key={book}>
                 <Book
-                  selected={viewingBook === `${book}`}
+                  selected={viewingBook === book}
                   onClick={() => {
                     setViewingBook(book);
-                    if (correctRateOfBooksArr) {
-                      setBookCorrectRate(
-                        Math.round(correctRateOfBooksArr[index] * 100)
-                      );
-                    }
+                    const correctRateOfBook = correctRateOfBooksArr?.find(
+                      (e) => book in e
+                    )[book];
+                    setBookCorrectRate(Math.round(correctRateOfBook * 100));
                   }}
                 >
                   {book.toLocaleLowerCase()} ({vocabBooks?.[book]?.length})
