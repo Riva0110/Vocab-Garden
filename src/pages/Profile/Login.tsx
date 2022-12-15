@@ -93,8 +93,8 @@ export default function LoginPage({
 }: Props) {
   const { login } = useContext(AuthContext);
   const [errorMsg, setErrorMsg] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [email, setEmail] = useState<string>("test@gmail.com");
+  const [password, setPassword] = useState<string>("xxxx1234");
   const [isMember, setIsMember] = useState<boolean>(true);
 
   return (
@@ -108,12 +108,14 @@ export default function LoginPage({
               key="loginEmail"
               placeholder="email"
               onChange={(e) => setEmail(e.target.value)}
+              defaultValue="test@gmail.com"
             />
             <Input
               key="loginPassword"
               type="password"
               placeholder="password"
               onChange={(e) => setPassword(e.target.value)}
+              defaultValue="xxxx1234"
             />
             <ErrorMsg>{errorMsg}</ErrorMsg>
             <div>
