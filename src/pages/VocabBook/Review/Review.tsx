@@ -94,14 +94,6 @@ const ScoreBar = styled.div`
   margin-top: 10px;
   z-index: 3;
   ${(props: Props) => props.insideColor && ScoreBarStyle}
-  @media screen and (max-width: 601px) {
-    ${(props: Props) =>
-      props.insideColor &&
-      css`
-        width: ${(props: Props) =>
-          props.score ? `${props.score * 30}px` : "0px"};
-      `}
-  }
 `;
 
 const Main = styled.div`
