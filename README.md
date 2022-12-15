@@ -10,7 +10,7 @@ Searching for words, reading articles, reviewing saved words, taking quizzes, an
 **Link:** https://vocab-garden.web.app/
 
 **Test Account:**        
-> Email: riva0110@xxxx.xx     
+> Email: test@gmail.com     
 > Password: xxxx1234
 
 
@@ -18,25 +18,28 @@ Searching for words, reading articles, reviewing saved words, taking quizzes, an
 
 ### Front-End Fundamental
 HTML / CSS / JavaScript    
+[TypeScript](https://www.typescriptlang.org/)    
 Responsive Web Design (RWD)
 
 ### Back-End Service
-Firebase (Firestore, Realtime Database, Cloud Functions, Authentication, and Hosting)
+[Firebase](https://firebase.google.com/) (Firestore, Realtime Database, Cloud Functions, Authentication, and Hosting)
 
 ### Frameworks & Libraries
-React.js (Hooks)     
-React Router      
-Styled-components
+[React](https://reactjs.org/) (Hooks)      
+[React Router](https://reactrouter.com/en/main)       
+[Styled-components](https://styled-components.com/)       
 
 ### Packages
-React-wordcloud   
-React-spring      
-React-quill
+[React-wordcloud](https://react-wordcloud.netlify.app/)     
+[React-spring](https://react-spring.dev/)         
+[React-quill](https://quilljs.com/)
 
 ### Development tools
-Prettier     
-ESLint    
-Storybook (?)
+[Prettier](https://prettier.io/)     
+[ESLint](https://eslint.org/)    
+[Storybook](https://storybook.js.org/)
+
+![Screen Shot 2022-12-15 at 2 20 19 PM](https://user-images.githubusercontent.com/77892687/207787355-2354e081-43e8-4fe2-bbff-c94cc0330c2f.png)
 
 
 ## Functional Map
