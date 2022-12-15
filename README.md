@@ -1,20 +1,20 @@
-# Vocab Garden
+#  ![logo](https://user-images.githubusercontent.com/77892687/207754711-2a027187-4ccc-4ee8-91ae-8ea0bdffebff.png) Vocab Garden
+
 
 An English reading and vocabulary learning website.     
 You can look up any word’s definition by simply clicking or selecting words throughout the website!
 
-**Main features:  **  
+**Main features:**     
 searching for words, reading articles, reviewing saved words, taking quizzes, and participating in online battles and achievement systems.
 
-## Link and Test Account
+**Link:** https://vocab-garden.web.app/
 
-https://vocab-garden.web.app/
+**Test Account:**        
+> Email: riva0110@xxxx.xx     
+> Password: xxxx1234
 
-Email: riva0110@xxxx.xx     
-Password: xxxx1234
 
-### Technical Skills
-
+## Technical Skills
 
 - Used Firebase Firestore Database for managing data, including using getting real-time updates for online battle information, such as connection status, scores, and user names for both sides.
 - Provided a friend system, and used Firebase Realtime Database and Cloud Functions for updating friends’ real-time online status.
@@ -29,33 +29,34 @@ Password: xxxx1234
 - Adopted React useContext Hook to manage states.
 - Applied React / React router for SPA.
 
-### `npm test`
+## Functional Map
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+![Screen Shot 2022-12-15 at 10 23 16 AM](https://user-images.githubusercontent.com/77892687/207757531-a94586bc-2556-4d79-836c-bcfe9e6b738a.png)
 
-### `npm run build`
+## Features
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Search English words
+Select any words to search word's definition! (Desktop => select or double click, Mobile => long press)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+<kbd>![Screen Shot 2022-12-15 at 9 53 51 AM](https://user-images.githubusercontent.com/77892687/207754034-50f23950-dce5-4873-9556-f7c885a88849.png)</kbd>
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Read English articles
+Look up unfamiliar words while reading!
 
-### `npm run eject`
+<kbd>![Screen Shot 2022-12-15 at 10 26 30 AM](https://user-images.githubusercontent.com/77892687/207757921-98899d99-e2c1-4f74-98a9-d57400766cab.png)</kbd>
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### Review English words
+Save word cards to vocabbooks, and review words' cards by different filed of books.       
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+<kbd>![Screen Shot 2022-12-15 at 10 24 44 AM](https://user-images.githubusercontent.com/77892687/207757715-fd096531-f926-40e6-a218-c4740c49b734.png)</kbd>
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+### Take quizzes
+There are two modes of quizzes: single mode and battle mode.    
+In the battle mode, you can invite your friends to take quizzes with you!
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+<kbd>![Screen Shot 2022-12-15 at 10 31 11 AM](https://user-images.githubusercontent.com/77892687/207758754-6868f932-6960-42f6-8239-786b03c9bd98.png)</kbd>
 
-## Learn More
+### Take challenges (Achievement system)
+Start a challenge,come back to take quizzes every day and enrich your Vocab Garden!
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+<kbd>![Screen Shot 2022-12-15 at 10 36 38 AM](https://user-images.githubusercontent.com/77892687/207759322-41f42de7-06d7-4300-bb60-296bed5cbe0e.png)</kbd>
