@@ -330,26 +330,16 @@ export default function VocabBook() {
   }, [topWrongWords, userId]);
 
   const correctRateOfBooksArr = getVocabBooksLogArr();
-  // .map((logOfBook) => {
-  //   const correctCount = logOfBook.reduce((acc, item) => {
-  //     if (item.isCorrect) {
-  //       acc += 1;
-  //     }
-  //     return acc;
-  //   }, 0);
-  //   return correctCount / logOfBook.length || 0;
-  // });
 
   function getVocabBooksLogArr() {
     let log: any[] = [];
     if (!vocabBooks) return;
     Object.keys(vocabBooks).forEach((key) => {
-      let insideLog: any[] = [];
+      let insideLog: Log[] = [];
       vocabBooks[key].map((vocab) => {
         if (vocab.log) {
           insideLog = [...insideLog, ...vocab.log];
         }
-
         return insideLog;
       });
       const correctCount = insideLog.reduce((acc, item) => {
@@ -367,11 +357,13 @@ export default function VocabBook() {
 
   useEffect(() => {
     if (typeof bookCorrectRate !== "undefined") return;
-    if (!correctRateOfBooksArr) return;
-    const correctRateOfUnsorted = correctRateOfBooksArr?.find(
-      (e) => "unsorted" in e
-    )["unsorted"];
-    setBookCorrectRate(Math.round(correctRateOfUnsorted * 100));
+    if (correctRateOfBooksArr) {
+      const correctRateOfUnsorted = correctRateOfBooksArr?.find(
+        (e) => "unsorted" in e
+      )["unsorted"] as number;
+
+      setBookCorrectRate(Math.round(correctRateOfUnsorted * 100));
+    }
   }, [bookCorrectRate, correctRateOfBooksArr, vocabBooks]);
 
   const handlePlayAudio = (audioLink: string) => {
