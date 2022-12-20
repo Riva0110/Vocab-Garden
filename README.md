@@ -37,7 +37,6 @@ Responsive Web Design (RWD)
 ### Development tools
 [Prettier](https://prettier.io/)     
 [ESLint](https://eslint.org/)    
-[Storybook](https://storybook.js.org/)
 
 ![Screen Shot 2022-12-15 at 2 20 19 PM](https://user-images.githubusercontent.com/77892687/207787355-2354e081-43e8-4fe2-bbff-c94cc0330c2f.png)
 
